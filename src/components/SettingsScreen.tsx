@@ -3,7 +3,6 @@ import {
   User,
   Globe,
   Sun,
-  Sparkles,
   Mic,
   Volume2,
   Info,
@@ -14,13 +13,15 @@ import {
   ChevronLeft,
   Check,
   X,
-  Trash2,
-  Download,
   Shield,
   Play,
   RotateCw,
   Send,
-  AlertCircle
+  Sparkles,
+  Lock,
+  Download,
+  Trash2,
+  CheckCircle2
 } from 'lucide-react';
 
 export interface SettingsScreenProps {
@@ -49,7 +50,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   // Data & cache state
   const [cacheSize, setCacheSize] = useState<string>('48.6 MB');
   const [isCheckingUpdate, setIsCheckingUpdate] = useState<boolean>(false);
-  const [updateStatus, setUpdateStatus] = useState<string>('Up to date');
+  const [updateCheckedAt, setUpdateCheckedAt] = useState<string>('Just now');
+
+  // Account editing state
+  const [displayName, setDisplayName] = useState<string>('Elena Vance');
+  const [username, setUsername] = useState<string>('aerifairy');
+  const [email, setEmail] = useState<string>('elena.vance@aeri.studio');
+  const [phone, setPhone] = useState<string>('+1 (555) 234-8901');
 
   // Feedback form state
   const [feedbackText, setFeedbackText] = useState<string>('');
@@ -75,12 +82,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     showToast('Cache cleared successfully (48.6 MB freed)');
   };
 
-  const handleCheckUpdate = () => {
+  const handleCheckUpdateModal = () => {
     setIsCheckingUpdate(true);
     setTimeout(() => {
       setIsCheckingUpdate(false);
-      setUpdateStatus('Latest version installed');
-      showToast('You are on the latest version 2.5.3(276)');
+      setUpdateCheckedAt('Just now');
+      showToast('FAIRY is up to date (v2.5.3)');
     }, 1200);
   };
 
@@ -283,7 +290,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)] border border-gray-100/80 overflow-hidden divide-y divide-gray-100/70">
             {/* Check for updates */}
             <button
-              onClick={handleCheckUpdate}
+              onClick={() => setActiveModal('updates')}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50/80 active:bg-gray-100/60 transition-colors text-left cursor-pointer"
             >
               <div className="flex items-center gap-3.5">
@@ -291,11 +298,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <span className="text-[15px] font-medium text-gray-900">Check for updates</span>
               </div>
               <div className="flex items-center gap-1.5">
-                {isCheckingUpdate ? (
-                  <RotateCw className="w-4 h-4 text-purple-600 animate-spin" />
-                ) : (
-                  <span className="text-[14px] text-gray-400 font-normal">2.5.3(276)</span>
-                )}
+                <span className="text-[14px] text-gray-400 font-normal">2.5.3(276)</span>
                 <ChevronRight className="w-4 h-4 text-gray-300 stroke-[2]" />
               </div>
             </button>
@@ -351,14 +354,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       </div>
 
-      {/* ----------------- SUB-MODALS / SHEETS ----------------- */}
+      {/* ----------------- NORMAL CENTERED MODALS ----------------- */}
 
-      {/* 1. Account Settings Modal */}
+      {/* 1. Account Settings Normal Modal */}
       {activeModal === 'account' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Account settings</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Account settings</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -366,54 +374,94 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-3 pt-2">
-              <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200/60">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-                  Username
-                </label>
-                <p className="text-sm font-bold text-gray-900">@aerifairy</p>
+            
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">Display Name</label>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={e => setDisplayName(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-purple-600 font-medium"
+                />
               </div>
-              <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200/60">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-                  Email
-                </label>
-                <p className="text-sm font-bold text-gray-900">elena.vance@aeri.studio</p>
-              </div>
-              <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200/60">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-                  Phone Number
-                </label>
-                <p className="text-sm font-bold text-gray-900">+1 (555) 234-8901</p>
-              </div>
-              <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200/60">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-                  Account Status
-                </label>
-                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>Verified Creator (Active)</span>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">Username</label>
+                <div className="flex items-center px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl">
+                  <span className="text-gray-400 mr-1 font-bold">@</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    className="w-full bg-transparent outline-none font-bold text-gray-900"
+                  />
                 </div>
               </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-purple-600 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-purple-600 font-medium"
+                />
+              </div>
+
+              <div className="bg-emerald-50/70 border border-emerald-100 p-3 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-semibold text-emerald-800">Verified Creator Status</span>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Active
+                </span>
+              </div>
             </div>
-            <button
-              onClick={() => {
-                showToast('Account details verified');
-                setActiveModal(null);
-              }}
-              className="w-full py-3 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-4"
-            >
-              Done
-            </button>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  showToast('Account details updated successfully');
+                  setActiveModal(null);
+                }}
+                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer shadow-sm"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* 2. Data Controls Modal */}
+      {/* 2. Data Controls Normal Modal */}
       {activeModal === 'data' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Data controls</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Download className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Data controls</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -421,7 +469,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-3 pt-2">
+
+            <div className="space-y-3 pt-1">
               <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200/60">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">App Cache</p>
@@ -438,7 +487,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200/60">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Search History</p>
-                  <p className="text-xs text-gray-500">Recently searched profiles and tags</p>
+                  <p className="text-xs text-gray-500">Cached tags and query history</p>
                 </div>
                 <button
                   onClick={() => showToast('Search history cleared')}
@@ -450,8 +499,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
               <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200/60">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Export My Data</p>
-                  <p className="text-xs text-gray-500">Download a JSON archive of your activity</p>
+                  <p className="text-sm font-semibold text-gray-900">Export Archive</p>
+                  <p className="text-xs text-gray-500">Download a full JSON archive of posts</p>
                 </div>
                 <button
                   onClick={() => showToast('Archive requested. Download link sent to email.')}
@@ -461,22 +510,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </button>
               </div>
             </div>
+
             <button
               onClick={() => setActiveModal(null)}
-              className="w-full py-3 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-4"
+              className="w-full py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-2"
             >
-              Close
+              Done
             </button>
           </div>
         </div>
       )}
 
-      {/* 3. Language Selector Modal */}
+      {/* 3. Language Selector Normal Modal */}
       {activeModal === 'language' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-3">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-3 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Select language</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Select language</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -484,7 +539,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="divide-y divide-gray-100">
+
+            <div className="divide-y divide-gray-100 max-h-[55vh] overflow-y-auto pr-1">
               {[
                 'English',
                 'Español (Spanish)',
@@ -505,11 +561,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                       showToast(`Language set to ${lang}`);
                       setActiveModal(null);
                     }}
-                    className="w-full py-3.5 px-2 flex items-center justify-between text-left hover:bg-gray-50 rounded-lg cursor-pointer"
+                    className={`w-full py-3 px-3 flex items-center justify-between text-left rounded-xl transition-colors cursor-pointer ${
+                      isSelected ? 'bg-purple-50 text-purple-900 font-bold' : 'hover:bg-gray-50 text-gray-700'
+                    }`}
                   >
-                    <span className={`text-sm ${isSelected ? 'font-bold text-gray-900' : 'text-gray-700'}`}>
-                      {lang}
-                    </span>
+                    <span className="text-sm">{lang}</span>
                     {isSelected && <Check className="w-4 h-4 text-purple-600 stroke-[2.5]" />}
                   </button>
                 );
@@ -519,12 +575,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       )}
 
-      {/* 4. Appearance Selector Modal */}
+      {/* 4. Appearance Selector Normal Modal */}
       {activeModal === 'appearance' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Appearance</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <Sun className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Appearance</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -532,6 +593,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <div className="space-y-2 pt-1">
               {[
                 { id: 'System', label: 'System', desc: 'Match device operating system settings' },
@@ -563,12 +625,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       )}
 
-      {/* 5. Font Size Selector Modal */}
+      {/* 5. Font Size Selector Normal Modal */}
       {activeModal === 'font_size' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Font size</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-slate-100 text-gray-800 flex items-center justify-center font-bold">
+                  AA
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Font size</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -576,6 +643,25 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Preview Box */}
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200/60">
+              <p className="text-xs font-semibold text-gray-400 mb-1">Preview</p>
+              <p
+                className={`text-gray-800 transition-all ${
+                  fontSize === 'Small'
+                    ? 'text-xs'
+                    : fontSize === 'Standard'
+                    ? 'text-sm'
+                    : fontSize === 'Large'
+                    ? 'text-base'
+                    : 'text-lg'
+                }`}
+              >
+                "The fairy dust shines brightest in silent twilight hours."
+              </p>
+            </div>
+
             <div className="space-y-2 pt-1">
               {(['Small', 'Standard', 'Large', 'Extra Large'] as const).map(size => (
                 <button
@@ -600,12 +686,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       )}
 
-      {/* 6. Personalization Modal */}
+      {/* 6. Personalization Normal Modal */}
       {activeModal === 'personalization' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Personalization</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Personalization</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -613,11 +704,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <div className="space-y-3 pt-1">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200/60">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Recommended for You</p>
-                  <p className="text-xs text-gray-500">Personalize posts based on reading habits</p>
+                  <p className="text-sm font-semibold text-gray-900">Personalized Feed</p>
+                  <p className="text-xs text-gray-500">Show posts matched to your interactions</p>
                 </div>
                 <input
                   type="checkbox"
@@ -627,9 +719,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200/60">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Curated Trending Topics</p>
+                  <p className="text-sm font-semibold text-gray-900">Curated Trends</p>
                   <p className="text-xs text-gray-500">Filter topics relevant to your interests</p>
                 </div>
                 <input
@@ -640,10 +732,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200/60">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Explore New Creators</p>
-                  <p className="text-xs text-gray-500">Allow Fairy to showcase emerging artists</p>
+                  <p className="text-sm font-semibold text-gray-900">Discover New Creators</p>
+                  <p className="text-xs text-gray-500">Showcase emerging digital artists</p>
                 </div>
                 <input
                   type="checkbox"
@@ -653,12 +745,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 />
               </div>
             </div>
+
             <button
               onClick={() => {
-                showToast('Personalization preferences updated');
+                showToast('Personalization preferences saved');
                 setActiveModal(null);
               }}
-              className="w-full py-3 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-3"
+              className="w-full py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-2"
             >
               Save Preferences
             </button>
@@ -666,12 +759,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       )}
 
-      {/* 7. Audio Main Language Modal */}
+      {/* 7. Audio Main Language Normal Modal */}
       {activeModal === 'audio_language' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-3">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-3 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Voice input language</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Mic className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Main language</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -679,47 +777,57 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-gray-400">
+            
+            <p className="text-xs text-gray-500">
               Select the primary language you use for voice input to achieve better recognition results.
             </p>
-            <div className="divide-y divide-gray-100">
+
+            <div className="divide-y divide-gray-100 max-h-[50vh] overflow-y-auto pr-1">
               {[
                 'Use App language',
                 'English (United States)',
                 'English (United Kingdom)',
                 'Español (España)',
                 'Español (Latinoamérica)',
-                'Français',
-                'Deutsch',
-                '日本語',
-                '中文 (普通话)',
-              ].map(item => (
-                <button
-                  key={item}
-                  onClick={() => {
-                    setAudioMainLanguage(item);
-                    showToast(`Voice language set to ${item}`);
-                    setActiveModal(null);
-                  }}
-                  className="w-full py-3.5 px-2 flex items-center justify-between text-left hover:bg-gray-50 rounded-lg cursor-pointer"
-                >
-                  <span className={`text-sm ${audioMainLanguage === item ? 'font-bold text-gray-900' : 'text-gray-700'}`}>
-                    {item}
-                  </span>
-                  {audioMainLanguage === item && <Check className="w-4 h-4 text-purple-600 stroke-[2.5]" />}
-                </button>
-              ))}
+                'Français (France)',
+                'Deutsch (Deutschland)',
+                '日本語 (Japan)',
+                '中文 (Mandarin)',
+              ].map(item => {
+                const isSelected = audioMainLanguage === item;
+                return (
+                  <button
+                    key={item}
+                    onClick={() => {
+                      setAudioMainLanguage(item);
+                      showToast(`Voice language set to ${item}`);
+                      setActiveModal(null);
+                    }}
+                    className={`w-full py-3 px-3 flex items-center justify-between text-left rounded-xl transition-colors cursor-pointer ${
+                      isSelected ? 'bg-purple-50 text-purple-900 font-bold' : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <span className="text-sm">{item}</span>
+                    {isSelected && <Check className="w-4 h-4 text-purple-600 stroke-[2.5]" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
       )}
 
-      {/* 8. Voice Style Modal */}
+      {/* 8. Voice Style Normal Modal */}
       {activeModal === 'voice' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Speech Voice</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center">
+                  <Volume2 className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Voice</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -727,6 +835,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <div className="space-y-2 pt-1">
               {[
                 { name: 'Breeze (Warm & Gentle)', tone: 'Warm, natural tone' },
@@ -766,9 +875,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </div>
               ))}
             </div>
+
             <button
               onClick={() => setActiveModal(null)}
-              className="w-full py-3 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-3"
+              className="w-full py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-2"
             >
               Done
             </button>
@@ -776,12 +886,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       )}
 
-      {/* 9. Service Agreement Modal */}
-      {activeModal === 'agreement' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4">
+      {/* 9. Check for Updates Normal Modal */}
+      {activeModal === 'updates' && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100 text-center">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Service agreement</h3>
+              <h3 className="text-base font-bold text-gray-900 text-left">Check for updates</h3>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -789,40 +899,118 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="text-xs text-gray-600 space-y-3 leading-relaxed">
-              <p className="font-bold text-gray-900 text-sm">FAIRY Terms of Service & Agreement</p>
+
+            <div className="py-3">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center mx-auto shadow-md">
+                <Sparkles className="w-8 h-8" />
+              </div>
+              <h4 className="text-lg font-black text-gray-900 mt-3">FAIRY</h4>
+              <p className="text-xs text-purple-700 font-bold">Version 2.5.3 (Build 276)</p>
+              <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold mt-2 border border-emerald-200/60">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>You're on the latest build</span>
+              </div>
+            </div>
+
+            <div className="text-left bg-gray-50 rounded-xl p-3.5 border border-gray-200/60 text-xs space-y-1.5">
+              <p className="font-bold text-gray-800">What's New in 2.5.3:</p>
+              <ul className="text-gray-600 space-y-1 list-disc list-inside">
+                <li>Revamped modern mobile Settings architecture</li>
+                <li>Instant voice language and sound preview support</li>
+                <li>Granular data controls with cache management</li>
+                <li>Full real-time repository sync and push</li>
+              </ul>
+            </div>
+
+            <p className="text-[11px] text-gray-400">
+              Last checked: {updateCheckedAt}
+            </p>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleCheckUpdateModal}
+                disabled={isCheckingUpdate}
+                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+              >
+                {isCheckingUpdate ? (
+                  <>
+                    <RotateCw className="w-4 h-4 animate-spin" />
+                    <span>Checking...</span>
+                  </>
+                ) : (
+                  <span>Check Now</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 10. Service Agreement Normal Modal */}
+      {activeModal === 'agreement' && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-slate-100 text-gray-800 flex items-center justify-center">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Service agreement</h3>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-gray-600 space-y-3 leading-relaxed max-h-[50vh] overflow-y-auto pr-1">
+              <p className="font-bold text-gray-900 text-sm">FAIRY Terms of Service & Privacy</p>
               <p>
-                Welcome to FAIRY. By accessing or using our services, you agree to be bound by our terms and community guidelines.
+                Welcome to FAIRY. By using this service, you consent to our terms regarding community integrity, content sharing, and data privacy.
               </p>
-              <p className="font-semibold text-gray-800">1. User Content & Conduct</p>
+              <p className="font-semibold text-gray-800">1. User Rights and Content Ownership</p>
               <p>
-                You retain ownership of the original artwork, soundscapes, and writing you publish. You agree not to post infringing, abusive, or unlawful material.
+                You retain full copyright over original creations, voice recordings, and creative contributions shared on the platform.
               </p>
-              <p className="font-semibold text-gray-800">2. Privacy & Data Integrity</p>
+              <p className="font-semibold text-gray-800">2. Community Standards</p>
               <p>
-                We value your autonomy and do not sell your personal biometric or voice data. Content generated or reviewed via AI complies with standard safety benchmarks.
+                Zero tolerance for harassment, discrimination, hate speech, or non-consensual content. Infractions lead to account restrictions.
               </p>
               <p className="font-semibold text-gray-800">3. Artificial Intelligence Disclaimer</p>
               <p>
-                AI-assisted outputs are provided for reference only. Users must verify outputs and use them legally within appropriate jurisdictions.
+                AI-generated feedback, assistance, and responses are provided for reference only. Please verify information and use legally.
               </p>
             </div>
+
             <button
               onClick={() => setActiveModal(null)}
-              className="w-full py-3 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-4"
+              className="w-full py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all cursor-pointer mt-2"
             >
-              I Understand
+              I Understand & Agree
             </button>
           </div>
         </div>
       )}
 
-      {/* 10. Help & Feedback Modal */}
+      {/* 11. Help & Feedback Normal Modal */}
       {activeModal === 'help_feedback' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">Help & Feedback</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center">
+                  <HelpCircle className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Help & Feedback</h3>
+              </div>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
@@ -830,6 +1018,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <div className="space-y-3 pt-1">
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1">Feedback Category</label>
@@ -856,10 +1045,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 />
               </div>
             </div>
+
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setActiveModal(null)}
-                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition-colors cursor-pointer"
+                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -869,7 +1059,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   setFeedbackText('');
                   setActiveModal(null);
                 }}
-                className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Send className="w-4 h-4" />
                 <span>Submit</span>
@@ -879,10 +1069,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       )}
 
-      {/* 11. Log Out Confirmation Modal */}
+      {/* 12. Log Out Normal Modal */}
       {activeModal === 'logout' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4 text-center">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4 text-center border border-gray-100">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto">
               <LogOut className="w-6 h-6 stroke-[2]" />
             </div>
@@ -895,7 +1085,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setActiveModal(null)}
-                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-xl transition-colors cursor-pointer"
+                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
