@@ -32,6 +32,7 @@ export interface SettingsScreenProps {
   onBack: () => void;
   onOpenDMControl?: () => void;
   onLogout?: () => void;
+  onOpenGitHubSync?: () => void;
   currentUser?: {
     name: string;
     handle: string;
@@ -43,6 +44,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onBack,
   onOpenDMControl,
   onLogout,
+  onOpenGitHubSync,
   currentUser,
 }) => {
   // Navigation / active modal states
@@ -350,6 +352,23 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               </div>
               <ChevronRight className="w-4 h-4 text-gray-300 stroke-[2]" />
             </button>
+
+            {/* Cloud & Repository Sync */}
+            {onOpenGitHubSync && (
+              <button
+                onClick={onOpenGitHubSync}
+                className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50/80 active:bg-gray-100/60 transition-colors text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Database className="w-5 h-5 text-indigo-600 stroke-[1.8]" />
+                  <span className="text-[15px] font-medium text-gray-900">Cloud & Repository Sync</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[12px] text-emerald-600 font-semibold">Active</span>
+                  <ChevronRight className="w-4 h-4 text-gray-300 stroke-[2]" />
+                </div>
+              </button>
+            )}
           </div>
         </div>
 

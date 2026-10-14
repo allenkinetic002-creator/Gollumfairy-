@@ -135,7 +135,7 @@ export function buildProfileWikiData(user: {
       bioOverview:
         user.bio ||
         `${user.name} (${user.handle}) is a creator, full-stack engineer, and ecosystem pioneer on the Fairy network. Leading social feeds, real-time trust receipts, and next-generation creative tooling.`,
-      beforeFame: `${user.name} founded digital interactive experiences and creative open-source tooling, pioneering digital identity verification and real-time distributed feeds before leading the modern Fairy and Gollumfairy ecosystem.`,
+      beforeFame: `${user.name} founded digital interactive experiences and creative open-source tooling, pioneering digital identity verification and real-time distributed feeds before leading the modern Fairy ecosystem.`,
       triviaList: [
         'Creator and architect of the Fairy Social Feed and Trust Receipt protocol.',
         'Maintains a 99% Verified Integrity Trust Score across all community interactions.',

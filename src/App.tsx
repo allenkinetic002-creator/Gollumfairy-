@@ -2046,17 +2046,6 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* GitHub Repo Button */}
-              <button
-                onClick={() => setShowGitHubSyncModal(true)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
-                title="Send updates to GitHub repo (allenkinetic002-creator/Gollumfairy-)"
-              >
-                <UploadCloud className="w-3.5 h-3.5 stroke-[2.2] text-indigo-400" />
-                <span className="hidden sm:inline text-slate-400">Repo:</span>
-                <span>Gollumfairy-</span>
-              </button>
-
               {/* Once logged in, Sign In button disappears! Only displays when logged out */}
               {(!currentUser || isLoggedOut) ? (
                 <button
@@ -3846,6 +3835,9 @@ export default function App() {
                 localStorage.removeItem('fairy_current_user');
               } catch (e) {}
               setActiveNavIndex(0);
+            }}
+            onOpenGitHubSync={() => {
+              setShowGitHubSyncModal(true);
             }}
             currentUser={currentUser || undefined}
           />
