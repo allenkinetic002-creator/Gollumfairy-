@@ -306,6 +306,8 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
           <FaceoffBattleModal
             onClose={() => onCloseFaceoff(post.id)}
             battleQuestion={post.faceoffConfig.battleQuestion}
+            totalParticipants={(post.faceoffConfig as any)?.totalParticipants}
+            participants={(post.faceoffConfig as any)?.participants}
             redParticipant={post.faceoffConfig.redParticipant}
             blueParticipant={post.faceoffConfig.blueParticipant}
             className="w-full max-w-full border-0 shadow-none bg-transparent p-2 sm:p-2.5"
@@ -448,6 +450,7 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
           <InfluenceRatingModal
             isOpen={true}
             isInline={true}
+            targetName={post.authorName}
             onClose={() => (onCloseInfluenceRating ? onCloseInfluenceRating() : onToggleInfluenceRating(post.id))}
             onOpenStarStamps={onOpenStarStamps}
           />

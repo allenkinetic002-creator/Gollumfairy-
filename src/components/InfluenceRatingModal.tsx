@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, Star, Info, ChevronDown, CheckCircle2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Star, Info, ChevronDown, CheckCircle2, ChevronLeft, ChevronRight, Edit3 } from 'lucide-react';
+import { syncActivityToRepo } from '../lib/repoSync';
 
 export interface InfluenceRatingModalProps {
   isOpen?: boolean;
@@ -7,6 +8,9 @@ export interface InfluenceRatingModalProps {
   isInline?: boolean;
   className?: string;
   onOpenStarStamps?: () => void;
+  initialRating?: number;
+  onRatingSubmit?: (rating: number) => void;
+  targetName?: string;
 }
 
 export function InfluenceRatingModal({
@@ -15,41 +19,121 @@ export function InfluenceRatingModal({
   isInline = false,
   className = '',
   onOpenStarStamps,
+  initialRating = 8.9,
+  onRatingSubmit,
+  targetName,
 }: InfluenceRatingModalProps) {
-  // Selected rating (default 8.9 as in screenshot)
-  const [rating, setRating] = useState<number>(8.9);
+  // Selected rating (default 8.9)
+  const [rating, setRating] = useState<number>(initialRating);
+  const [typedValue, setTypedValue] = useState<string>(initialRating.toFixed(1));
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [activeFace, setActiveFace] = useState<number>(4); // 0: Fail, 1: Poor, 2: Fair, 3: Good, 4: Very good
 
-  if (!isOpen) return null;
+  const scrollTrackRef = useRef<HTMLDivElement | null>(null);
 
-  const ratingOptions = [8.5, 8.6, 8.7, 8.8, 8.9, 9.0];
+  // Generate full range of numbers from 1.0 to 10.0 in 0.1 increments (91 values)
+  const allRatingNumbers: number[] = React.useMemo(() => {
+    const list: number[] = [];
+    for (let i = 10; i <= 100; i++) {
+      list.push(parseFloat((i / 10).toFixed(1)));
+    }
+    return list;
+  }, []);
 
-  const handleSelectRating = (val: number) => {
-    setRating(val);
-    if (val >= 8.9) setActiveFace(4);
-    else if (val >= 8.7) setActiveFace(3);
-    else if (val >= 8.5) setActiveFace(2);
+  const updateFaceForRating = (val: number) => {
+    if (val >= 8.8) setActiveFace(4);
+    else if (val >= 8.6) setActiveFace(3);
+    else if (val >= 8.0) setActiveFace(2);
     else if (val >= 7.0) setActiveFace(1);
     else setActiveFace(0);
   };
 
+  const handleSelectRating = (val: number, scrollIntoView = false) => {
+    const clamped = Math.max(0, Math.min(10, parseFloat(val.toFixed(1))));
+    setRating(clamped);
+    setTypedValue(clamped.toFixed(1));
+    updateFaceForRating(clamped);
+
+    if (scrollIntoView && scrollTrackRef.current) {
+      const activeEl = scrollTrackRef.current.querySelector(`[data-rating="${clamped.toFixed(1)}"]`) as HTMLElement;
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  };
+
+  const handleTypedInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setTypedValue(raw);
+    const num = parseFloat(raw);
+    if (!isNaN(num)) {
+      const clamped = Math.max(0, Math.min(10, num));
+      setRating(clamped);
+      updateFaceForRating(clamped);
+
+      // Auto-scroll track to nearest value
+      if (scrollTrackRef.current) {
+        const roundedKey = (Math.round(clamped * 10) / 10).toFixed(1);
+        const activeEl = scrollTrackRef.current.querySelector(`[data-rating="${roundedKey}"]`) as HTMLElement;
+        if (activeEl) {
+          activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }
+    }
+  };
+
   const handleSelectFace = (faceIndex: number) => {
     setActiveFace(faceIndex);
-    if (faceIndex === 4) setRating(8.9);
-    else if (faceIndex === 3) setRating(8.7);
-    else if (faceIndex === 2) setRating(8.5);
-    else if (faceIndex === 1) setRating(7.2);
-    else setRating(5.4);
+    let targetVal = 8.9;
+    if (faceIndex === 4) targetVal = 8.9;
+    else if (faceIndex === 3) targetVal = 8.7;
+    else if (faceIndex === 2) targetVal = 8.5;
+    else if (faceIndex === 1) targetVal = 7.2;
+    else targetVal = 5.4;
+
+    handleSelectRating(targetVal, true);
   };
+
+  const handleScrollLeft = () => {
+    if (scrollTrackRef.current) {
+      scrollTrackRef.current.scrollBy({ left: -140, behavior: 'smooth' });
+    }
+  };
+
+  const handleScrollRight = () => {
+    if (scrollTrackRef.current) {
+      scrollTrackRef.current.scrollBy({ left: 140, behavior: 'smooth' });
+    }
+  };
+
+  // Center selected rating on first open
+  useEffect(() => {
+    if (isOpen && scrollTrackRef.current) {
+      setTimeout(() => {
+        const activeEl = scrollTrackRef.current?.querySelector(`[data-rating="${rating.toFixed(1)}"]`) as HTMLElement;
+        if (activeEl) {
+          activeEl.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+        }
+      }, 100);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const handleSubmit = () => {
     setSubmitted(true);
+    onRatingSubmit?.(rating);
+    syncActivityToRepo(
+      'rate_masked_eyes',
+      `Rated ${rating.toFixed(1)} on ${targetName || 'post'} via 2 eyes mask`,
+      { rating, targetName }
+    );
+
     setTimeout(() => {
       setSubmitted(false);
       onClose?.();
-    }, 1400);
+    }, 1200);
   };
 
   const cardContent = (
@@ -57,16 +141,16 @@ export function InfluenceRatingModal({
       onClick={(e) => e.stopPropagation()}
       className={
         isInline
-          ? `w-full max-w-[420px] mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/90 flex flex-col overflow-hidden animate-in fade-in duration-150 select-none ${className}`
-          : `w-[94%] sm:w-full max-w-[380px] bg-white rounded-[24px] shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 max-h-[88vh] ${className}`
+          ? `w-full max-w-[440px] mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/90 flex flex-col overflow-hidden animate-in fade-in duration-150 select-none ${className}`
+          : `w-[94%] sm:w-full max-w-[420px] bg-white rounded-[24px] shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] ${className}`
       }
     >
       {/* Header bar with close button */}
-      <div className="px-4 pt-3 pb-1.5 flex items-center justify-between shrink-0 border-b border-slate-100/70">
+      <div className="px-4 pt-3 pb-2 flex items-center justify-between shrink-0 border-b border-slate-100/70">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[11px] font-black uppercase tracking-wider text-slate-600">
-            Fairy Influence Metrics
+          <span className="text-[11px] font-black uppercase tracking-wider text-slate-700">
+            Fairy Influence Rating & Metrics
           </span>
         </div>
         {onClose && (
@@ -87,19 +171,19 @@ export function InfluenceRatingModal({
           {/* Left: Overall ratings */}
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[22px] sm:text-[24px] font-black text-slate-900 leading-none tracking-tight">
+              <span className="text-[24px] sm:text-[26px] font-black text-slate-900 leading-none tracking-tight">
                 {rating.toFixed(1)}
               </span>
-              <Star className="w-4 h-4 text-amber-400 fill-amber-400 -mt-0.5" />
+              <Star className="w-4.5 h-4.5 text-amber-400 fill-amber-400 -mt-0.5" />
               <span className="text-[13px] sm:text-[14px] font-black text-[#15803D] leading-none">
-                {rating >= 8.8 ? 'Very good' : rating >= 8.6 ? 'Good' : rating >= 8.0 ? 'Fair' : 'Poor'}
+                {rating >= 8.8 ? 'Very good' : rating >= 8.6 ? 'Good' : rating >= 8.0 ? 'Fair' : rating >= 7.0 ? 'Poor' : 'Fail'}
               </span>
             </div>
             <h4 className="font-extrabold text-[11px] sm:text-xs text-slate-900 mt-1.5 leading-tight">
-              Overall ratings
+              Overall ratings {targetName ? `for ${targetName}` : ''}
             </h4>
             <p className="text-[10px] sm:text-[11px] font-medium text-slate-500 mt-0.5">
-              1.3M ratings
+              1.3M verified rating submissions
             </p>
           </div>
 
@@ -109,7 +193,7 @@ export function InfluenceRatingModal({
               97%
             </span>
             <h4 className="font-extrabold text-[11px] sm:text-xs text-slate-900 mt-1.5 leading-tight flex items-center gap-1">
-              <span>Completion rates</span>
+              <span>Completion</span>
               <Info className="w-3 h-3 text-slate-400" />
             </h4>
             <p className="text-[10px] sm:text-[11px] font-medium text-slate-500 mt-0.5">
@@ -118,9 +202,9 @@ export function InfluenceRatingModal({
           </div>
         </div>
 
-        {/* Row of 5 Emotional Faces (Smooth, high-def vector graphics - zero pixelation) */}
+        {/* Row of 5 Emotional Faces */}
         <div className="flex items-center justify-between px-1 pt-0.5">
-          {/* 1. Red Fail (Smooth X eyes, wavy mouth) */}
+          {/* 1. Red Fail */}
           <button
             type="button"
             onClick={() => handleSelectFace(0)}
@@ -129,25 +213,17 @@ export function InfluenceRatingModal({
             }`}
             title="Fail"
           >
-            <svg
-              className="w-8 h-8 sm:w-8.5 sm:h-8.5"
-              viewBox="0 0 44 44"
-              fill="none"
-              style={{ shapeRendering: 'geometricPrecision' }}
-            >
+            <svg className="w-8 h-8 sm:w-8.5 sm:h-8.5" viewBox="0 0 44 44" fill="none">
               <circle cx="22" cy="22" r="19" stroke="#E11D48" strokeWidth="2.4" fill="#FFF1F2" />
-              {/* Left X eye */}
               <line x1="14" y1="15" x2="18" y2="19" stroke="#E11D48" strokeWidth="2.4" strokeLinecap="round" />
               <line x1="18" y1="15" x2="14" y2="19" stroke="#E11D48" strokeWidth="2.4" strokeLinecap="round" />
-              {/* Right X eye */}
               <line x1="26" y1="15" x2="30" y2="19" stroke="#E11D48" strokeWidth="2.4" strokeLinecap="round" />
               <line x1="30" y1="15" x2="26" y2="19" stroke="#E11D48" strokeWidth="2.4" strokeLinecap="round" />
-              {/* Smooth squiggly mouth */}
               <path d="M15 28 C17.5 25.5, 20.5 29.5, 23 27 C25.5 24.5, 28.5 28.5, 29 27" stroke="#E11D48" strokeWidth="2.4" strokeLinecap="round" fill="none" />
             </svg>
           </button>
 
-          {/* 2. Orange Poor (Smooth sad frown) */}
+          {/* 2. Orange Poor */}
           <button
             type="button"
             onClick={() => handleSelectFace(1)}
@@ -156,12 +232,7 @@ export function InfluenceRatingModal({
             }`}
             title="Poor"
           >
-            <svg
-              className="w-8 h-8 sm:w-8.5 sm:h-8.5"
-              viewBox="0 0 44 44"
-              fill="none"
-              style={{ shapeRendering: 'geometricPrecision' }}
-            >
+            <svg className="w-8 h-8 sm:w-8.5 sm:h-8.5" viewBox="0 0 44 44" fill="none">
               <circle cx="22" cy="22" r="19" stroke="#EA580C" strokeWidth="2.4" fill="#FFF7ED" />
               <circle cx="16" cy="18" r="2.2" fill="#EA580C" />
               <circle cx="28" cy="18" r="2.2" fill="#EA580C" />
@@ -169,7 +240,7 @@ export function InfluenceRatingModal({
             </svg>
           </button>
 
-          {/* 3. Yellow Fair (Smooth straight mouth) */}
+          {/* 3. Yellow Fair */}
           <button
             type="button"
             onClick={() => handleSelectFace(2)}
@@ -178,12 +249,7 @@ export function InfluenceRatingModal({
             }`}
             title="Fair"
           >
-            <svg
-              className="w-8 h-8 sm:w-8.5 sm:h-8.5"
-              viewBox="0 0 44 44"
-              fill="none"
-              style={{ shapeRendering: 'geometricPrecision' }}
-            >
+            <svg className="w-8 h-8 sm:w-8.5 sm:h-8.5" viewBox="0 0 44 44" fill="none">
               <circle cx="22" cy="22" r="19" stroke="#CA8A04" strokeWidth="2.4" fill="#FEFCE8" />
               <circle cx="16" cy="18" r="2.2" fill="#CA8A04" />
               <circle cx="28" cy="18" r="2.2" fill="#CA8A04" />
@@ -191,7 +257,7 @@ export function InfluenceRatingModal({
             </svg>
           </button>
 
-          {/* 4. Light Green Good (Smooth crisp smiling face) */}
+          {/* 4. Light Green Good */}
           <button
             type="button"
             onClick={() => handleSelectFace(3)}
@@ -200,12 +266,7 @@ export function InfluenceRatingModal({
             }`}
             title="Good"
           >
-            <svg
-              className="w-8 h-8 sm:w-8.5 sm:h-8.5"
-              viewBox="0 0 44 44"
-              fill="none"
-              style={{ shapeRendering: 'geometricPrecision' }}
-            >
+            <svg className="w-8 h-8 sm:w-8.5 sm:h-8.5" viewBox="0 0 44 44" fill="none">
               <circle cx="22" cy="22" r="19" stroke="#16A34A" strokeWidth="2.4" fill="#F0FDF4" />
               <circle cx="16" cy="18" r="2.2" fill="#16A34A" />
               <circle cx="28" cy="18" r="2.2" fill="#16A34A" />
@@ -213,7 +274,7 @@ export function InfluenceRatingModal({
             </svg>
           </button>
 
-          {/* 5. Rich Green Very Good (Smooth curved eyes, joyful anti-aliased smile) */}
+          {/* 5. Rich Green Very Good */}
           <button
             type="button"
             onClick={() => handleSelectFace(4)}
@@ -222,37 +283,20 @@ export function InfluenceRatingModal({
             }`}
             title="Very good"
           >
-            <svg
-              className="w-8 h-8 sm:w-8.5 sm:h-8.5"
-              viewBox="0 0 44 44"
-              fill="none"
-              style={{ shapeRendering: 'geometricPrecision' }}
-            >
-              {/* Crisp smooth circle with soft mint fill */}
+            <svg className="w-8 h-8 sm:w-8.5 sm:h-8.5" viewBox="0 0 44 44" fill="none">
               <circle cx="22" cy="22" r="19" stroke="#059669" strokeWidth="2.4" fill="#ECFDF5" />
-              {/* Smooth joyful arc eyes with round caps */}
               <path d="M13.5 18 C15.2 15, 18.8 15, 20.5 18" stroke="#059669" strokeWidth="2.4" strokeLinecap="round" fill="none" />
               <path d="M23.5 18 C25.2 15, 28.8 15, 30.5 18" stroke="#059669" strokeWidth="2.4" strokeLinecap="round" fill="none" />
-              {/* Soft blush cheeks */}
               <circle cx="12" cy="21.5" r="2" fill="#34D399" fillOpacity="0.45" />
               <circle cx="32" cy="21.5" r="2" fill="#34D399" fillOpacity="0.45" />
-              {/* Smooth open joyful smile */}
-              <path
-                d="M14.5 24 C14.5 31.5, 29.5 31.5, 29.5 24 C27.5 25.2, 16.5 25.2, 14.5 24 Z"
-                fill="#059669"
-              />
-              {/* Teeth glint */}
-              <path
-                d="M16.5 24.8 C19 26, 25 26, 27.5 24.8 C26.2 25.6, 17.8 25.6, 16.5 24.8 Z"
-                fill="#FFFFFF"
-              />
+              <path d="M14.5 24 C14.5 31.5, 29.5 31.5, 29.5 24 C27.5 25.2, 16.5 25.2, 14.5 24 Z" fill="#059669" />
+              <path d="M16.5 24.8 C19 26, 25 26, 27.5 24.8 C26.2 25.6, 17.8 25.6, 16.5 24.8 Z" fill="#FFFFFF" />
             </svg>
           </button>
         </div>
 
-        {/* Color Rating Progress Bar & Labels */}
+        {/* Color Rating Progress Bar */}
         <div className="space-y-1 pt-0.5">
-          {/* Multi-color segment bar */}
           <div className="w-full h-1.5 rounded-full overflow-hidden flex">
             <div className="flex-1 bg-[#E11D48]" />
             <div className="flex-1 bg-[#EA580C]" />
@@ -261,7 +305,6 @@ export function InfluenceRatingModal({
             <div className="flex-1 bg-[#059669]" />
           </div>
 
-          {/* Labels across zones */}
           <div className="flex items-center justify-between text-[9px] font-bold text-slate-500 px-0.5">
             <span className="text-[#E11D48]">- Fail</span>
             <span className="text-[#EA580C]">Poor</span>
@@ -269,153 +312,156 @@ export function InfluenceRatingModal({
             <span className="text-[#16A34A]">Good</span>
             <span className="text-[#059669]">Very good +</span>
           </div>
+        </div>
 
-          {/* Ruler with tick marks & selector circle */}
-          <div className="relative py-2 flex items-center justify-center">
-            {/* Horizontal deep blue line */}
-            <div className="w-full h-[4px] bg-[#1E40AF] rounded-full relative flex items-center justify-between px-1.5">
-              {/* 12 vertical ticks */}
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="w-[2.5px] h-3 bg-[#1E40AF] rounded-full shrink-0" />
-              ))}
+        {/* ========================================================================= */}
+        {/* NEW ENHANCED NUMERIC ENTRY SECTION: TYPE OR SCROLL SIDEWAYS */}
+        {/* ========================================================================= */}
+        <div className="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/80 space-y-2.5">
+          {/* Header row with Type input box */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              <Edit3 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <div>
+                <label htmlFor="rating-direct-input" className="text-[11.5px] font-black text-slate-900 leading-tight block">
+                  Type Number to Rate:
+                </label>
+                <span className="text-[9.5px] text-slate-500">
+                  Type any number (0.0 &ndash; 10.0) or scroll sideways below
+                </span>
+              </div>
+            </div>
 
-              {/* Circular slider thumb */}
-              <div
-                className="absolute w-4.5 h-4.5 rounded-full border-[2.5px] border-[#1E40AF] bg-white shadow-md transition-all duration-200 pointer-events-none"
-                style={{
-                  left: `${Math.min(94, Math.max(4, ((rating - 7.5) / 2) * 100))}%`,
-                  transform: 'translateX(-50%)',
+            {/* Direct Number Input */}
+            <div className="relative shrink-0 flex items-center">
+              <input
+                id="rating-direct-input"
+                type="number"
+                min="0"
+                max="10"
+                step="0.1"
+                value={typedValue}
+                onChange={handleTypedInputChange}
+                onBlur={() => {
+                  const num = parseFloat(typedValue);
+                  if (isNaN(num)) {
+                    setTypedValue(rating.toFixed(1));
+                  } else {
+                    const clamped = Math.max(0, Math.min(10, num));
+                    setRating(clamped);
+                    setTypedValue(clamped.toFixed(1));
+                  }
                 }}
+                className="w-20 px-2 py-1.5 bg-white border-2 border-indigo-500 text-indigo-950 font-black text-center text-sm rounded-xl shadow-xs focus:ring-2 focus:ring-indigo-400 focus:outline-none tabular-nums"
+                placeholder="8.9"
               />
+              <span className="ml-1 text-[11px] font-black text-amber-500">★</span>
             </div>
           </div>
 
-          {/* Stepper minus & plus row */}
-          <div className="flex items-center justify-between px-1 text-slate-400">
-            <button
-              type="button"
-              onClick={() => setRating((prev) => Math.max(7.0, parseFloat((prev - 0.1).toFixed(1))))}
-              className="hover:text-slate-800 transition-colors cursor-pointer text-base font-bold leading-none p-0.5"
-              title="Decrease rating"
-            >
-              &minus;
-            </button>
-            <button
-              type="button"
-              onClick={() => setRating((prev) => Math.min(10.0, parseFloat((prev + 0.1).toFixed(1))))}
-              className="hover:text-slate-800 transition-colors cursor-pointer text-base font-bold leading-none p-0.5"
-              title="Increase rating"
-            >
-              &#43;
-            </button>
+          {/* Quick Preset Jumps */}
+          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 overflow-x-auto pb-0.5">
+            <span className="text-[9px] uppercase tracking-wider text-slate-400 shrink-0 mr-0.5">Presets:</span>
+            {[
+              { label: '5.0', val: 5.0 },
+              { label: '7.5', val: 7.5 },
+              { label: '8.5', val: 8.5 },
+              { label: '8.8', val: 8.8 },
+              { label: '8.9', val: 8.9 },
+              { label: '9.0', val: 9.0 },
+              { label: '9.5', val: 9.5 },
+              { label: '10.0', val: 10.0 },
+            ].map((p) => (
+              <button
+                key={p.val}
+                type="button"
+                onClick={() => handleSelectRating(p.val, true)}
+                className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer shrink-0 ${
+                  Math.abs(rating - p.val) < 0.05
+                    ? 'bg-indigo-600 text-white font-extrabold'
+                    : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-200'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Sideways Scrollable Numbers Strip with Left/Right Arrow Controls */}
+          <div className="relative pt-1">
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-1 px-0.5">
+              <span>Scroll sideways &larr; &rarr;</span>
+              <span className="font-mono text-indigo-700 font-extrabold">
+                Selected: {rating.toFixed(1)} / 10.0
+              </span>
+            </div>
+
+            <div className="relative flex items-center">
+              {/* Left Scroll Arrow */}
+              <button
+                type="button"
+                onClick={handleScrollLeft}
+                aria-label="Scroll left"
+                className="w-6 h-9 rounded-l-lg bg-slate-200/90 hover:bg-slate-300 text-slate-700 flex items-center justify-center shrink-0 z-10 cursor-pointer shadow-2xs"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {/* Horizontal Scroll Track */}
+              <div
+                ref={scrollTrackRef}
+                tabIndex={0}
+                aria-label="Sideways scrollable rating numbers"
+                className="flex-1 flex items-center gap-1.5 overflow-x-auto py-1 px-2 bg-white border-y border-slate-200 scrollbar-thin scroll-smooth select-none focus:outline-none"
+                style={{ scrollbarWidth: 'thin' }}
+              >
+                {allRatingNumbers.map((val) => {
+                  const isSelected = Math.abs(rating - val) < 0.05;
+                  return (
+                    <button
+                      key={val}
+                      data-rating={val.toFixed(1)}
+                      type="button"
+                      onClick={() => handleSelectRating(val)}
+                      className={`min-w-[44px] h-8 rounded-lg text-center font-black text-xs transition-all cursor-pointer shrink-0 flex items-center justify-center ${
+                        isSelected
+                          ? 'bg-[#16A34A] text-white shadow-md scale-105 ring-2 ring-emerald-400'
+                          : 'bg-[#F1F5F9] text-slate-800 hover:bg-slate-200'
+                      }`}
+                    >
+                      {val.toFixed(1)}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right Scroll Arrow */}
+              <button
+                type="button"
+                onClick={handleScrollRight}
+                aria-label="Scroll right"
+                className="w-6 h-9 rounded-r-lg bg-slate-200/90 hover:bg-slate-300 text-slate-700 flex items-center justify-center shrink-0 z-10 cursor-pointer shadow-2xs"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Social Reach Text + High-Definition Smooth Vector Thumbs Up */}
-        <div className="flex items-center justify-between pt-0.5 gap-2.5 bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
+        {/* Social Reach Boost Info */}
+        <div className="flex items-center justify-between gap-2.5 bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
           <div className="space-y-0.5">
-            <p className="font-extrabold text-[12.5px] sm:text-[13px] text-slate-900 leading-tight">
+            <p className="font-extrabold text-[12px] sm:text-[12.5px] text-slate-900 leading-tight">
               Max out your social reach.
             </p>
-            <p className="font-extrabold text-[12.5px] sm:text-[13px] text-slate-900 leading-tight">
+            <p className="font-extrabold text-[12px] sm:text-[12.5px] text-indigo-900 leading-tight">
               500X your presence.
             </p>
-            <p className="font-medium text-[10.5px] sm:text-[11px] text-slate-600 pt-0.5 flex items-center gap-1">
+            <p className="font-medium text-[10px] text-slate-600 pt-0.5 flex items-center gap-1">
               <span>Only on Fairy where Influence gets real.</span>
               <Info className="w-3 h-3 text-slate-400 shrink-0 inline" />
             </p>
           </div>
-
-          {/* Ultra-smooth, high-def vector Thumbs Up Hand (no pixelation) */}
-          <div className="shrink-0 p-1 bg-white rounded-xl shadow-2xs border border-slate-200/60">
-            <svg
-              className="w-8 h-8 sm:w-8.5 sm:h-8.5"
-              viewBox="0 0 32 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ shapeRendering: 'geometricPrecision' }}
-            >
-              {/* Smooth wrist sleeve / cuff */}
-              <rect
-                x="3"
-                y="13"
-                width="5.5"
-                height="13.5"
-                rx="2.5"
-                fill="#1E293B"
-                stroke="#0F172A"
-                strokeWidth="1.6"
-              />
-              {/* Smooth modern thumbs-up hand contour */}
-              <path
-                d="
-                  M8.5 14H13.2
-                  C14.2 14 15 13.2 15.2 12.2
-                  L15.8 8.4
-                  C16.1 6.5 17.5 5 19.3 5
-                  C20.6 5 21.6 6 21.6 7.3
-                  C21.6 9 20.8 11.2 20.2 12.8
-                  C20 13.5 20.5 14.2 21.2 14.2
-                  H26.2
-                  C27.8 14.2 29 15.5 29 17.1
-                  C29 17.6 28.8 18.1 28.5 18.5
-                  C29 19 29.2 19.7 29.2 20.4
-                  C29.2 21 29 21.6 28.6 22
-                  C29 22.5 29.1 23.2 29 23.9
-                  C28.7 25.5 27.3 26.6 25.7 26.8
-                  L19.5 27.2
-                  C15.8 27.4 12.2 27 8.5 26.2
-                  V14
-                  Z
-                "
-                fill="#FFFFFF"
-                stroke="#0F172A"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* Smooth finger crease lines */}
-              <path
-                d="M20.5 17.5H26.2"
-                stroke="#0F172A"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-              />
-              <path
-                d="M20.5 20.8H25.8"
-                stroke="#0F172A"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-              />
-              <path
-                d="M20 24.1H25"
-                stroke="#0F172A"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-        </div>
-
-        {/* Rating Number Selector Chips: 8.5, 8.6, 8.7, 8.8, 8.9, 9.0 */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-0.5">
-          {ratingOptions.map((val) => {
-            const isSelected = rating === val;
-            return (
-              <button
-                key={val}
-                type="button"
-                onClick={() => handleSelectRating(val)}
-                className={`flex-1 min-w-[42px] py-1.5 rounded-lg text-center font-black text-xs sm:text-[13px] transition-all cursor-pointer shadow-2xs ${
-                  isSelected
-                    ? 'bg-[#16A34A] text-white shadow-xs scale-102 ring-2 ring-emerald-300'
-                    : 'bg-[#F1F5F9] text-slate-800 hover:bg-slate-200'
-                }`}
-              >
-                {val.toFixed(1)}
-              </button>
-            );
-          })}
         </div>
 
         {/* Expandable Accordion: "Unlock the Rest...." */}
@@ -474,7 +520,11 @@ export function InfluenceRatingModal({
         )}
 
         {/* Bottom Submit Button Row */}
-        <div className="pt-1 flex items-center justify-end">
+        <div className="pt-1 flex items-center justify-between">
+          <div className="text-[11px] font-bold text-slate-600">
+            Rating: <span className="font-black text-slate-900">{rating.toFixed(1)}</span>
+          </div>
+
           <button
             type="button"
             onClick={handleSubmit}
@@ -483,11 +533,11 @@ export function InfluenceRatingModal({
           >
             {submitted ? (
               <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                <span>Submitted!</span>
+                <CheckCircle2 className="w-4 h-4 text-white" />
+                <span>Submitted ({rating.toFixed(1)})!</span>
               </>
             ) : (
-              'Submit'
+              'Submit Rating'
             )}
           </button>
         </div>

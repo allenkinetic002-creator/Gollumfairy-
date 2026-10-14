@@ -1473,6 +1473,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                 <InfluenceRatingModal
                   isOpen={true}
                   isInline={true}
+                  targetName={wikiData.name}
                   onClose={() => setActiveInfluenceRating(false)}
                   onOpenStarStamps={() => {
                     setActiveInfluenceRating(false);

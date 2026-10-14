@@ -46,7 +46,7 @@ import { NormalMessagesScreen, TargetMessagePerson } from './components/NormalMe
 import { StarStampsScreen } from './components/StarStampsScreen';
 import { InfluenceRatingModal } from './components/InfluenceRatingModal';
 import { PhoneReactionPopup } from './components/PhoneReactionPopup';
-import { FaceoffBattleModal } from './components/FaceoffBattleModal';
+import { FaceoffBattleModal, BattleParticipant } from './components/FaceoffBattleModal';
 import { FairyPotIcon } from './components/FairyPotIcon';
 import { AeriFrogIcon } from './components/AeriFrogIcon';
 import { AeriFlameIcon } from './components/AeriFlameIcon';
@@ -113,6 +113,8 @@ export interface FeedPost {
   isBookmarked?: boolean;
   faceoffConfig?: {
     battleQuestion?: string;
+    totalParticipants?: number;
+    participants?: BattleParticipant[];
     redParticipant?: {
       name: string;
       avatar: string;
@@ -1894,6 +1896,8 @@ export default function App() {
       isRetweeted: false,
       faceoffConfig: {
         battleQuestion: payload.battleQuestion,
+        totalParticipants: payload.totalParticipants,
+        participants: payload.participants,
         redParticipant: {
           name: payload.challengerName,
           avatar: payload.challengerAvatar,
@@ -1915,6 +1919,8 @@ export default function App() {
               tweetContent: payload.caption || p.tweetContent,
               faceoffConfig: {
                 battleQuestion: payload.battleQuestion,
+                totalParticipants: payload.totalParticipants,
+                participants: payload.participants,
                 redParticipant: {
                   name: payload.challengerName,
                   avatar: payload.challengerAvatar,
@@ -2505,6 +2511,8 @@ export default function App() {
                     <FaceoffBattleModal
                       onClose={() => handleCloseFaceoff(post.id)}
                       battleQuestion={post.faceoffConfig?.battleQuestion}
+                      totalParticipants={post.faceoffConfig?.totalParticipants}
+                      participants={post.faceoffConfig?.participants}
                       redParticipant={post.faceoffConfig?.redParticipant}
                       blueParticipant={post.faceoffConfig?.blueParticipant}
                     />
@@ -2746,7 +2754,12 @@ export default function App() {
                     <InfluenceRatingModal
                       isOpen={true}
                       isInline={true}
+                      targetName={post.authorName}
                       onClose={handleCloseInfluenceRating}
+                      onRatingSubmit={(val) => {
+                        setTweetSuccessToast(`Submitted rating: ${val.toFixed(1)} ★ for ${post.authorName}`);
+                        setTimeout(() => setTweetSuccessToast(null), 3000);
+                      }}
                       onOpenStarStamps={() => {
                         setActiveInfluenceRatingId(null);
                         setStarStampsSearchQuery(post.authorName);
@@ -3507,7 +3520,22 @@ export default function App() {
                       <InfluenceRatingModal
                         isOpen={true}
                         isInline={true}
+                        targetName={person.name}
+                        initialRating={person.rating || 8.9}
                         onClose={handleCloseInfluenceRating}
+                        onRatingSubmit={(val) => {
+                          setCreatorsData((prev) => {
+                            const updated = { ...prev };
+                            Object.keys(updated).forEach((cat) => {
+                              updated[cat] = updated[cat].map((c) =>
+                                c.name === person.name ? { ...c, rating: val } : c
+                              );
+                            });
+                            return updated;
+                          });
+                          setTweetSuccessToast(`Rated ${person.name}: ${val.toFixed(1)} ★`);
+                          setTimeout(() => setTweetSuccessToast(null), 3000);
+                        }}
                         onOpenStarStamps={() => {
                           setActiveInfluenceRatingId(null);
                           setStarStampsSearchQuery(person.name);
