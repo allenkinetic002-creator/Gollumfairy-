@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { initializeTrustReceiptsSync } from './data/trustReceipts';
+import { initializeStarStampsSync } from './data/starStamps';
+import { fetchRemotePosts, syncPostToSupabase } from './lib/fairyBackend';
+
 import {
   Home,
   TrendingUp,
@@ -1544,6 +1548,53 @@ export default function App() {
     },
   ]);
 
+  // Initialize Supabase backend sync and real-time listeners on mount
+  useEffect(() => {
+    initializeTrustReceiptsSync();
+    initializeStarStampsSync();
+
+    // Fetch any community posts from Supabase
+    fetchRemotePosts().then((remotePosts) => {
+      if (remotePosts && remotePosts.length > 0) {
+        setFeedPosts((prev) => {
+          const map = new Map<string, FeedPost>();
+          // Put remote first
+          remotePosts.forEach((r) => {
+            map.set(r.id, {
+              id: r.id,
+              authorName: r.author_name,
+              authorHandle: r.author_handle,
+              authorAvatar: r.author_avatar || elenaAvatar,
+              isVerified: !!r.is_verified,
+              timeAgo: r.time_ago || 'Recent',
+              location: r.location || undefined,
+              mediaType: (r.media_type as any) || (r.is_tweet ? 'tweet' : 'image'),
+              isTweet: r.is_tweet,
+              tweetContent: r.tweet_content || undefined,
+              mediaUrl: r.media_url || undefined,
+              caption: r.caption || r.tweet_content || '',
+              tags: r.tags || [],
+              audioTitle: r.audio_title || 'Original Audio',
+              likeCount: r.like_count ?? 0,
+              isLiked: false,
+              isTrending: true,
+              retweetCount: r.retweet_count ?? 0,
+              replyCount: r.reply_count ?? 0,
+              viewCount: r.view_count || '1',
+            });
+          });
+          // Add default local posts if not already present
+          prev.forEach((p) => {
+            if (!map.has(p.id)) {
+              map.set(p.id, p);
+            }
+          });
+          return Array.from(map.values());
+        });
+      }
+    });
+  }, []);
+
   const handlePublishTweet = (payload: NewTweetPayload) => {
     const newTweet: FeedPost = {
       id: 'tweet-' + Date.now(),
@@ -1573,6 +1624,11 @@ export default function App() {
     setShowNormalMessagesScreen(false);
     setTargetMessagePerson(null);
 
+    // Sync to Supabase in the background
+    syncPostToSupabase(newTweet).catch((err) =>
+      console.warn('[Supabase] Failed to sync new tweet:', err)
+    );
+
     setTweetSuccessToast('Your post was published!');
     setTimeout(() => {
       setTweetSuccessToast(null);
@@ -1599,6 +1655,12 @@ export default function App() {
       faceoffConfig: payload.faceoffConfig,
     };
     setFeedPosts((prev) => [newPost, ...prev]);
+
+    // Sync to Supabase in the background
+    syncPostToSupabase(newPost).catch((err) =>
+      console.warn('[Supabase] Failed to sync new post:', err)
+    );
+
     if (payload.faceoffConfig) {
       setOpenFaceoffPosts((prev) => ({
         ...prev,
@@ -1610,6 +1672,7 @@ export default function App() {
       }));
     }
   };
+
 
   const handleTogglePostLike = (postId: string) => {
     setFeedPosts((prev) =>

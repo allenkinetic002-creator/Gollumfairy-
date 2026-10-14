@@ -164,6 +164,9 @@ export const INITIAL_TRUST_RECEIPTS: TrustReceipt[] = [
   },
 ];
 
+import { syncTrustReceiptToSupabase, fetchRemoteTrustReceipts } from '../lib/fairyBackend';
+import { supabase } from '../lib/supabase';
+
 export function loadTrustReceipts(): TrustReceipt[] {
   try {
     const raw = localStorage.getItem(STORAGE_TRUST_RECEIPTS_KEY);
@@ -184,8 +187,60 @@ export function saveTrustReceipts(receipts: TrustReceipt[]) {
     const json = JSON.stringify(receipts);
     localStorage.setItem(STORAGE_TRUST_RECEIPTS_KEY, json);
     window.dispatchEvent(new CustomEvent('fairy_receipts_sync'));
+
+    // Sync latest changes to Supabase in the background
+    if (receipts.length > 0) {
+      receipts.slice(0, 5).forEach((r) => {
+        syncTrustReceiptToSupabase(r).catch((err) =>
+          console.warn('[Supabase] background receipt sync err:', err)
+        );
+      });
+    }
   } catch (e) {
     console.warn('Failed to save trust receipts:', e);
+  }
+}
+
+// Auto-sync with remote Supabase database on launch & live changes
+let isReceiptSyncInitialized = false;
+export function initializeTrustReceiptsSync() {
+  if (isReceiptSyncInitialized || typeof window === 'undefined') return;
+  isReceiptSyncInitialized = true;
+
+  fetchRemoteTrustReceipts().then((remoteData) => {
+    if (remoteData && remoteData.length > 0) {
+      const local = loadTrustReceipts();
+      // Merge by ID keeping remote or newest
+      const mergedMap = new Map<string, TrustReceipt>();
+      local.forEach((r) => mergedMap.set(r.id, r));
+      remoteData.forEach((r) => mergedMap.set(r.id, r));
+      const combined = Array.from(mergedMap.values()).sort(
+        (a, b) => b.createdAt - a.createdAt
+      );
+      localStorage.setItem(STORAGE_TRUST_RECEIPTS_KEY, JSON.stringify(combined));
+      window.dispatchEvent(new CustomEvent('fairy_receipts_sync'));
+    }
+  });
+
+  // Subscribe to real-time postgres changes
+  try {
+    supabase
+      .channel('public:fairy_trust_receipts')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'fairy_trust_receipts' },
+        () => {
+          fetchRemoteTrustReceipts().then((fresh) => {
+            if (fresh && fresh.length > 0) {
+              localStorage.setItem(STORAGE_TRUST_RECEIPTS_KEY, JSON.stringify(fresh));
+              window.dispatchEvent(new CustomEvent('fairy_receipts_sync'));
+            }
+          });
+        }
+      )
+      .subscribe();
+  } catch (err) {
+    console.warn('[Supabase] Realtime receipt subscription error:', err);
   }
 }
 
@@ -203,3 +258,4 @@ export function computeReceiptStatus(receipt: TrustReceipt, currentTime: number)
 
   return 'acknowledged';
 }
+

@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { AeriRaygunIcon } from './AeriRaygunIcon';
 import elenaAvatar from '../assets/images/creator_portrait_elena_1791014499312.jpg';
+import { sendRemoteMessage } from '../lib/fairyBackend';
+
 
 import {
   SharedPerson,
@@ -454,7 +456,16 @@ export function NormalMessagesScreen({
     setConversations(updatedConvs);
     saveSharedPeople(updatedConvs);
 
+    // Sync sent message to Supabase
+    sendRemoteMessage({
+      id: newMsg.id,
+      sender_id: 'me',
+      receiver_id: selectedConvId,
+      text: newMsg.text,
+    }).catch((err) => console.warn('[Supabase] Failed to sync message:', err));
+
     setInputText('');
+
 
     // Simulate reply from the user after 1.4 seconds
     setIsTyping(true);

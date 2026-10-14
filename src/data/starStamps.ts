@@ -215,6 +215,9 @@ export const INITIAL_STAR_STAMPS: StarStamp[] = [
   },
 ];
 
+import { syncStarStampToSupabase, fetchRemoteStarStamps } from '../lib/fairyBackend';
+import { supabase } from '../lib/supabase';
+
 export function loadStarStamps(): StarStamp[] {
   try {
     const raw = localStorage.getItem(STORAGE_STAR_STAMPS_KEY);
@@ -236,8 +239,59 @@ export function saveStarStamps(stamps: StarStamp[]): void {
   try {
     localStorage.setItem(STORAGE_STAR_STAMPS_KEY, JSON.stringify(stamps));
     window.dispatchEvent(new Event('fairy_star_stamps_sync'));
+
+    // Sync latest to Supabase in the background
+    if (stamps.length > 0) {
+      stamps.slice(0, 5).forEach((stamp) => {
+        syncStarStampToSupabase(stamp).catch((err) =>
+          console.warn('[Supabase] background star stamp sync err:', err)
+        );
+      });
+    }
   } catch (err) {
     console.error('Failed to save star stamps to localStorage', err);
+  }
+}
+
+// Auto-sync with remote Supabase database on launch & live changes
+let isStarSyncInitialized = false;
+export function initializeStarStampsSync() {
+  if (isStarSyncInitialized || typeof window === 'undefined') return;
+  isStarSyncInitialized = true;
+
+  fetchRemoteStarStamps().then((remoteData) => {
+    if (remoteData && remoteData.length > 0) {
+      const local = loadStarStamps();
+      const mergedMap = new Map<string, StarStamp>();
+      local.forEach((s) => mergedMap.set(s.id, s));
+      remoteData.forEach((s) => mergedMap.set(s.id, s));
+      const combined = Array.from(mergedMap.values()).sort(
+        (a, b) => b.createdAt - a.createdAt
+      );
+      localStorage.setItem(STORAGE_STAR_STAMPS_KEY, JSON.stringify(combined));
+      window.dispatchEvent(new Event('fairy_star_stamps_sync'));
+    }
+  });
+
+  // Subscribe to real-time postgres changes
+  try {
+    supabase
+      .channel('public:fairy_star_stamps')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'fairy_star_stamps' },
+        () => {
+          fetchRemoteStarStamps().then((fresh) => {
+            if (fresh && fresh.length > 0) {
+              localStorage.setItem(STORAGE_STAR_STAMPS_KEY, JSON.stringify(fresh));
+              window.dispatchEvent(new Event('fairy_star_stamps_sync'));
+            }
+          });
+        }
+      )
+      .subscribe();
+  } catch (err) {
+    console.warn('[Supabase] Realtime star stamp subscription error:', err);
   }
 }
 
@@ -332,3 +386,4 @@ export function voteStarStampOutcome(
   saveStarStamps(updated);
   return updated;
 }
+

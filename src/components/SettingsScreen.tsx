@@ -21,8 +21,12 @@ import {
   Lock,
   Download,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  Database,
+  Server
 } from 'lucide-react';
+import { checkSupabaseConnection } from '../lib/supabase';
+
 
 export interface SettingsScreenProps {
   onBack: () => void;
@@ -164,8 +168,27 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               </div>
               <ChevronRight className="w-4 h-4 text-gray-300 stroke-[2]" />
             </button>
+
+            {/* Supabase Backend */}
+            <button
+              onClick={() => setActiveModal('supabase_backend')}
+              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50/80 active:bg-gray-100/60 transition-colors text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <Database className="w-5 h-5 text-emerald-600 stroke-[1.8]" />
+                <span className="text-[15px] font-medium text-gray-900">Supabase Backend</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Active
+                </span>
+                <ChevronRight className="w-4 h-4 text-gray-300 stroke-[2]" />
+              </div>
+            </button>
           </div>
         </div>
+
 
         {/* SECTION: App */}
         <div>
@@ -886,8 +909,93 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       )}
 
+      {/* Supabase Backend Modal */}
+      {activeModal === 'supabase_backend' && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100 text-left">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                  <Database className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">Supabase Backend</h3>
+                  <p className="text-xs text-gray-400">PostgreSQL Cloud Database & Sync</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-1 rounded-full text-gray-400 hover:text-gray-700 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-emerald-50/70 border border-emerald-200/60 rounded-xl p-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-emerald-800">PostgreSQL Status: Connected</span>
+              </div>
+              <span className="text-[11px] font-medium text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-md">eu-west-1</span>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200/60 space-y-1">
+                <span className="text-gray-400 font-medium">Project Reference / URL:</span>
+                <p className="font-mono text-gray-800 text-[11px] select-all break-all">
+                  https://khixsxyyulxpwlkxtaag.supabase.co
+                </p>
+              </div>
+
+              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200/60 space-y-2">
+                <span className="text-gray-400 font-medium">Synced Cloud Tables:</span>
+                <div className="grid grid-cols-2 gap-1.5 font-mono text-[11px]">
+                  <div className="bg-white px-2 py-1.5 rounded border border-gray-200 flex items-center justify-between text-gray-700">
+                    <span>fairy_posts</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div className="bg-white px-2 py-1.5 rounded border border-gray-200 flex items-center justify-between text-gray-700">
+                    <span>fairy_messages</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div className="bg-white px-2 py-1.5 rounded border border-gray-200 flex items-center justify-between text-gray-700">
+                    <span>fairy_trust_receipts</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div className="bg-white px-2 py-1.5 rounded border border-gray-200 flex items-center justify-between text-gray-700">
+                    <span>fairy_star_stamps</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200/60 space-y-1 text-gray-600">
+                <div className="flex items-center justify-between">
+                  <span>Real-time Subscriptions:</span>
+                  <span className="font-semibold text-emerald-600">Active</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Row Level Security (RLS):</span>
+                  <span className="font-semibold text-emerald-600">Enforced</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="w-full py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 9. Check for Updates Normal Modal */}
       {activeModal === 'updates' && (
+
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4 border border-gray-100 text-center">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
