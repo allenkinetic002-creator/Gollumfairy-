@@ -95,6 +95,249 @@ async function startServer() {
     });
   });
 
+  // --- REAL-TIME SERVER-SENT EVENTS (SSE) & STORAGE HELPERS ---
+  const sseClients = new Set<express.Response>();
+
+  function broadcastRealtime(eventType: string, payload: any) {
+    const message = `event: ${eventType}\ndata: ${JSON.stringify(payload)}\n\n`;
+    for (const client of sseClients) {
+      try {
+        client.write(message);
+      } catch {
+        sseClients.delete(client);
+      }
+    }
+  }
+
+  function readJsonFile<T>(relPath: string, defaultValue: T): T {
+    try {
+      const fullPath = path.resolve(__dirname, relPath);
+      if (fs.existsSync(fullPath)) {
+        const raw = fs.readFileSync(fullPath, 'utf-8');
+        return JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn(`[Storage] Failed to read ${relPath}:`, e);
+    }
+    return defaultValue;
+  }
+
+  function writeJsonFile(relPath: string, data: any) {
+    try {
+      const fullPath = path.resolve(__dirname, relPath);
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, JSON.stringify(data, null, 2), 'utf-8');
+    } catch (e) {
+      console.error(`[Storage] Failed to write ${relPath}:`, e);
+    }
+  }
+
+  function logActivity(action: string, description: string, details?: any) {
+    const activityFile = 'src/data/user_activity.json';
+    const activities = readJsonFile<any[]>(activityFile, []);
+    activities.unshift({
+      id: `act-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      action,
+      description,
+      details,
+      savedAt: new Date().toISOString(),
+    });
+    writeJsonFile(activityFile, activities.slice(0, 100));
+  }
+
+  function autoCommitAndPush(commitMsg: string) {
+    runGitQueued(async () => {
+      try {
+        await execAsync('git add -A');
+        const { stdout: diffOut } = await execAsync('git status --porcelain');
+        if (diffOut.trim().length > 0) {
+          const sanitizedMsg = commitMsg.replace(/"/g, '\\"');
+          await execAsync(`git commit -m "${sanitizedMsg}"`);
+          await execAsync('git push origin main');
+          console.log(`[Git] Auto-pushed: ${commitMsg}`);
+        }
+      } catch (err: any) {
+        console.warn('[Git] Auto-push notice:', err.message);
+      }
+    });
+  }
+
+  // Real-time SSE stream endpoint
+  app.get('/api/realtime/stream', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    sseClients.add(res);
+    res.write(`event: connected\ndata: ${JSON.stringify({ status: 'connected', time: new Date().toISOString() })}\n\n`);
+
+    const timer = setInterval(() => {
+      try {
+        res.write(': ping\n\n');
+      } catch {
+        clearInterval(timer);
+        sseClients.delete(res);
+      }
+    }, 25000);
+
+    req.on('close', () => {
+      clearInterval(timer);
+      sseClients.delete(res);
+    });
+  });
+
+  // --- RATINGS ENDPOINTS ---
+  app.get('/api/ratings', (_req, res) => {
+    const ratings = readJsonFile('src/data/ratings.json', {});
+    res.json({ success: true, ratings });
+  });
+
+  app.post('/api/ratings/submit', (req, res) => {
+    const { targetName, targetId, rating } = req.body;
+    const key = targetName || targetId || 'default';
+    const ratings = readJsonFile<Record<string, any>>('src/data/ratings.json', {});
+    const numRating = Number(rating);
+    const finalRating = isNaN(numRating) ? 8.9 : numRating;
+
+    ratings[key] = {
+      targetName: key,
+      rating: finalRating,
+      isFinalized: true,
+      updatedAt: new Date().toISOString(),
+    };
+    writeJsonFile('src/data/ratings.json', ratings);
+
+    const eventPayload = {
+      targetName: key,
+      rating: finalRating,
+      isFinalized: true,
+      updatedAt: ratings[key].updatedAt,
+    };
+
+    broadcastRealtime('rating_submitted', eventPayload);
+    logActivity('rating_submitted', `Finalized rating ${finalRating.toFixed(1)} ★ for ${key}`, eventPayload);
+    autoCommitAndPush(`feat(ratings): finalized rating ${finalRating.toFixed(1)} on ${key}`);
+
+    res.json({ success: true, ...eventPayload });
+  });
+
+  app.post('/api/ratings/reset', (req, res) => {
+    const { targetName, targetId } = req.body;
+    const key = targetName || targetId || 'default';
+    const ratings = readJsonFile<Record<string, any>>('src/data/ratings.json', {});
+
+    if (ratings[key]) {
+      ratings[key].isFinalized = false;
+      ratings[key].updatedAt = new Date().toISOString();
+      writeJsonFile('src/data/ratings.json', ratings);
+    }
+
+    const eventPayload = {
+      targetName: key,
+      isFinalized: false,
+      rating: ratings[key]?.rating || 8.9,
+      updatedAt: new Date().toISOString(),
+    };
+
+    broadcastRealtime('rating_reset', eventPayload);
+    logActivity('rating_reset', `Reset rating for ${key} to rate again`, eventPayload);
+    autoCommitAndPush(`chore(ratings): reset rating for ${key} to rate again`);
+
+    res.json({ success: true, ...eventPayload });
+  });
+
+  // --- VOTES & REACTIONS ENDPOINTS ---
+  app.get('/api/votes', (_req, res) => {
+    const votes = readJsonFile('src/data/votes.json', {});
+    res.json({ success: true, votes });
+  });
+
+  app.post('/api/votes/submit', (req, res) => {
+    const { personName, vote, likes, dislikes } = req.body;
+    const key = personName || 'default';
+    const votes = readJsonFile<Record<string, any>>('src/data/votes.json', {});
+
+    votes[key] = {
+      personName: key,
+      vote,
+      isFinal: true,
+      likes: typeof likes === 'number' ? likes : 101,
+      dislikes: typeof dislikes === 'number' ? dislikes : 0,
+      updatedAt: new Date().toISOString(),
+    };
+    writeJsonFile('src/data/votes.json', votes);
+
+    const eventPayload = { ...votes[key] };
+    broadcastRealtime('vote_submitted', eventPayload);
+    logActivity('vote_submitted', `Finalized ${vote === 'like' ? 'UP' : 'DOWN'} vote for ${key}`, eventPayload);
+    autoCommitAndPush(`feat(votes): recorded ${vote} vote for ${key}`);
+
+    res.json({ success: true, ...eventPayload });
+  });
+
+  app.post('/api/votes/reset', (req, res) => {
+    const { personName } = req.body;
+    const key = personName || 'default';
+    const votes = readJsonFile<Record<string, any>>('src/data/votes.json', {});
+
+    if (votes[key]) {
+      votes[key].vote = null;
+      votes[key].isFinal = false;
+      votes[key].updatedAt = new Date().toISOString();
+      writeJsonFile('src/data/votes.json', votes);
+    }
+
+    const eventPayload = {
+      personName: key,
+      isFinal: false,
+      vote: null,
+      updatedAt: new Date().toISOString(),
+    };
+
+    broadcastRealtime('vote_reset', eventPayload);
+    logActivity('vote_reset', `Reset vote for ${key}`, eventPayload);
+    autoCommitAndPush(`chore(votes): reset vote for ${key}`);
+
+    res.json({ success: true, ...eventPayload });
+  });
+
+  // --- POSTS ACTIONS & COMMENTS ENDPOINTS ---
+  app.post('/api/posts/action', (req, res) => {
+    const { postId, action, isLiked, likeCount, isRetweeted, retweetCount } = req.body;
+    const payload = {
+      postId,
+      action,
+      isLiked,
+      likeCount,
+      isRetweeted,
+      retweetCount,
+      updatedAt: new Date().toISOString(),
+    };
+
+    broadcastRealtime('post_action', payload);
+    logActivity('post_action', `Post action: ${action} on ${postId}`, payload);
+    autoCommitAndPush(`feat(posts): ${action} on ${postId}`);
+
+    res.json({ success: true, ...payload });
+  });
+
+  app.post('/api/posts/:id/comment', (req, res) => {
+    const { id } = req.params;
+    const { comment } = req.body;
+    const payload = {
+      postId: id,
+      comment,
+      updatedAt: new Date().toISOString(),
+    };
+
+    broadcastRealtime('comment_added', payload);
+    logActivity('comment_added', `New comment on ${id}`, payload);
+    autoCommitAndPush(`feat(comments): added comment on post ${id}`);
+
+    res.json({ success: true, ...payload });
+  });
+
   // Automated Activity Sync endpoint: called when user creates posts, votes, interacts
   app.post('/api/sync/repo-update', async (req, res) => {
     runGitQueued(async () => {

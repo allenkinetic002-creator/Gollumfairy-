@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RotateCcw, Lock, CheckCircle2 } from 'lucide-react';
 import { AeriBattleThumbsUpIcon } from './AeriBattleThumbsUpIcon';
 import { syncActivityToRepo } from '../lib/repoSync';
+import { submitVoteToBackend, resetVoteOnBackend, subscribeToRealtime, fetchRemoteVotes } from '../lib/realtimeSync';
 
 export interface PhoneReactionWidgetProps {
   initialLikes?: number;
@@ -67,12 +68,43 @@ export function PhoneReactionPopup({
 
   const [resetMessage, setResetMessage] = useState<string | null>(null);
 
+  // Sync with remote votes & realtime stream
   useEffect(() => {
-    if (!isFinal) {
-      setLikes(initialLikes);
-      setDislikes(initialDislikes);
-    }
-  }, [initialLikes, initialDislikes, isFinal]);
+    let mounted = true;
+    fetchRemoteVotes().then((remoteVotes) => {
+      if (!mounted) return;
+      const remote = remoteVotes[personName || 'default'];
+      if (remote) {
+        setIsFinal(Boolean(remote.isFinal));
+        setUserVote(remote.vote);
+        if (typeof remote.likes === 'number') setLikes(remote.likes);
+        if (typeof remote.dislikes === 'number') setDislikes(remote.dislikes);
+      }
+    });
+
+    const unsubscribe = subscribeToRealtime((event, data) => {
+      if (data?.personName === (personName || 'default')) {
+        if (event === 'vote_submitted') {
+          setIsFinal(true);
+          setUserVote(data.vote);
+          if (typeof data.likes === 'number') setLikes(data.likes);
+          if (typeof data.dislikes === 'number') setDislikes(data.dislikes);
+        } else if (event === 'vote_reset') {
+          setIsFinal(false);
+          setUserVote(null);
+          setLikes(initialLikes);
+          setDislikes(initialDislikes);
+          setResetMessage('Vote reset! You can now vote again.');
+          setTimeout(() => setResetMessage(null), 3000);
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, [personName, initialLikes, initialDislikes]);
 
   const handleVote = (type: 'like' | 'dislike') => {
     // If already finalized, user must click Reset to vote again
@@ -82,15 +114,11 @@ export function PhoneReactionPopup({
       return;
     }
 
-    // Register vote as final
-    if (type === 'like') {
-      setLikes(initialLikes + 1);
-      setDislikes(initialDislikes);
-    } else {
-      setLikes(Math.max(0, initialLikes - 1));
-      setDislikes(initialDislikes + 1);
-    }
+    const nextLikes = type === 'like' ? initialLikes + 1 : Math.max(0, initialLikes - 1);
+    const nextDislikes = type === 'like' ? initialDislikes : initialDislikes + 1;
 
+    setLikes(nextLikes);
+    setDislikes(nextDislikes);
     setUserVote(type);
     setIsFinal(true);
 
@@ -102,10 +130,12 @@ export function PhoneReactionPopup({
       onVote(type, type);
     }
 
+    submitVoteToBackend(personName || 'default', type, nextLikes, nextDislikes);
     syncActivityToRepo(
       'phone_hand_vote',
       `Finalized ${type === 'like' ? 'UP (+1 like)' : 'DOWN (-1 like)'} vote for ${personName || 'creator'} via Phone Hand`,
-      { personName, vote: type }
+      { personName, vote: type },
+      true
     );
   };
 
@@ -124,13 +154,15 @@ export function PhoneReactionPopup({
       onVote(previousVote, null); // Revert the rank shift
     }
 
+    resetVoteOnBackend(personName || 'default');
     setResetMessage('Vote reset! You can now vote again.');
     setTimeout(() => setResetMessage(null), 3000);
 
     syncActivityToRepo(
       'phone_hand_reset',
       `Reset Phone Hand tie-breaker vote for ${personName || 'creator'}`,
-      { personName }
+      { personName },
+      true
     );
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Star, Info, ChevronDown, CheckCircle2, ChevronLeft, ChevronRight, Edit3, RotateCcw, Lock } from 'lucide-react';
 import { syncActivityToRepo } from '../lib/repoSync';
+import { submitRatingToBackend, resetRatingOnBackend, subscribeToRealtime, fetchRemoteRatings } from '../lib/realtimeSync';
 
 export interface InfluenceRatingModalProps {
   isOpen?: boolean;
@@ -10,6 +11,7 @@ export interface InfluenceRatingModalProps {
   onOpenStarStamps?: () => void;
   initialRating?: number;
   onRatingSubmit?: (rating: number) => void;
+  onRatingReset?: () => void;
   targetName?: string;
 }
 
@@ -21,6 +23,7 @@ export function InfluenceRatingModal({
   onOpenStarStamps,
   initialRating = 8.9,
   onRatingSubmit,
+  onRatingReset,
   targetName,
 }: InfluenceRatingModalProps) {
   const finalizedStorageKey = `fairy_influence_finalized_${targetName || 'default'}`;
@@ -159,7 +162,44 @@ export function InfluenceRatingModal({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  // Real-time backend subscription and initial fetch
+  useEffect(() => {
+    let mounted = true;
+    fetchRemoteRatings().then((remoteRatings) => {
+      if (!mounted) return;
+      const remote = remoteRatings[targetName || 'default'];
+      if (remote) {
+        setIsFinalized(Boolean(remote.isFinalized));
+        if (typeof remote.rating === 'number') {
+          setRating(remote.rating);
+          setTypedValue(remote.rating.toFixed(1));
+        }
+      }
+    });
+
+    const unsubscribe = subscribeToRealtime((event, data) => {
+      if (data?.targetName === (targetName || 'default')) {
+        if (event === 'rating_submitted') {
+          setIsFinalized(true);
+          if (typeof data.rating === 'number') {
+            setRating(data.rating);
+            setTypedValue(data.rating.toFixed(1));
+          }
+          setSubmittedMessage(`✓ Rating Finalized: ${Number(data.rating).toFixed(1)} ★`);
+          setTimeout(() => setSubmittedMessage(null), 3000);
+        } else if (event === 'rating_reset') {
+          setIsFinalized(false);
+          setSubmittedMessage('Rating reset! You can now choose or type a new number.');
+          setTimeout(() => setSubmittedMessage(null), 3000);
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, [targetName]);
 
   const handleSubmit = () => {
     setIsFinalized(true);
@@ -169,10 +209,12 @@ export function InfluenceRatingModal({
     } catch {}
 
     onRatingSubmit?.(rating);
+    submitRatingToBackend(targetName || 'default', rating);
     syncActivityToRepo(
       'rate_masked_eyes_final',
       `Finalized rating ${rating.toFixed(1)} on ${targetName || 'post'} via 2 eyes mask`,
-      { rating, targetName }
+      { rating, targetName },
+      true
     );
 
     setTimeout(() => {
@@ -187,15 +229,18 @@ export function InfluenceRatingModal({
     } catch {}
 
     setSubmittedMessage('Rating reset! You can now choose or type a new number.');
-    setTimeout(() => {
-      setSubmittedMessage(null);
-    }, 3000);
-
+    onRatingReset?.();
+    resetRatingOnBackend(targetName || 'default');
     syncActivityToRepo(
       'reset_masked_eyes_rating',
       `Reset rating on ${targetName || 'post'} via 2 eyes mask`,
-      { targetName }
+      { targetName },
+      true
     );
+
+    setTimeout(() => {
+      setSubmittedMessage(null);
+    }, 3000);
   };
 
   const cardContent = (
@@ -625,10 +670,10 @@ export function InfluenceRatingModal({
               <button
                 type="button"
                 onClick={handleReset}
-                className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-black text-xs border border-slate-300 shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2 rounded-full bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-black text-xs sm:text-sm shadow-md shadow-purple-500/25 transition-all cursor-pointer flex items-center gap-1.5"
                 title="Reset this rating to rate again"
               >
-                <RotateCcw className="w-3.5 h-3.5 text-purple-600" />
+                <RotateCcw className="w-3.5 h-3.5 text-white" />
                 <span>Reset Rating & Rate Again</span>
               </button>
             ) : (

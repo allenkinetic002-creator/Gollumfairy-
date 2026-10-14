@@ -73,6 +73,8 @@ interface TweetPostCardProps {
   onMorphPencil: (id: string) => void;
   onNoAdverb?: () => void;
   onOpenStarStamps?: () => void;
+  onRatingSubmit?: (rating: number) => void;
+  onRatingReset?: () => void;
 }
 
 export const TweetPostCard: React.FC<TweetPostCardProps> = ({
@@ -97,6 +99,8 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
   onMorphPencil,
   onNoAdverb,
   onOpenStarStamps,
+  onRatingSubmit,
+  onRatingReset,
 }) => {
   const [isRetweeted, setIsRetweeted] = useState(Boolean(post.isRetweeted));
   const [retweetCount, setRetweetCount] = useState(post.retweetCount ?? 14);
@@ -452,6 +456,8 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
             isInline={true}
             targetName={post.authorName}
             onClose={() => (onCloseInfluenceRating ? onCloseInfluenceRating() : onToggleInfluenceRating(post.id))}
+            onRatingSubmit={onRatingSubmit}
+            onRatingReset={onRatingReset}
             onOpenStarStamps={onOpenStarStamps}
           />
         </div>

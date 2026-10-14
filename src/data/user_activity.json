@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792002414422-gdsqs",
+    "action": "rating_submitted",
+    "description": "Finalized rating 9.5 ★ for Elena Vance",
+    "details": {
+      "targetName": "Elena Vance",
+      "rating": 9.5,
+      "isFinalized": true,
+      "updatedAt": "2026-10-14T18:26:54.421Z"
+    },
+    "savedAt": "2026-10-14T18:26:54.422Z"
+  },
+  {
     "id": "act-1792001723925-mug9j",
     "action": "test_sync",
     "description": "AI Studio connected and sync verified",

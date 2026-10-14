@@ -281,7 +281,15 @@ export function FaceoffBattleModal({
       syncActivityToRepo(
         'vote_faceoff',
         `Voted for ${votedPerson.name} in Faceoff (${targetContenderCount} fighters)`,
-        { contenderId, name: votedPerson.name, totalContenders: targetContenderCount }
+        { contenderId, name: votedPerson.name, totalContenders: targetContenderCount },
+        true
+      );
+    } else if (isRemoving && votedPerson) {
+      syncActivityToRepo(
+        'reset_faceoff_vote',
+        `Reset vote for ${votedPerson.name} in Faceoff`,
+        { contenderId, name: votedPerson.name },
+        true
       );
     }
   };

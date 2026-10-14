@@ -86,6 +86,7 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { SignInModal } from './components/SignInModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
+import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend } from './lib/realtimeSync';
 
 
 export interface FeedPost {
@@ -1754,11 +1755,13 @@ export default function App() {
       prev.map((p) => {
         if (p.id === postId) {
           const nextLiked = !p.isLiked;
-          syncActivityToRepo('like_post', `${nextLiked ? 'Liked' : 'Unliked'} post ${p.authorHandle}`);
+          const nextCount = nextLiked ? p.likeCount + 1 : Math.max(0, p.likeCount - 1);
+          togglePostLikeOnBackend(postId, nextLiked, nextCount);
+          syncActivityToRepo('like_post', `${nextLiked ? 'Liked' : 'Unliked'} post ${p.authorHandle}`, { postId, isLiked: nextLiked });
           return {
             ...p,
             isLiked: nextLiked,
-            likeCount: nextLiked ? p.likeCount + 1 : p.likeCount - 1,
+            likeCount: nextCount,
           };
         }
         return p;
@@ -1817,6 +1820,68 @@ export default function App() {
   const handleCloseInfluenceRating = () => {
     setActiveInfluenceRatingId(null);
   };
+
+  const handleRatingSubmitted = (targetName: string, val: number) => {
+    setCreatorsData((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((cat) => {
+        updated[cat] = updated[cat].map((c) =>
+          c.name.toLowerCase() === targetName.toLowerCase() ? { ...c, rating: val } : c
+        );
+      });
+      return updated;
+    });
+    setTweetSuccessToast(`✓ Rating Finalized: ${val.toFixed(1)} ★ for ${targetName}`);
+    setTimeout(() => setTweetSuccessToast(null), 3000);
+  };
+
+  const handleRatingReset = (targetName: string) => {
+    setTweetSuccessToast(`✓ Rating reset for ${targetName}. You can now choose or type a new score!`);
+    setTimeout(() => setTweetSuccessToast(null), 3000);
+  };
+
+  // Real-time backend updates listener for ratings, votes, likes and comments
+  useEffect(() => {
+    const unsubscribe = subscribeToRealtime((event, data) => {
+      if (event === 'rating_submitted' && data?.targetName) {
+        setCreatorsData((prev) => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach((cat) => {
+            updated[cat] = updated[cat].map((c) =>
+              c.name.toLowerCase() === data.targetName.toLowerCase() ? { ...c, rating: data.rating } : c
+            );
+          });
+          return updated;
+        });
+      } else if (event === 'vote_submitted' && data?.personName) {
+        setFeedPosts((prev) =>
+          prev.map((p) =>
+            p.authorName.toLowerCase() === data.personName.toLowerCase()
+              ? { ...p, likeCount: typeof data.likes === 'number' ? data.likes : p.likeCount }
+              : p
+          )
+        );
+      } else if (event === 'post_action') {
+        if (data?.postId && data?.action === 'like') {
+          setFeedPosts((prev) =>
+            prev.map((p) =>
+              p.id === data.postId
+                ? { ...p, isLiked: data.isLiked, likeCount: data.likeCount }
+                : p
+            )
+          );
+        }
+      } else if (event === 'comment_added' && data?.comment) {
+        setComments((prev) => {
+          if (prev.some((c) => c.id === data.comment.id)) return prev;
+          return [data.comment, ...prev];
+        });
+        setTotalComments((cnt) => cnt + 1);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Per-post broken pencil states to ensure each post is 100% independent (even from the same author)
   const [openFaceoffPosts, setOpenFaceoffPosts] = useState<Record<string, boolean>>({
@@ -2003,6 +2068,8 @@ export default function App() {
     setComments([newComment, ...comments]);
     setInputComment('');
     setTotalComments((prev) => prev + 1);
+    addCommentToBackend('global-feed', newComment);
+    syncActivityToRepo('add_comment', `Added comment: "${newComment.text.slice(0, 30)}"`, { text: newComment.text }, true);
   };
 
   const handleToggleUpvoteCreator = (categoryKey: string, rank: number) => {
@@ -2488,6 +2555,12 @@ export default function App() {
                     setStarStampsSearchQuery(post.authorName);
                     setShowStarStampsScreen(true);
                   }}
+                  onRatingSubmit={(val) => {
+                    handleRatingSubmitted(post.authorName, val);
+                  }}
+                  onRatingReset={() => {
+                    handleRatingReset(post.authorName);
+                  }}
                 />
               ) : (
               <div key={post.id} className="space-y-1.5 shrink-0">
@@ -2757,8 +2830,10 @@ export default function App() {
                       targetName={post.authorName}
                       onClose={handleCloseInfluenceRating}
                       onRatingSubmit={(val) => {
-                        setTweetSuccessToast(`Submitted rating: ${val.toFixed(1)} ★ for ${post.authorName}`);
-                        setTimeout(() => setTweetSuccessToast(null), 3000);
+                        handleRatingSubmitted(post.authorName, val);
+                      }}
+                      onRatingReset={() => {
+                        handleRatingReset(post.authorName);
                       }}
                       onOpenStarStamps={() => {
                         setActiveInfluenceRatingId(null);
@@ -3524,17 +3599,10 @@ export default function App() {
                         initialRating={person.rating || 8.9}
                         onClose={handleCloseInfluenceRating}
                         onRatingSubmit={(val) => {
-                          setCreatorsData((prev) => {
-                            const updated = { ...prev };
-                            Object.keys(updated).forEach((cat) => {
-                              updated[cat] = updated[cat].map((c) =>
-                                c.name === person.name ? { ...c, rating: val } : c
-                              );
-                            });
-                            return updated;
-                          });
-                          setTweetSuccessToast(`Rated ${person.name}: ${val.toFixed(1)} ★`);
-                          setTimeout(() => setTweetSuccessToast(null), 3000);
+                          handleRatingSubmitted(person.name, val);
+                        }}
+                        onRatingReset={() => {
+                          handleRatingReset(person.name);
                         }}
                         onOpenStarStamps={() => {
                           setActiveInfluenceRatingId(null);
