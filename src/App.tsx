@@ -31,6 +31,8 @@ import {
   Star,
   UserPlus,
   UserCheck,
+  UploadCloud,
+  GitBranch,
 } from 'lucide-react';
 import postImage from './assets/images/fairy_post_image_1791012530319.jpg';
 import elenaAvatar from './assets/images/creator_portrait_elena_1791014499312.jpg';
@@ -81,6 +83,7 @@ import { UserSearchModal, UserSearchItem } from './components/UserSearchModal';
 import { UserProfileScreen } from './components/UserProfileScreen';
 import { SettingsScreen } from './components/SettingsScreen';
 import { SignInModal } from './components/SignInModal';
+import { GitHubSyncModal } from './components/GitHubSyncModal';
 
 
 export interface FeedPost {
@@ -1536,6 +1539,7 @@ export default function App() {
     };
   });
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
+  const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
 
 
   const [showCreateTweetModal, setShowCreateTweetModal] = useState(false);
@@ -2041,15 +2045,28 @@ export default function App() {
               )}
             </div>
 
-            {/* Sign In Button placed directly above the 5 header icons */}
-            <button
-              onClick={() => setShowSignInModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
-              title="Sign in to your account"
-            >
-              <User className="w-3.5 h-3.5 stroke-[2.2]" />
-              <span>Sign In</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {/* GitHub Repo Button */}
+              <button
+                onClick={() => setShowGitHubSyncModal(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
+                title="Send updates to GitHub repo (allenkinetic002-creator/Gollumfairy-)"
+              >
+                <UploadCloud className="w-3.5 h-3.5 stroke-[2.2] text-indigo-400" />
+                <span className="hidden sm:inline text-slate-400">Repo:</span>
+                <span>Gollumfairy-</span>
+              </button>
+
+              {/* Sign In Button placed directly above the 5 header icons */}
+              <button
+                onClick={() => setShowSignInModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
+                title="Sign in to your account"
+              >
+                <User className="w-3.5 h-3.5 stroke-[2.2]" />
+                <span>Sign In</span>
+              </button>
+            </div>
           </div>
 
           {/* Header */}
@@ -3767,6 +3784,12 @@ export default function App() {
             setTweetSuccessToast(null);
           }, 3500);
         }}
+      />
+
+      {/* GitHub & Supabase Sync Modal */}
+      <GitHubSyncModal
+        isOpen={showGitHubSyncModal}
+        onClose={() => setShowGitHubSyncModal(false)}
       />
 
 
