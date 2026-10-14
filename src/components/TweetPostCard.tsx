@@ -11,6 +11,7 @@ import { FaceoffBattleModal } from './FaceoffBattleModal';
 import { PhoneReactionPopup } from './PhoneReactionPopup';
 import { InfluenceRatingModal } from './InfluenceRatingModal';
 import { RaygunActionModal } from './RaygunActionModal';
+import { User } from 'lucide-react';
 
 export interface TweetPostItem {
   id: string;
@@ -169,12 +170,22 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
       <div className="flex items-start justify-between gap-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative shrink-0">
-            <img
-              src={post.authorAvatar}
-              alt={post.authorName}
-              onClick={() => onTogglePhoneReaction(post.id)}
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
-            />
+            {post.authorAvatar ? (
+              <img
+                src={post.authorAvatar}
+                alt={post.authorName}
+                onClick={() => onTogglePhoneReaction(post.id)}
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
+              />
+            ) : (
+              <div
+                onClick={() => onTogglePhoneReaction(post.id)}
+                className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center p-0.5 shadow-xs cursor-pointer hover:border-slate-400 transition-all"
+                title="Profile icon"
+              >
+                <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col min-w-0 leading-tight">

@@ -28,6 +28,7 @@ import {
   List,
   Hash,
   Send,
+  User,
   UserPlus,
   UserCheck,
   Clock,
@@ -773,27 +774,23 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
         <div className="flex items-center gap-4 sm:gap-6 mb-3">
           {/* Avatar and Fairy Flame */}
           <div className="relative shrink-0">
-            <div className="w-20 h-20 rounded-full p-1 bg-purple-100 ring-2 ring-purple-600/30 overflow-hidden flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full p-0.5 bg-slate-100 ring-2 ring-slate-200 overflow-hidden flex items-center justify-center">
               {activeUser.avatarUrl ? (
                 <img
                   src={activeUser.avatarUrl}
                   alt={wikiData.name}
                   className="w-full h-full rounded-full object-cover"
                 />
-              ) : activeUser.name.toLowerCase().includes('elena') ? (
+              ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
                 <img
                   src={elenaAvatar}
                   alt={wikiData.name}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-500 text-white font-black text-2xl flex items-center justify-center shadow-inner select-none">
-                  {wikiData.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')
-                    .slice(0, 2)
-                    .toUpperCase() || 'AD'}
+                /* Empty state profile icon for new user */
+                <div className="w-full h-full rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center select-none shadow-inner" title="New user profile icon">
+                  <User className="w-10 h-10 text-slate-400 stroke-[1.6]" />
                 </div>
               )}
             </div>
@@ -1030,11 +1027,23 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             {/* Fairypedia Circular Post Image */}
             <div className="p-4 bg-gradient-to-b from-slate-50 to-purple-50/20 flex flex-col items-center justify-center border-b border-slate-200">
               <div className="relative">
-                <img
-                  src={elenaAvatar}
-                  alt={wikiData.name}
-                  className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-md ring-2 ring-purple-300"
-                />
+                {activeUser.avatarUrl ? (
+                  <img
+                    src={activeUser.avatarUrl}
+                    alt={wikiData.name}
+                    className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-md ring-2 ring-purple-300"
+                  />
+                ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
+                  <img
+                    src={elenaAvatar}
+                    alt={wikiData.name}
+                    className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-md ring-2 ring-purple-300"
+                  />
+                ) : (
+                  <div className="w-40 h-40 rounded-full bg-slate-100 border-4 border-white shadow-md ring-2 ring-slate-200 flex items-center justify-center text-slate-400" title="New user profile">
+                    <User className="w-20 h-20 text-slate-400 stroke-[1.4]" />
+                  </div>
+                )}
                 <div
                   className="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-gradient-to-tr from-[#FF5722] to-amber-400 flex items-center justify-center ring-2 ring-white shadow-xs"
                   title="Fairypedia Verified Article"
@@ -1043,7 +1052,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                 </div>
               </div>
               <span className="text-[11px] text-slate-500 mt-2.5 text-center font-serif italic font-medium">
-                {wikiData.name} ({wikiData.handle}) &middot; Kyoto visual residency
+                {wikiData.name} ({wikiData.handle}) &middot; Community member
               </span>
             </div>
 
@@ -1315,11 +1324,23 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             </div>
             <form onSubmit={handleCreateSitch} className="space-y-2.5">
               <div className="flex items-start gap-2.5">
-                <img
-                  src={elenaAvatar}
-                  alt={wikiData.name}
-                  className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5"
-                />
+                {activeUser.avatarUrl ? (
+                  <img
+                    src={activeUser.avatarUrl}
+                    alt={wikiData.name}
+                    className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5"
+                  />
+                ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
+                  <img
+                    src={elenaAvatar}
+                    alt={wikiData.name}
+                    className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <User className="w-4 h-4 text-slate-400 stroke-[1.6]" />
+                  </div>
+                )}
                 <textarea
                   value={newSitchContent}
                   onChange={(e) => setNewSitchContent(e.target.value)}
@@ -1502,12 +1523,28 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             <div className="flex items-center justify-between py-1 px-0.5 shrink-0 bg-white">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <img
-                    src={elenaAvatar}
-                    alt={wikiData.name}
-                    onClick={() => setActivePhoneReaction(!activePhoneReaction)}
-                    className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
-                  />
+                  {activeUser.avatarUrl ? (
+                    <img
+                      src={activeUser.avatarUrl}
+                      alt={wikiData.name}
+                      onClick={() => setActivePhoneReaction(!activePhoneReaction)}
+                      className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
+                    />
+                  ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
+                    <img
+                      src={elenaAvatar}
+                      alt={wikiData.name}
+                      onClick={() => setActivePhoneReaction(!activePhoneReaction)}
+                      className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
+                    />
+                  ) : (
+                    <div
+                      onClick={() => setActivePhoneReaction(!activePhoneReaction)}
+                      className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center p-0.5 shadow-xs cursor-pointer hover:border-slate-400 transition-all"
+                    >
+                      <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
+                    </div>
+                  )}
                   {/* Flame Badge directly on top of the profile pic */}
                   <div
                     className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-tr from-[#FF5722] to-amber-400 flex items-center justify-center ring-1.5 ring-white shadow-2xs"

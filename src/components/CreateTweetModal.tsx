@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, User } from 'lucide-react';
 
 export interface NewTweetPayload {
   text: string;
@@ -133,11 +133,17 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
 
               {/* Card header */}
               <div className="flex items-start gap-2.5">
-                <img
-                  src={authorAvatar}
-                  alt={authorName}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30"
-                />
+                {authorAvatar ? (
+                  <img
+                    src={authorAvatar}
+                    alt={authorName}
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 leading-tight">
                     <span className="text-[13px] font-black text-slate-900">{authorName}</span>
@@ -169,11 +175,17 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
             <>
               {/* Author header */}
               <div className="flex items-start gap-3">
-                <img
-                  src={authorAvatar}
-                  alt={authorName}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30 shrink-0"
-                />
+                {authorAvatar ? (
+                  <img
+                    src={authorAvatar}
+                    alt={authorName}
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30 shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 leading-tight">
                     <span className="text-sm font-bold text-slate-900">{authorName}</span>

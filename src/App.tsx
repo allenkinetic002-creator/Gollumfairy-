@@ -2038,7 +2038,7 @@ export default function App() {
               <span className="text-[11px] font-bold tracking-tight text-slate-500 uppercase">
                 Fairy Live
               </span>
-              {currentUser && (
+              {currentUser && !isLoggedOut && (
                 <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
                   · {currentUser.name}
                 </span>
@@ -2057,15 +2057,51 @@ export default function App() {
                 <span>Gollumfairy-</span>
               </button>
 
-              {/* Sign In Button placed directly above the 5 header icons */}
-              <button
-                onClick={() => setShowSignInModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
-                title="Sign in to your account"
-              >
-                <User className="w-3.5 h-3.5 stroke-[2.2]" />
-                <span>Sign In</span>
-              </button>
+              {/* Once logged in, Sign In button disappears! Only displays when logged out */}
+              {(!currentUser || isLoggedOut) ? (
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer animate-fadeIn"
+                  title="Sign in to your account"
+                >
+                  <User className="w-3.5 h-3.5 stroke-[2.2]" />
+                  <span>Sign In</span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      setSelectedProfileUser(null);
+                      setActiveNavIndex(4);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11.5px] font-semibold rounded-full shadow-2xs active:scale-95 transition-all cursor-pointer"
+                    title="View your profile (@allenkinetic002-creator)"
+                  >
+                    {/* Empty state profile icon for new user */}
+                    <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center shrink-0">
+                      <User className="w-3.5 h-3.5 stroke-[1.8] text-slate-400" />
+                    </div>
+                    <span className="max-w-[110px] truncate text-slate-800 font-bold">
+                      {currentUser.handle || currentUser.name}
+                    </span>
+                  </button>
+
+                  {/* Quick Log out button */}
+                  <button
+                    onClick={() => {
+                      setCurrentUser(null);
+                      setIsLoggedOut(true);
+                      try {
+                        localStorage.removeItem('fairy_current_user');
+                      } catch (e) {}
+                    }}
+                    className="px-2 py-0.5 text-[11px] font-semibold text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors cursor-pointer"
+                    title="Log out"
+                  >
+                    Log out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -3708,9 +3744,9 @@ export default function App() {
         isOpen={showCreateTweetModal}
         onClose={() => setShowCreateTweetModal(false)}
         onPublishTweet={handlePublishTweet}
-        authorAvatar={elenaAvatar}
-        authorName="Elena Vance"
-        authorHandle="@elena_aeri"
+        authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : elenaAvatar}
+        authorName={currentUser && !isLoggedOut ? currentUser.name : "Elena Vance"}
+        authorHandle={currentUser && !isLoggedOut ? currentUser.handle : "@elena_aeri"}
       />
 
       {/* Create Post Modal (Allows posting video, pic, and writing) */}
@@ -3778,11 +3814,10 @@ export default function App() {
           } catch (e) {}
           setIsLoggedOut(false);
           setSelectedProfileUser(null);
-          setActiveNavIndex(4); // Switch to Profile tab immediately!
-          setTweetSuccessToast(`Welcome, ${user.name}! Your profile is now live.`);
+          setTweetSuccessToast(`Welcome back, ${user.name}!`);
           setTimeout(() => {
             setTweetSuccessToast(null);
-          }, 3500);
+          }, 3000);
         }}
       />
 
@@ -3805,88 +3840,15 @@ export default function App() {
             }}
             onLogout={() => {
               setShowSettingsScreen(false);
+              setCurrentUser(null);
               setIsLoggedOut(true);
+              try {
+                localStorage.removeItem('fairy_current_user');
+              } catch (e) {}
+              setActiveNavIndex(0);
             }}
-            currentUser={currentUser}
+            currentUser={currentUser || undefined}
           />
-        </div>
-      )}
-
-
-      {/* FAIRY Sign-In Screen upon Log Out */}
-      {isLoggedOut && (
-        <div className="fixed inset-0 z-50 bg-[#FAFBFD] flex flex-col items-center justify-center p-6 animate-fadeIn">
-          <div className="max-w-sm w-full bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xl space-y-5 text-center">
-            <div className="flex flex-col items-center">
-              <AeriSlimeSqueezeIcon size={52} />
-              <h2 className="text-xl font-black text-slate-900 tracking-tight mt-3">Welcome to FAIRY</h2>
-              <p className="text-xs text-slate-500 mt-1">Sign in to resume creating, collecting and connecting</p>
-            </div>
-
-            <div className="space-y-3 text-left">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Username or Email</label>
-                <input
-                  type="text"
-                  defaultValue="allendharak9@gmail.com"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-purple-600 font-medium"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Password</label>
-                <input
-                  type="password"
-                  defaultValue="••••••••••••"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-purple-600 font-medium"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                const allenProfile = {
-                  id: 'user-allen',
-                  name: 'Allen Dharak',
-                  handle: '@allenkinetic002-creator',
-                  email: 'allendharak9@gmail.com',
-                  location: 'London, UK',
-                  profession: 'Creative Developer & Founder',
-                  bio: 'Creative developer, founder & digital artist on Fairy.',
-                };
-                setCurrentUser(allenProfile);
-                try {
-                  localStorage.setItem('fairy_current_user', JSON.stringify(allenProfile));
-                } catch (e) {}
-                setIsLoggedOut(false);
-                setSelectedProfileUser(null);
-                setActiveNavIndex(4);
-              }}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-black text-sm rounded-xl shadow-md transition-all cursor-pointer"
-            >
-              Log In as Allen Dharak (@allenkinetic002-creator)
-            </button>
-
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-700">
-              <button
-                onClick={() => {
-                  setShowSignInModal(true);
-                  setIsLoggedOut(false);
-                }}
-                className="hover:underline cursor-pointer"
-              >
-                Switch Account
-              </button>
-              <button
-                onClick={() => {
-                  setIsLoggedOut(false);
-                  setActiveNavIndex(0);
-                }}
-                className="hover:underline cursor-pointer"
-              >
-                Continue as Guest
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
