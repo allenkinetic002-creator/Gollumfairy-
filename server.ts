@@ -5,7 +5,8 @@ import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
