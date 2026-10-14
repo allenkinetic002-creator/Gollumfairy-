@@ -28,11 +28,13 @@ function runGitQueued<T>(fn: () => Promise<T>): Promise<T> {
 async function configureGitRemote() {
   try {
     await execAsync('git config --global --add safe.directory "*"');
+    let needsFetch = false;
     try {
       await execAsync('git rev-parse --is-inside-work-tree');
     } catch {
       await execAsync('git init');
       await execAsync('git branch -M main');
+      needsFetch = true;
     }
     const token = process.env.GITHUB_TOKEN;
     if (token) {
@@ -45,6 +47,22 @@ async function configureGitRemote() {
     }
     await execAsync('git config user.name "allenkinetic002-creator"');
     await execAsync('git config user.email "casperthefriendlyghost90212@gmail.com"');
+
+    try {
+      await execAsync('git rev-parse HEAD');
+    } catch {
+      needsFetch = true;
+    }
+
+    if (needsFetch) {
+      try {
+        await execAsync('git fetch origin main --depth=10');
+        await execAsync('git reset --mixed origin/main');
+      } catch (fErr: any) {
+        console.warn('[Git] Auto-fetch notice:', fErr.message);
+      }
+    }
+
     console.log('[Git] Origin remote and git author configured successfully');
   } catch (err: any) {
     console.warn('[Git] Remote configuration warning:', err.message);
@@ -62,6 +80,7 @@ async function startServer() {
   // Git status endpoint
   app.get('/api/github/status', async (_req, res) => {
     try {
+      await configureGitRemote();
       const { stdout: statusOut } = await execAsync('git status -s');
       const { stdout: logOut } = await execAsync('git log -1 --pretty=format:"%h - %s (%cr) <%an>"');
       const { stdout: branchOut } = await execAsync('git rev-parse --abbrev-ref HEAD');
@@ -82,6 +101,7 @@ async function startServer() {
   app.post('/api/github/push', async (req, res) => {
     runGitQueued(async () => {
       try {
+        await configureGitRemote();
         const rawMessage = typeof req.body?.message === 'string' && req.body.message.trim()
           ? req.body.message.trim()
           : `feat: update app ${new Date().toISOString()}`;
