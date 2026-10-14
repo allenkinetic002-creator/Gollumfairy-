@@ -80,6 +80,8 @@ import { ChallengePostModal, ChallengePostPayload } from './components/Challenge
 import { UserSearchModal, UserSearchItem } from './components/UserSearchModal';
 import { UserProfileScreen } from './components/UserProfileScreen';
 import { SettingsScreen } from './components/SettingsScreen';
+import { SignInModal } from './components/SignInModal';
+
 
 export interface FeedPost {
   id: string;
@@ -1505,7 +1507,18 @@ export default function App() {
   const [activeNavIndex, setActiveNavIndex] = useState(0);
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
   const [isLoggedOut, setIsLoggedOut] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{
+    name: string;
+    handle: string;
+    email: string;
+  }>({
+    name: 'Elena Vance',
+    handle: '@aerifairy',
+    email: 'elena.vance@aeri.studio',
+  });
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
+
   const [showCreateTweetModal, setShowCreateTweetModal] = useState(false);
   const [tweetSuccessToast, setTweetSuccessToast] = useState<string | null>(null);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([
@@ -1994,8 +2007,34 @@ export default function App() {
           {/* ========================================================================= */}
           {activeNavIndex === 0 && (
         <>
+          {/* Top Utility Bar with Sign In Button positioned above the 5 upper header icons */}
+          <div className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-slate-50/90 border-b border-slate-100 z-10">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] font-bold tracking-tight text-slate-500 uppercase">
+                Fairy Live
+              </span>
+              {currentUser && (
+                <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                  · {currentUser.name}
+                </span>
+              )}
+            </div>
+
+            {/* Sign In Button placed directly above the 5 header icons */}
+            <button
+              onClick={() => setShowSignInModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
+              title="Sign in to your account"
+            >
+              <User className="w-3.5 h-3.5 stroke-[2.2]" />
+              <span>Sign In</span>
+            </button>
+          </div>
+
           {/* Header */}
           <header className="w-full px-4 pt-2.5 pb-1 flex items-center justify-between shrink-0 bg-white z-10 border-b border-slate-50">
+
             <div className="flex items-center gap-2">
               <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
                 <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
@@ -3688,6 +3727,21 @@ export default function App() {
           setActiveNavIndex(4);
         }}
       />
+
+      {/* Sign In Modal */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onSuccess={(user) => {
+          setCurrentUser(user);
+          setIsLoggedOut(false);
+          setTweetSuccessToast(`Signed in as ${user.name}`);
+          setTimeout(() => {
+            setTweetSuccessToast(null);
+          }, 3500);
+        }}
+      />
+
 
       {/* FAIRY Settings Screen */}
       {showSettingsScreen && (
