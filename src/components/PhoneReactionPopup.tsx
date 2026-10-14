@@ -108,10 +108,7 @@ export function PhoneReactionPopup({
           title="Vote Up: Move UP in Top 10 rankings"
           aria-label="Move Up"
         >
-          <div className="flex items-center gap-1">
-            <AeriBattleThumbsUpIcon className="w-3.5 h-3.5" contrastColor="#E51E2B" facing="right" />
-            <span className="text-[10px] font-black text-white">▲</span>
-          </div>
+          <AeriBattleThumbsUpIcon className="w-4 h-4" contrastColor="#E51E2B" facing="right" />
         </button>
 
         {/* Centered Writing: Likes | Dislikes matching broken position */}
@@ -120,9 +117,8 @@ export function PhoneReactionPopup({
             <div className={`text-[12px] sm:text-[12.5px] font-bold tabular-nums leading-none ${userVote === 'like' ? 'text-[#E51E2B]' : 'text-black'}`}>
               {likes.toLocaleString()}
             </div>
-            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5 flex items-center justify-center gap-0.5">
-              <span>Likes</span>
-              <span className="text-[9px] text-red-600 font-bold">▲</span>
+            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5">
+              Likes
             </div>
           </div>
 
@@ -132,9 +128,8 @@ export function PhoneReactionPopup({
             <div className={`text-[12px] sm:text-[12.5px] font-bold tabular-nums leading-none ${userVote === 'dislike' ? 'text-[#1D3D8F]' : 'text-black'}`}>
               {dislikes.toLocaleString()}
             </div>
-            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5 flex items-center justify-center gap-0.5">
-              <span>Dislikes</span>
-              <span className="text-[9px] text-blue-700 font-bold">▼</span>
+            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5">
+              Dislikes
             </div>
           </div>
         </div>
@@ -151,10 +146,7 @@ export function PhoneReactionPopup({
           title="Vote Down: Move DOWN in Top 10 rankings"
           aria-label="Move Down"
         >
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] font-black text-white">▼</span>
-            <AeriBattleThumbsUpIcon className="w-3.5 h-3.5" contrastColor="#1D3D8F" facing="left" direction="down" />
-          </div>
+          <AeriBattleThumbsUpIcon className="w-4 h-4" contrastColor="#1D3D8F" facing="left" direction="down" />
         </button>
       </div>
 
