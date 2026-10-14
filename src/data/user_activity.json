@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792002418094-q6ndo",
+    "action": "rating_reset",
+    "description": "Reset rating for Elena Vance to rate again",
+    "details": {
+      "targetName": "Elena Vance",
+      "isFinalized": false,
+      "rating": 9.5,
+      "updatedAt": "2026-10-14T18:26:58.093Z"
+    },
+    "savedAt": "2026-10-14T18:26:58.094Z"
+  },
+  {
     "id": "act-1792002414422-gdsqs",
     "action": "rating_submitted",
     "description": "Finalized rating 9.5 ★ for Elena Vance",
