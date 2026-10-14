@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { RotateCcw, Lock, CheckCircle2 } from 'lucide-react';
 import { AeriBattleThumbsUpIcon } from './AeriBattleThumbsUpIcon';
+import { syncActivityToRepo } from '../lib/repoSync';
 
 export interface PhoneReactionWidgetProps {
   initialLikes?: number;
@@ -17,7 +19,8 @@ export interface PhoneReactionWidgetProps {
 
 /**
  * Pure Reaction Widget for Phone Hand Icon:
- * - Serves as a live Tie-Breaker indicator to move a person up or down in Top 10
+ * - Once used, the vote is FINAL (locked in)
+ * - Has an explicit RESET button to reset the vote and do it again at any time!
  * - Red button at the left end with wrist line thumbs-up icon (adds +1, moves person UP)
  * - Centered writing: Likes | Dislikes
  * - Blue button at the right end with wrist line thumbs-up icon facing left (subtracts -1, moves person DOWN)
@@ -33,37 +36,102 @@ export function PhoneReactionPopup({
   currentRank,
   onVote,
 }: PhoneReactionWidgetProps) {
-  const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
-  const [likes, setLikes] = useState<number>(initialLikes);
-  const [dislikes, setDislikes] = useState<number>(initialDislikes);
+  const storageKey = `fairy_phone_vote_${personName || 'default'}`;
 
-  React.useEffect(() => {
-    setLikes(initialLikes);
-  }, [initialLikes]);
+  // Check if user previously finalized vote
+  const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved === 'like' || saved === 'dislike') return saved;
+    } catch {}
+    return null;
+  });
 
-  const handleVote = (type: 'like' | 'dislike') => {
-    let nextVote: 'like' | 'dislike' | null = null;
-    if (userVote === type) {
-      // Toggle off -> restore base likes
-      nextVote = null;
+  const [isFinal, setIsFinal] = useState<boolean>(() => {
+    try {
+      return Boolean(localStorage.getItem(storageKey));
+    } catch {}
+    return false;
+  });
+
+  const [likes, setLikes] = useState<number>(() => {
+    if (userVote === 'like') return initialLikes + 1;
+    if (userVote === 'dislike') return Math.max(0, initialLikes - 1);
+    return initialLikes;
+  });
+
+  const [dislikes, setDislikes] = useState<number>(() => {
+    if (userVote === 'dislike') return initialDislikes + 1;
+    return initialDislikes;
+  });
+
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isFinal) {
       setLikes(initialLikes);
       setDislikes(initialDislikes);
+    }
+  }, [initialLikes, initialDislikes, isFinal]);
+
+  const handleVote = (type: 'like' | 'dislike') => {
+    // If already finalized, user must click Reset to vote again
+    if (isFinal) {
+      setResetMessage('Vote is finalized! Click "Reset & Vote Again" below to change it.');
+      setTimeout(() => setResetMessage(null), 3000);
+      return;
+    }
+
+    // Register vote as final
+    if (type === 'like') {
+      setLikes(initialLikes + 1);
+      setDislikes(initialDislikes);
     } else {
-      nextVote = type;
-      if (type === 'like') {
-        // Red button: +1 like -> moves person UP in Top 10
-        setLikes(initialLikes + 1);
-        setDislikes(initialDislikes);
-      } else {
-        // Blue button: subtracts like (-1) -> moves person DOWN in Top 10
-        setLikes(Math.max(0, initialLikes - 1));
-        setDislikes(initialDislikes + 1);
-      }
+      setLikes(Math.max(0, initialLikes - 1));
+      setDislikes(initialDislikes + 1);
     }
-    setUserVote(nextVote);
+
+    setUserVote(type);
+    setIsFinal(true);
+
+    try {
+      localStorage.setItem(storageKey, type);
+    } catch {}
+
     if (onVote) {
-      onVote(type, nextVote);
+      onVote(type, type);
     }
+
+    syncActivityToRepo(
+      'phone_hand_vote',
+      `Finalized ${type === 'like' ? 'UP (+1 like)' : 'DOWN (-1 like)'} vote for ${personName || 'creator'} via Phone Hand`,
+      { personName, vote: type }
+    );
+  };
+
+  const handleReset = () => {
+    const previousVote = userVote;
+    setUserVote(null);
+    setIsFinal(false);
+    setLikes(initialLikes);
+    setDislikes(initialDislikes);
+
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {}
+
+    if (onVote && previousVote) {
+      onVote(previousVote, null); // Revert the rank shift
+    }
+
+    setResetMessage('Vote reset! You can now vote again.');
+    setTimeout(() => setResetMessage(null), 3000);
+
+    syncActivityToRepo(
+      'phone_hand_reset',
+      `Reset Phone Hand tie-breaker vote for ${personName || 'creator'}`,
+      { personName }
+    );
   };
 
   return (
@@ -81,20 +149,30 @@ export function PhoneReactionPopup({
               : 'Red ▲ (+1 like) moves UP, Blue ▼ (-1 like) moves DOWN'}
           </span>
         </div>
-        {userVote && (
+
+        {/* Finalized Status Badge */}
+        {isFinal && (
           <span
-            className={`font-black text-[10px] px-2 py-0.5 rounded-md shrink-0 shadow-2xs ${
+            className={`font-black text-[10px] px-2 py-0.5 rounded-md shrink-0 shadow-2xs flex items-center gap-1 ${
               userVote === 'like'
                 ? 'bg-red-600 text-white'
                 : 'bg-blue-600 text-white'
             }`}
           >
-            {userVote === 'like' ? '▲ Moved UP (+1 like)' : '▼ Moved DOWN (-1 like)'}
+            <Lock className="w-2.5 h-2.5" />
+            <span>{userVote === 'like' ? 'Final: Moved UP (+1)' : 'Final: Moved DOWN (-1)'}</span>
           </span>
         )}
       </div>
 
-      {/* Top row: Red Like button at left end, centered writing, Blue button at right end with thumbsup facing left */}
+      {/* Reset Notification Message */}
+      {resetMessage && (
+        <div className="w-full mb-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-200 text-indigo-900 text-[10.5px] font-bold rounded-lg flex items-center justify-between animate-fadeIn">
+          <span>{resetMessage}</span>
+        </div>
+      )}
+
+      {/* Top row: Red Like button at left end, centered writing, Blue button at right end */}
       <div className="w-full flex items-center justify-between gap-2 mt-0.5">
         {/* Red Like Button (moves person UP in Top 10) */}
         <button
@@ -104,8 +182,8 @@ export function PhoneReactionPopup({
             userVote === 'like'
               ? 'bg-[#E51E2B] ring-3 ring-red-400 ring-offset-1 scale-105'
               : 'bg-[#E51E2B] hover:bg-[#D41825]'
-          }`}
-          title="Vote Up: Move UP in Top 10 rankings"
+          } ${isFinal && userVote !== 'like' ? 'opacity-40 cursor-not-allowed' : ''}`}
+          title={isFinal ? 'Vote finalized (use Reset button to vote again)' : 'Vote Up: Move UP in Top 10 rankings'}
           aria-label="Move Up"
         >
           <AeriBattleThumbsUpIcon className="w-4 h-4" contrastColor="#E51E2B" facing="right" />
@@ -142,17 +220,36 @@ export function PhoneReactionPopup({
             userVote === 'dislike'
               ? 'bg-[#1D3D8F] ring-3 ring-blue-400 ring-offset-1 scale-105'
               : 'bg-[#1D3D8F] hover:bg-[#183275]'
-          }`}
-          title="Vote Down: Move DOWN in Top 10 rankings"
+          } ${isFinal && userVote !== 'dislike' ? 'opacity-40 cursor-not-allowed' : ''}`}
+          title={isFinal ? 'Vote finalized (use Reset button to vote again)' : 'Vote Down: Move DOWN in Top 10 rankings'}
           aria-label="Move Down"
         >
           <AeriBattleThumbsUpIcon className="w-4 h-4" contrastColor="#1D3D8F" facing="left" direction="down" />
         </button>
       </div>
 
-      {/* Yellow stuff: Double yellow line with upward yellow triangle matching broken position */}
+      {/* RESET OPTION: Allows user to reset vote and do it again */}
+      {isFinal && (
+        <div className="w-full flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200/80 px-1">
+          <div className="flex items-center gap-1 text-[11px] font-black text-slate-700">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>Choice is final & locked</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10.5px] font-black rounded-lg border border-slate-300 transition-all active:scale-95 cursor-pointer shadow-2xs"
+            title="Reset your vote and vote again"
+          >
+            <RotateCcw className="w-3 h-3 text-purple-600" />
+            <span>Reset & Vote Again</span>
+          </button>
+        </div>
+      )}
+
+      {/* Double yellow line with upward yellow triangle */}
       <div className="w-full mt-2 relative pt-1">
-        {/* Wide double yellow lines */}
         <div className="w-full flex flex-col gap-[2.5px]">
           <div className="w-full h-[3px] bg-[#F5C21B] rounded-full" />
           <div className="w-full h-[3px] bg-[#F5C21B] rounded-full" />
