@@ -27,12 +27,13 @@ function runGitQueued<T>(fn: () => Promise<T>): Promise<T> {
 
 async function configureGitRemote() {
   try {
+    await execAsync('git config --global --add safe.directory "*"');
     const token = process.env.GITHUB_TOKEN;
     if (token) {
       await execAsync(`git remote set-url origin "https://allenkinetic002-creator:${token}@github.com/${GITHUB_REPO}.git"`);
     }
     await execAsync('git config user.name "allenkinetic002-creator"');
-    await execAsync('git config user.email "casperthefriendlyghost90213@gmail.com"');
+    await execAsync('git config user.email "casperthefriendlyghost90212@gmail.com"');
     console.log('[Git] Origin remote and git author configured successfully');
   } catch (err: any) {
     console.warn('[Git] Remote configuration warning:', err.message);
