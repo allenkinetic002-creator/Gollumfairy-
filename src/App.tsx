@@ -33,6 +33,7 @@ import {
   UserCheck,
   UploadCloud,
   GitBranch,
+  RefreshCw,
 } from 'lucide-react';
 import postImage from './assets/images/fairy_post_image_1791012530319.jpg';
 import elenaAvatar from './assets/images/creator_portrait_elena_1791014499312.jpg';
@@ -84,6 +85,7 @@ import { UserProfileScreen } from './components/UserProfileScreen';
 import { SettingsScreen } from './components/SettingsScreen';
 import { SignInModal } from './components/SignInModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
+import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
 
 
 export interface FeedPost {
@@ -1552,6 +1554,13 @@ export default function App() {
   });
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
   const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
+  const [repoSyncStatus, setRepoSyncStatus] = useState<SyncStatus | null>(null);
+
+  useEffect(() => {
+    return subscribeToSyncStatus((status) => {
+      setRepoSyncStatus(status);
+    });
+  }, []);
 
 
   const [showCreateTweetModal, setShowCreateTweetModal] = useState(false);
@@ -1677,6 +1686,14 @@ export default function App() {
       console.warn('[Supabase] Failed to sync new tweet:', err)
     );
 
+    // Auto-update GitHub repository on use
+    syncActivityToRepo(
+      'publish_tweet',
+      `Tweet published: "${payload.text.slice(0, 45)}"`,
+      { id: newTweet.id, author: newTweet.authorName },
+      true
+    );
+
     setTweetSuccessToast('Your post was published!');
     setTimeout(() => {
       setTweetSuccessToast(null);
@@ -1704,10 +1721,17 @@ export default function App() {
     };
     setFeedPosts((prev) => [newPost, ...prev]);
 
-
     // Sync to Supabase in the background
     syncPostToSupabase(newPost).catch((err) =>
       console.warn('[Supabase] Failed to sync new post:', err)
+    );
+
+    // Auto-update GitHub repository on use
+    syncActivityToRepo(
+      'publish_post',
+      `Post published: "${payload.caption ? payload.caption.slice(0, 45) : 'New media post'}"`,
+      { id: newPost.id, mediaType: newPost.mediaType },
+      true
     );
 
     if (payload.faceoffConfig) {
@@ -1728,6 +1752,7 @@ export default function App() {
       prev.map((p) => {
         if (p.id === postId) {
           const nextLiked = !p.isLiked;
+          syncActivityToRepo('like_post', `${nextLiked ? 'Liked' : 'Unliked'} post ${p.authorHandle}`);
           return {
             ...p,
             isLiked: nextLiked,
@@ -2180,6 +2205,20 @@ export default function App() {
           {/* ========================================================================= */}
           {activeNavIndex === 0 && (
         <>
+          {/* Real-time GitHub & Supabase Repo Sync Status Toast */}
+          {repoSyncStatus?.status === 'syncing' && (
+            <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-indigo-950/95 text-white text-[11px] font-medium px-4 py-2 rounded-full shadow-xl border border-indigo-400/40 flex items-center gap-2 backdrop-blur-md animate-fade-in pointer-events-none">
+              <RefreshCw className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
+              <span>Syncing update to Gollumfairy repo...</span>
+            </div>
+          )}
+          {repoSyncStatus?.status === 'synced' && (
+            <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-emerald-950/95 text-white text-[11px] font-medium px-4 py-2 rounded-full shadow-xl border border-emerald-400/40 flex items-center gap-2 backdrop-blur-md animate-fade-in pointer-events-none">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Updates saved & pushed to GitHub main ✓</span>
+            </div>
+          )}
+
           {/* Top Utility Bar with Sign In Button positioned above the 5 upper header icons */}
           <div className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-slate-50/90 border-b border-slate-100 z-10">
             <div className="flex items-center gap-2">
@@ -2253,6 +2292,24 @@ export default function App() {
               <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
                 Fairy
               </h1>
+              {/* GitHub Repo & Supabase Status Pill */}
+              <button
+                onClick={() => setShowGitHubSyncModal(true)}
+                title="Gollumfairy · Auto-Sync to GitHub & Supabase Active"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200/80 border border-slate-200/90 text-[10px] font-medium text-slate-700 transition-all cursor-pointer shadow-2xs ml-0.5 active:scale-95"
+              >
+                <GitBranch className="w-2.5 h-2.5 text-indigo-600 shrink-0" />
+                <span className="font-mono text-[9px] font-semibold text-slate-800">Gollumfairy</span>
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    repoSyncStatus?.status === 'syncing'
+                      ? 'bg-amber-400 animate-spin'
+                      : repoSyncStatus?.status === 'error'
+                      ? 'bg-rose-500'
+                      : 'bg-emerald-500 animate-pulse'
+                  }`}
+                />
+              </button>
             </div>
 
             <div className="flex items-center gap-3">

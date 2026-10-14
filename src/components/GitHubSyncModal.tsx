@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, GitBranch, GitCommit, UploadCloud, CheckCircle2, AlertCircle, RefreshCw, Database, ExternalLink, ShieldCheck } from 'lucide-react';
+import { X, GitBranch, GitCommit, UploadCloud, CheckCircle2, AlertCircle, RefreshCw, Database, ExternalLink, ShieldCheck, Zap, Activity } from 'lucide-react';
+import { setAutoSyncEnabled } from '../lib/repoSync';
 
 interface GitHubSyncModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [commitMessage, setCommitMessage] = useState('');
+  const [autoSync, setAutoSync] = useState(() => localStorage.getItem('fairy_auto_sync_repo') !== 'false');
   const [gitStatus, setGitStatus] = useState<{
     repo: string;
     branch: string;
@@ -17,18 +19,45 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
     uncommittedChanges: string[];
     lastCommit: string;
   } | null>(null);
+  const [supabaseStatus, setSupabaseStatus] = useState<{
+    success: boolean;
+    projectRef: string;
+    name?: string;
+    status: string;
+    region?: string;
+    databaseHost?: string;
+  } | null>(null);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchStatus = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/github/status');
-      if (res.ok) {
-        const data = await res.json();
+      const [gitRes, supaRes] = await Promise.all([
+        fetch('/api/github/status'),
+        fetch('/api/supabase/status'),
+      ]);
+
+      if (gitRes.ok) {
+        const data = await gitRes.json();
         setGitStatus(data);
       }
+
+      if (supaRes.ok) {
+        const data = await supaRes.json();
+        setSupabaseStatus(data);
+      }
+
+      // Try loading activities
+      try {
+        const actRes = await fetch('/src/data/user_activity.json');
+        if (actRes.ok) {
+          const acts = await actRes.json();
+          setRecentActivities(Array.isArray(acts) ? acts.slice(0, 5) : []);
+        }
+      } catch {}
     } catch (err) {
-      console.warn('Failed to fetch git status:', err);
+      console.warn('Failed to fetch status:', err);
     } finally {
       setLoading(false);
     }
@@ -42,6 +71,11 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleToggleAutoSync = (checked: boolean) => {
+    setAutoSync(checked);
+    setAutoSyncEnabled(checked);
+  };
 
   const handlePush = async () => {
     try {
@@ -81,9 +115,9 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
               <UploadCloud className="w-4 h-4 text-indigo-400" />
@@ -106,7 +140,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-4 overflow-y-auto flex-1">
           {/* Status Message */}
           {statusMessage && (
             <div
@@ -125,10 +159,34 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
             </div>
           )}
 
+          {/* Auto-Sync Toggle Banner */}
+          <div className="bg-indigo-50/80 border border-indigo-200/80 rounded-xl p-3.5 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+                <Zap className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-indigo-950">Auto-Update Repo on Use</div>
+                <div className="text-[11px] text-indigo-700">
+                  Automatically commits & pushes to main when creating posts, tweets, receipts, or voting
+                </div>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoSync}
+                onChange={(e) => handleToggleAutoSync(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+          </div>
+
           {/* Repository Details Card */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-semibold uppercase tracking-wider text-[10px]">Repository Info</span>
+              <span className="font-semibold uppercase tracking-wider text-[10px]">Repository Details</span>
               <button
                 onClick={fetchStatus}
                 disabled={loading}
@@ -189,25 +247,47 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
               </div>
               <div>
                 <div className="font-semibold text-emerald-950 flex items-center gap-1">
-                  Supabase Backend
+                  {supabaseStatus?.name || "allenkinetic002-creator's Project"}
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
                 <div className="text-[11px] text-emerald-800 font-mono">
-                  khixsxyyulxpwlkxtaag (eu-west-1)
+                  {supabaseStatus?.projectRef || 'khixsxyyulxpwlkxtaag'} ({supabaseStatus?.region || 'eu-west-1'})
                 </div>
               </div>
             </div>
             <div className="text-right">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" /> Connected
+                <ShieldCheck className="w-3 h-3 text-emerald-600" /> Active & Healthy
               </span>
             </div>
           </div>
 
-          {/* Push to GitHub Form */}
+          {/* Recent Synced Actions */}
+          {recentActivities.length > 0 && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider flex items-center gap-1">
+                <Activity className="w-3 h-3 text-slate-500" />
+                Recent Synced Actions
+              </div>
+              <div className="space-y-1.5 text-[11px]">
+                {recentActivities.map((act) => (
+                  <div key={act.id} className="bg-white p-2 rounded-lg border border-slate-200/60 flex items-center justify-between">
+                    <span className="font-medium text-slate-700 truncate max-w-[260px]">
+                      {act.description || act.action}
+                    </span>
+                    <span className="text-[9px] text-slate-400 font-mono shrink-0">
+                      {act.timestamp ? new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Manual Push to GitHub Form */}
           <div className="space-y-2">
             <label className="block text-xs font-semibold text-slate-700">
-              Commit Message (Optional)
+              Manual Commit Message (Optional)
             </label>
             <input
               type="text"
@@ -220,7 +300,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
           <a
             href="https://github.com/allenkinetic002-creator/Gollumfairy-"
             target="_blank"
@@ -251,7 +331,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
               ) : (
                 <>
                   <UploadCloud className="w-3.5 h-3.5" />
-                  Send Updates to Repo
+                  Push Updates Now
                 </>
               )}
             </button>

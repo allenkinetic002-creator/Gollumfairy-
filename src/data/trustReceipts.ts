@@ -196,6 +196,16 @@ export function saveTrustReceipts(receipts: TrustReceipt[]) {
         );
       });
     }
+
+    // Auto-sync update to GitHub repository
+    import('../lib/repoSync').then(({ syncActivityToRepo }) => {
+      const latest = receipts[0];
+      syncActivityToRepo(
+        'trust_receipt_update',
+        `Trust receipt saved: ${latest?.receiptNumber || 'receipt'} - ${latest?.promiserName || 'entry'}`,
+        { count: receipts.length, latestId: latest?.id }
+      );
+    }).catch(() => {});
   } catch (e) {
     console.warn('Failed to save trust receipts:', e);
   }

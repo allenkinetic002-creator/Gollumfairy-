@@ -248,6 +248,16 @@ export function saveStarStamps(stamps: StarStamp[]): void {
         );
       });
     }
+
+    // Auto-sync update to GitHub repository
+    import('../lib/repoSync').then(({ syncActivityToRepo }) => {
+      const latest = stamps[0];
+      syncActivityToRepo(
+        'star_stamp_update',
+        `Star stamp saved: ${latest?.stampNumber || 'stamp'} - ${latest?.promiserName || 'entry'}`,
+        { count: stamps.length, latestId: latest?.id }
+      );
+    }).catch(() => {});
   } catch (err) {
     console.error('Failed to save star stamps to localStorage', err);
   }
