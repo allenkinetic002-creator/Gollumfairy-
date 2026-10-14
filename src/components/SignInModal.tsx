@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
-import { X, User, Mail, Lock, Sparkles, CheckCircle2, ArrowRight, ShieldCheck, LogIn } from 'lucide-react';
+import { X, User, Mail, Lock, Sparkles, CheckCircle2, ArrowRight, ShieldCheck, LogIn, Crown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { AeriSlimeSqueezeIcon } from './AeriSlimeSqueezeIcon';
+
+export interface AuthUserProfile {
+  id?: string;
+  name: string;
+  handle: string;
+  email: string;
+  location?: string;
+  profession?: string;
+  bio?: string;
+  avatarUrl?: string;
+}
 
 interface SignInModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (user: { name: string; handle: string; email: string }) => void;
+  onSuccess?: (user: AuthUserProfile) => void;
 }
 
 export const SignInModal: React.FC<SignInModalProps> = ({
@@ -15,33 +26,63 @@ export const SignInModal: React.FC<SignInModalProps> = ({
   onSuccess,
 }) => {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('allendharak9@gmail.com');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [name, setName] = useState('Allen Dharak');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleQuickLoginElena = () => {
+  const handleQuickLoginAllen = () => {
     setIsLoading(true);
     setErrorMessage(null);
+    const profile: AuthUserProfile = {
+      id: 'user-allen',
+      name: 'Allen Dharak',
+      handle: '@allenkinetic002-creator',
+      email: 'allendharak9@gmail.com',
+      location: 'London, UK',
+      profession: 'Creative Developer & Founder',
+      bio: 'Creative developer, founder & digital artist on Fairy. Building verified trust receipts and live social networks.',
+    };
     setTimeout(() => {
       setIsLoading(false);
-      setSuccessMessage('Signed in as Elena Vance (@aerifairy)');
+      setSuccessMessage('Signed in as Allen Dharak (@allenkinetic002-creator)!');
       if (onSuccess) {
-        onSuccess({
-          name: 'Elena Vance',
-          handle: '@aerifairy',
-          email: 'elena.vance@aeri.studio',
-        });
+        onSuccess(profile);
       }
       setTimeout(() => {
         onClose();
         setSuccessMessage(null);
-      }, 1000);
-    }, 400);
+      }, 700);
+    }, 300);
+  };
+
+  const handleQuickLoginElena = () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    const profile: AuthUserProfile = {
+      id: 'user-elena',
+      name: 'Elena Vance',
+      handle: '@aerifairy',
+      email: 'elena.vance@aeri.studio',
+      location: 'Seoul / Han River',
+      profession: 'Concept Visual Artist & Beatmaker',
+      bio: 'Concept visual artist, worldbuilder, and synth beatmaker exploring mythological realms on Fairy.',
+    };
+    setTimeout(() => {
+      setIsLoading(false);
+      setSuccessMessage('Signed in as Elena Vance (@aerifairy)');
+      if (onSuccess) {
+        onSuccess(profile);
+      }
+      setTimeout(() => {
+        onClose();
+        setSuccessMessage(null);
+      }, 700);
+    }, 300);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,18 +112,21 @@ export const SignInModal: React.FC<SignInModalProps> = ({
         });
 
         if (error) {
-          // If Supabase auth errors, fallback to friendly local session
           console.warn('[Supabase Auth] Sign up notice:', error.message);
         }
 
-        const displayName = name.trim() || trimmedEmail.split('@')[0];
+        const displayName = name.trim() || (trimmedEmail.includes('allen') ? 'Allen Dharak' : trimmedEmail.split('@')[0]);
+        const displayHandle = trimmedEmail.includes('allen') ? '@allenkinetic002-creator' : `@${trimmedEmail.split('@')[0]}`;
+        const profile: AuthUserProfile = {
+          name: displayName,
+          handle: displayHandle,
+          email: trimmedEmail,
+          profession: 'Creative Developer & Founder',
+          bio: 'Verified creator on Fairy.',
+        };
         setSuccessMessage(`Account created! Welcome, ${displayName}`);
         if (onSuccess) {
-          onSuccess({
-            name: displayName,
-            handle: `@${trimmedEmail.split('@')[0]}`,
-            email: trimmedEmail,
-          });
+          onSuccess(profile);
         }
       } else {
         // Sign in with Supabase Auth
@@ -95,14 +139,18 @@ export const SignInModal: React.FC<SignInModalProps> = ({
           console.warn('[Supabase Auth] Sign in notice:', error.message);
         }
 
-        const displayName = name.trim() || trimmedEmail.split('@')[0];
+        const displayName = trimmedEmail.includes('allen') ? 'Allen Dharak' : trimmedEmail.split('@')[0];
+        const displayHandle = trimmedEmail.includes('allen') ? '@allenkinetic002-creator' : `@${trimmedEmail.split('@')[0]}`;
+        const profile: AuthUserProfile = {
+          name: displayName,
+          handle: displayHandle,
+          email: trimmedEmail,
+          profession: 'Creative Developer & Founder',
+          bio: 'Verified creator on Fairy.',
+        };
         setSuccessMessage(`Signed in as ${displayName}`);
         if (onSuccess) {
-          onSuccess({
-            name: displayName,
-            handle: `@${trimmedEmail.split('@')[0]}`,
-            email: trimmedEmail,
-          });
+          onSuccess(profile);
         }
       }
 
@@ -110,24 +158,27 @@ export const SignInModal: React.FC<SignInModalProps> = ({
         setIsLoading(false);
         onClose();
         setSuccessMessage(null);
-      }, 1200);
+      }, 700);
     } catch (err: any) {
       console.warn('Auth error:', err);
-      // Fallback: log the user in locally so they are never blocked
-      const displayName = trimmedEmail.split('@')[0];
+      const displayName = trimmedEmail.includes('allen') ? 'Allen Dharak' : trimmedEmail.split('@')[0];
+      const displayHandle = trimmedEmail.includes('allen') ? '@allenkinetic002-creator' : `@${trimmedEmail.split('@')[0]}`;
+      const profile: AuthUserProfile = {
+        name: displayName,
+        handle: displayHandle,
+        email: trimmedEmail,
+        profession: 'Creative Developer & Founder',
+        bio: 'Verified creator on Fairy.',
+      };
       setSuccessMessage(`Signed in as ${displayName}`);
       if (onSuccess) {
-        onSuccess({
-          name: displayName,
-          handle: `@${displayName}`,
-          email: trimmedEmail,
-        });
+        onSuccess(profile);
       }
       setTimeout(() => {
         setIsLoading(false);
         onClose();
         setSuccessMessage(null);
-      }, 1000);
+      }, 700);
     }
   };
 
@@ -144,15 +195,15 @@ export const SignInModal: React.FC<SignInModalProps> = ({
         </button>
 
         {/* Modal Header */}
-        <div className="flex flex-col items-center text-center pt-1 pb-4 border-b border-slate-100">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center shadow-md">
+        <div className="flex flex-col items-center text-center pt-1 pb-3 border-b border-slate-100">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-500 text-white flex items-center justify-center shadow-md">
             <AeriSlimeSqueezeIcon size={34} />
           </div>
           <h3 className="text-xl font-black text-slate-900 tracking-tight mt-2.5">
             {isSignUp ? 'Create your account' : 'Sign in to FAIRY'}
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Connect to the creative network & sync your receipts
+            Connect your personal profile, posts & receipts
           </p>
         </div>
 
@@ -170,25 +221,45 @@ export const SignInModal: React.FC<SignInModalProps> = ({
           </div>
         )}
 
-        {/* Quick Log In Button */}
-        <div className="mt-4">
+        {/* Quick Log In Options */}
+        <div className="mt-3.5 space-y-2">
+          {/* Main User: Allen Dharak */}
+          <button
+            type="button"
+            onClick={handleQuickLoginAllen}
+            disabled={isLoading}
+            className="w-full py-2.5 px-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold text-xs flex items-center justify-between transition-all cursor-pointer shadow-md active:scale-98"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black ring-1 ring-white/40">
+                AD
+              </span>
+              <div className="text-left">
+                <span className="block font-black leading-tight">Log in as Allen Dharak</span>
+                <span className="text-[10px] text-purple-200 font-medium">@allenkinetic002-creator</span>
+              </div>
+            </div>
+            <Crown className="w-4 h-4 text-amber-300" />
+          </button>
+
+          {/* Secondary Account: Elena Vance */}
           <button
             type="button"
             onClick={handleQuickLoginElena}
             disabled={isLoading}
-            className="w-full py-2.5 px-3 bg-purple-50 hover:bg-purple-100/80 border border-purple-200/70 text-purple-900 rounded-xl font-bold text-xs flex items-center justify-between transition-colors cursor-pointer"
+            className="w-full py-2 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-between transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-[11px] font-black">
+              <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-black">
                 E
               </span>
-              <span>Quick Login as Elena Vance</span>
+              <span>Switch to Elena Vance (@aerifairy)</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-purple-600" />
+            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
           </button>
         </div>
 
-        <div className="relative my-4 text-center">
+        <div className="relative my-3 text-center">
           <hr className="border-slate-200" />
           <span className="absolute left-1/2 -top-2.5 -translate-x-1/2 bg-white px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
             or continue with email
@@ -196,15 +267,15 @@ export const SignInModal: React.FC<SignInModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2.5">
           {isSignUp && (
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">Your Name</label>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Your Full Name</label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
                   type="text"
-                  placeholder="e.g. Jordan Hayes"
+                  placeholder="e.g. Allen Dharak"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent font-medium"
@@ -220,7 +291,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({
               <input
                 type="email"
                 required
-                placeholder="you@domain.com"
+                placeholder="allendharak9@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent font-medium"
@@ -246,21 +317,21 @@ export const SignInModal: React.FC<SignInModalProps> = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 mt-2 bg-purple-600 hover:bg-purple-700 active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 mt-1 bg-purple-600 hover:bg-purple-700 active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             {isLoading ? (
               <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <LogIn className="w-3.5 h-3.5" />
-                <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
+                <span>{isSignUp ? 'Create Account & Start' : 'Log In & Open My Profile'}</span>
               </>
             )}
           </button>
         </form>
 
         {/* Toggle between Sign In and Sign Up */}
-        <div className="mt-4 pt-3 border-t border-slate-100 text-center text-xs text-slate-500">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 text-center text-xs text-slate-500">
           {isSignUp ? (
             <p>
               Already have an account?{' '}
@@ -277,7 +348,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({
             </p>
           ) : (
             <p>
-              Don't have an account?{' '}
+              New to FAIRY?{' '}
               <button
                 type="button"
                 onClick={() => {
@@ -286,7 +357,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({
                 }}
                 className="font-bold text-purple-600 hover:underline cursor-pointer"
               >
-                Create one
+                Create an account
               </button>
             </p>
           )}

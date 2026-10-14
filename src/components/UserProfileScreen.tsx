@@ -105,7 +105,125 @@ export interface UserWikiBioData {
   website: string;
 }
 
+export function buildProfileWikiData(user: {
+  name: string;
+  handle: string;
+  profession?: string;
+  bio?: string;
+  location?: string;
+}): UserWikiBioData {
+  const isAllen =
+    user.handle.toLowerCase().includes('allen') ||
+    user.name.toLowerCase().includes('allen');
+
+  if (isAllen) {
+    return {
+      name: user.name,
+      handle: user.handle,
+      profession: user.profession || 'Creative Developer & Founder',
+      birthdate: 'March 14, 1999',
+      age: 27,
+      birthSign: 'Pisces ♓',
+      birthplace: user.location || 'London, United Kingdom',
+      nationality: 'British',
+      almaMater: 'Imperial College London',
+      yearsActive: '2021–present',
+      fairyRankText: '#1 Verified Creator & Lead Architect',
+      trustScore: 99,
+      starStampCount: 3120,
+      bioOverview:
+        user.bio ||
+        `${user.name} (${user.handle}) is a creator, full-stack engineer, and ecosystem pioneer on the Fairy network. Leading social feeds, real-time trust receipts, and next-generation creative tooling.`,
+      beforeFame: `${user.name} founded digital interactive experiences and creative open-source tooling, pioneering digital identity verification and real-time distributed feeds before leading the modern Fairy and Gollumfairy ecosystem.`,
+      triviaList: [
+        'Creator and architect of the Fairy Social Feed and Trust Receipt protocol.',
+        'Maintains a 99% Verified Integrity Trust Score across all community interactions.',
+        'Pioneered instant peer-to-peer verbal commitment receipts (Star Stamps).',
+        'Directly connected with international developers and artists worldwide.',
+        'Over 3,120 verified Star Stamps logged and acknowledged on the network.',
+      ],
+      associatedWith: [
+        { name: 'Elena Vance', handle: '@aerifairy', role: 'Concept Visual Artist & Beatmaker' },
+        { name: 'Alex Chen', handle: '@alexchen', role: 'Frontend & UI Specialist' },
+        { name: 'Tunde Ojo', handle: '@tunde_dev', role: 'Senior Database Engineer' },
+      ],
+      website: `fairy.app/${user.handle}`,
+    };
+  }
+
+  const isElena =
+    user.handle.toLowerCase().includes('elena') ||
+    user.name.toLowerCase().includes('elena') ||
+    user.handle.toLowerCase().includes('aeri');
+
+  if (isElena) {
+    return {
+      name: 'Elena Vance',
+      handle: '@aerifairy',
+      profession: 'Concept Visual Artist & Beatmaker',
+      birthdate: 'July 13, 2000',
+      age: 24,
+      birthSign: 'Cancer ♋',
+      birthplace: 'Seoul, South Korea',
+      nationality: 'South Korean / German',
+      almaMater: 'Seoul Institute of the Arts',
+      yearsActive: '2020–present',
+      fairyRankText: '#1 in Visual Art · #12 Global Fairy',
+      trustScore: 98,
+      starStampCount: 1420,
+      bioOverview:
+        'Elena Vance, widely known by her creator moniker Aeri Fairy, is an acclaimed concept visual artist, worldbuilder, and synth beatmaker. A leading voice of the neo-folklore and cyber-ambient aesthetic on the Fairy ecosystem, her immersive visual narratives explore mythological realms, luminous forest flora, and futuristic analog synthesis.',
+      beforeFame:
+        'Before establishing herself as a leading creator on Fairy, Vance began sketching fantasy scenes and architectural dioramas in digital painting communities in 2019 while studying at the Seoul Institute of the Arts.',
+      triviaList: [
+        'Youngest visual artist to reach #1 Top Ranked Creator on the Fairy platform.',
+        'All ambient soundscapes in her posts are produced and mixed personally on vintage Roland Juno-106 and Moog Matriarch hardware.',
+        'Collaborated with over 24 global musicians and architects on cross-medium digital pavilions.',
+        'Her signature purple aesthetic palette was inspired by neon dusk reflections over the Han River in Seoul.',
+        'Has achieved a 98% Integrity Trust Score and over 1,420 Star Stamps awarded by peers.',
+      ],
+      associatedWith: [
+        { name: 'Elena Rostova', handle: '@elena_art', role: 'Brutalist Architecture & Visuals' },
+        { name: 'Marcus Thorne', handle: '@marcus_design', role: 'Industrial 3D Sculptor' },
+        { name: 'Maya Lin', handle: '@mayalin', role: 'Ceramic & Spatial Installations' },
+      ],
+      website: 'fairy.app/@aerifairy',
+    };
+  }
+
+  return {
+    name: user.name,
+    handle: user.handle,
+    profession: user.profession || 'Digital Creator',
+    birthdate: 'January 1, 2000',
+    age: 26,
+    birthSign: 'Capricorn ♑',
+    birthplace: user.location || 'Creative Hub',
+    nationality: 'Verified Creator',
+    almaMater: 'Academy of Digital Arts',
+    yearsActive: '2022–present',
+    fairyRankText: 'Verified Fairy Creator',
+    trustScore: 96,
+    starStampCount: 840,
+    bioOverview:
+      user.bio ||
+      `${user.name} (${user.handle}) is an active creator and participant in the Fairy community.`,
+    beforeFame: `${user.name} joined the platform to share creative projects and establish verified trust receipts with peers.`,
+    triviaList: [
+      'Active contributor to the Fairy feed and challenge ecosystem.',
+      'Regular recipient of community Star Stamps.',
+      'Verified profile on Fairy network.',
+    ],
+    associatedWith: [
+      { name: 'Allen Dharak', handle: '@allenkinetic002-creator', role: 'Platform Architect' },
+      { name: 'Elena Vance', handle: '@aerifairy', role: 'Creator & Artist' },
+    ],
+    website: `fairy.app/${user.handle}`,
+  };
+}
+
 export interface UserProfileScreenProps {
+
   onBackToFeed: () => void;
   onOpenSendPersonMessage: (person: { id: string; name: string; handle: string; avatarUrl?: string }) => void;
   onOpenStarStamps?: () => void;
@@ -122,6 +240,16 @@ export interface UserProfileScreenProps {
     integrityScore?: number;
     category?: string;
   } | null;
+  currentUser?: {
+    id?: string;
+    name: string;
+    handle: string;
+    email?: string;
+    location?: string;
+    profession?: string;
+    bio?: string;
+    avatarUrl?: string;
+  };
   onClearViewUser?: () => void;
   onOpenSettings?: () => void;
 }
@@ -134,9 +262,20 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   onOpenPastChallengesModal,
   setRaygunTarget,
   viewUser,
+  currentUser,
   onClearViewUser,
   onOpenSettings,
 }) => {
+  // Active user resolution
+  const activeUser = viewUser || currentUser || {
+    name: 'Allen Dharak',
+    handle: '@allenkinetic002-creator',
+    email: 'allendharak9@gmail.com',
+    location: 'London, UK',
+    profession: 'Creative Developer & Founder',
+    bio: 'Creative developer, founder & digital artist on Fairy.',
+  };
+
   // Settings modal fallback state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -243,42 +382,23 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   const [isEditWikiModalOpen, setIsEditWikiModalOpen] = useState(false);
 
   // Editable User Wiki & Biographical Data
-  const [wikiData, setWikiData] = useState<UserWikiBioData>({
-    name: 'Elena Vance',
-    handle: '@aerifairy',
-    profession: 'Concept Visual Artist & Beatmaker',
-    birthdate: 'July 13, 2000',
-    age: 24,
-    birthSign: 'Cancer ♋',
-    birthplace: 'Seoul, South Korea',
-    nationality: 'South Korean / German',
-    almaMater: 'Seoul Institute of the Arts',
-    yearsActive: '2020–present',
-    fairyRankText: '#1 in Visual Art · #12 Global Fairy',
-    trustScore: 98,
-    starStampCount: 1420,
-    bioOverview:
-      'Elena Vance, widely known by her creator moniker Aeri Fairy, is an acclaimed concept visual artist, worldbuilder, and synth beatmaker. A leading voice of the neo-folklore and cyber-ambient aesthetic on the Fairy ecosystem, her immersive visual narratives explore mythological realms, luminous forest flora, and futuristic analog synthesis.',
-    beforeFame:
-      'Before establishing herself as a leading creator on Fairy, Vance began sketching fantasy scenes and architectural dioramas in digital painting communities in 2019 while studying at the Seoul Institute of the Arts. In late 2021, she began combining analog Roland synthesizer audio textures with generative illustration, releasing mini-drops that quickly went viral among international design collectives. She joined the Fairy platform in early 2023, where her debut post received over 100,000 community interactions within 48 hours.',
-    triviaList: [
-      'Youngest visual artist to reach #1 Top Ranked Creator on the Fairy platform.',
-      'All ambient soundscapes in her posts are produced and mixed personally on vintage Roland Juno-106 and Moog Matriarch hardware.',
-      'Collaborated with over 24 global musicians and architects on cross-medium digital pavilions.',
-      'Her signature purple aesthetic palette was inspired by neon dusk reflections over the Han River in Seoul.',
-      'Has achieved a 98% Integrity Trust Score and over 1,420 Star Stamps awarded by peers.',
-    ],
-    associatedWith: [
-      { name: 'Elena Rostova', handle: '@elena_art', role: 'Brutalist Architecture & Visuals' },
-      { name: 'Marcus Thorne', handle: '@marcus_design', role: 'Industrial 3D Sculptor' },
-      { name: 'Maya Lin', handle: '@mayalin', role: 'Ceramic & Spatial Installations' },
-    ],
-    website: 'fairy.app/@aerifairy',
-  });
+  const [wikiData, setWikiData] = useState<UserWikiBioData>(() =>
+    buildProfileWikiData(activeUser)
+  );
 
   // Edit Form Temp State
-  const [editFormData, setEditFormData] = useState<UserWikiBioData>(wikiData);
+  const [editFormData, setEditFormData] = useState<UserWikiBioData>(() =>
+    buildProfileWikiData(activeUser)
+  );
   const [newTriviaInput, setNewTriviaInput] = useState('');
+
+  // Automatically sync wiki data whenever active user changes
+  useEffect(() => {
+    const updated = buildProfileWikiData(activeUser);
+    setWikiData(updated);
+    setEditFormData(updated);
+  }, [activeUser.name, activeUser.handle]);
+
 
   // 12 Rich Posts for the Instagram Grid
   const [posts, setPosts] = useState<ProfileGridPost[]>([
@@ -653,13 +773,31 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
         <div className="flex items-center gap-4 sm:gap-6 mb-3">
           {/* Avatar and Fairy Flame */}
           <div className="relative shrink-0">
-            <div className="w-20 h-20 rounded-full p-1 bg-purple-100 ring-2 ring-purple-600/30">
-              <img
-                src={elenaAvatar}
-                alt={wikiData.name}
-                className="w-full h-full rounded-full object-cover"
-              />
+            <div className="w-20 h-20 rounded-full p-1 bg-purple-100 ring-2 ring-purple-600/30 overflow-hidden flex items-center justify-center">
+              {activeUser.avatarUrl ? (
+                <img
+                  src={activeUser.avatarUrl}
+                  alt={wikiData.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : activeUser.name.toLowerCase().includes('elena') ? (
+                <img
+                  src={elenaAvatar}
+                  alt={wikiData.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-500 text-white font-black text-2xl flex items-center justify-center shadow-inner select-none">
+                  {wikiData.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase() || 'AD'}
+                </div>
+              )}
             </div>
+
             {/* Trending Flame on Profile Avatar */}
             <div
               className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-tr from-[#FF5722] to-amber-400 flex items-center justify-center ring-2 ring-white shadow-xs"

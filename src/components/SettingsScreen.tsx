@@ -32,12 +32,18 @@ export interface SettingsScreenProps {
   onBack: () => void;
   onOpenDMControl?: () => void;
   onLogout?: () => void;
+  currentUser?: {
+    name: string;
+    handle: string;
+    email: string;
+  };
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onBack,
   onOpenDMControl,
   onLogout,
+  currentUser,
 }) => {
   // Navigation / active modal states
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -57,10 +63,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [updateCheckedAt, setUpdateCheckedAt] = useState<string>('Just now');
 
   // Account editing state
-  const [displayName, setDisplayName] = useState<string>('Elena Vance');
-  const [username, setUsername] = useState<string>('aerifairy');
-  const [email, setEmail] = useState<string>('elena.vance@aeri.studio');
-  const [phone, setPhone] = useState<string>('+1 (555) 234-8901');
+  const [displayName, setDisplayName] = useState<string>(
+    currentUser?.name || 'Allen Dharak'
+  );
+  const [username, setUsername] = useState<string>(
+    currentUser?.handle.replace('@', '') || 'allenkinetic002-creator'
+  );
+  const [email, setEmail] = useState<string>(
+    currentUser?.email || 'allendharak9@gmail.com'
+  );
+  const [phone, setPhone] = useState<string>('+44 20 7946 0912');
+
 
   // Feedback form state
   const [feedbackText, setFeedbackText] = useState<string>('');

@@ -1509,15 +1509,34 @@ export default function App() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<{
+    id?: string;
     name: string;
     handle: string;
     email: string;
-  }>({
-    name: 'Elena Vance',
-    handle: '@aerifairy',
-    email: 'elena.vance@aeri.studio',
+    location?: string;
+    profession?: string;
+    bio?: string;
+    avatarUrl?: string;
+  }>(() => {
+    try {
+      const saved = localStorage.getItem('fairy_current_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.name) return parsed;
+      }
+    } catch (e) {}
+    return {
+      id: 'user-allen',
+      name: 'Allen Dharak',
+      handle: '@allenkinetic002-creator',
+      email: 'allendharak9@gmail.com',
+      location: 'London, UK',
+      profession: 'Creative Developer & Founder',
+      bio: 'Creative developer, founder & digital artist on Fairy. Building verified trust receipts and live social networks.',
+    };
   });
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
+
 
   const [showCreateTweetModal, setShowCreateTweetModal] = useState(false);
   const [tweetSuccessToast, setTweetSuccessToast] = useState<string | null>(null);
@@ -1611,10 +1630,10 @@ export default function App() {
   const handlePublishTweet = (payload: NewTweetPayload) => {
     const newTweet: FeedPost = {
       id: 'tweet-' + Date.now(),
-      authorName: 'Elena Vance',
-      authorHandle: '@elena_aeri',
-      authorAvatar: elenaAvatar,
-      isVerified: false,
+      authorName: currentUser.name,
+      authorHandle: currentUser.handle,
+      authorAvatar: currentUser.avatarUrl || elenaAvatar,
+      isVerified: true,
       timeAgo: 'Just now',
       isTweet: true,
       tweetContent: payload.text,
@@ -1651,9 +1670,9 @@ export default function App() {
   const handlePublishPost = (payload: NewPostPayload) => {
     const newPost: FeedPost = {
       id: 'post-' + Date.now(),
-      authorName: 'Elena Vance',
-      authorHandle: '@elena_aeri',
-      authorAvatar: elenaAvatar,
+      authorName: currentUser.name,
+      authorHandle: currentUser.handle,
+      authorAvatar: currentUser.avatarUrl || elenaAvatar,
       isVerified: true,
       timeAgo: 'Just now',
       location: payload.location,
@@ -1668,6 +1687,7 @@ export default function App() {
       faceoffConfig: payload.faceoffConfig,
     };
     setFeedPosts((prev) => [newPost, ...prev]);
+
 
     // Sync to Supabase in the background
     syncPostToSupabase(newPost).catch((err) =>
@@ -3518,9 +3538,11 @@ export default function App() {
           onOpenPastChallengesModal={() => setShowPastChallengesModal(true)}
           setRaygunTarget={setRaygunTarget}
           viewUser={selectedProfileUser}
+          currentUser={currentUser}
           onClearViewUser={() => setSelectedProfileUser(null)}
           onOpenSettings={() => setShowSettingsScreen(true)}
         />
+
       )}
         </>
       )}
@@ -3734,8 +3756,13 @@ export default function App() {
         onClose={() => setShowSignInModal(false)}
         onSuccess={(user) => {
           setCurrentUser(user);
+          try {
+            localStorage.setItem('fairy_current_user', JSON.stringify(user));
+          } catch (e) {}
           setIsLoggedOut(false);
-          setTweetSuccessToast(`Signed in as ${user.name}`);
+          setSelectedProfileUser(null);
+          setActiveNavIndex(4); // Switch to Profile tab immediately!
+          setTweetSuccessToast(`Welcome, ${user.name}! Your profile is now live.`);
           setTimeout(() => {
             setTweetSuccessToast(null);
           }, 3500);
@@ -3757,9 +3784,11 @@ export default function App() {
               setShowSettingsScreen(false);
               setIsLoggedOut(true);
             }}
+            currentUser={currentUser}
           />
         </div>
       )}
+
 
       {/* FAIRY Sign-In Screen upon Log Out */}
       {isLoggedOut && (
@@ -3776,7 +3805,7 @@ export default function App() {
                 <label className="text-xs font-bold text-slate-700 block mb-1">Username or Email</label>
                 <input
                   type="text"
-                  defaultValue="aerifairy"
+                  defaultValue="allendharak9@gmail.com"
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-purple-600 font-medium"
                 />
               </div>
@@ -3792,19 +3821,33 @@ export default function App() {
 
             <button
               onClick={() => {
+                const allenProfile = {
+                  id: 'user-allen',
+                  name: 'Allen Dharak',
+                  handle: '@allenkinetic002-creator',
+                  email: 'allendharak9@gmail.com',
+                  location: 'London, UK',
+                  profession: 'Creative Developer & Founder',
+                  bio: 'Creative developer, founder & digital artist on Fairy.',
+                };
+                setCurrentUser(allenProfile);
+                try {
+                  localStorage.setItem('fairy_current_user', JSON.stringify(allenProfile));
+                } catch (e) {}
                 setIsLoggedOut(false);
-                setActiveNavIndex(0);
+                setSelectedProfileUser(null);
+                setActiveNavIndex(4);
               }}
               className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-black text-sm rounded-xl shadow-md transition-all cursor-pointer"
             >
-              Log In as Elena Vance (@aerifairy)
+              Log In as Allen Dharak (@allenkinetic002-creator)
             </button>
 
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-700">
               <button
                 onClick={() => {
+                  setShowSignInModal(true);
                   setIsLoggedOut(false);
-                  setActiveNavIndex(0);
                 }}
                 className="hover:underline cursor-pointer"
               >
@@ -3817,12 +3860,13 @@ export default function App() {
                 }}
                 className="hover:underline cursor-pointer"
               >
-                Need Help?
+                Continue as Guest
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }
