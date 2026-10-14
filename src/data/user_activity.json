@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792002472573-sffwv",
+    "action": "rating_submitted",
+    "description": "Finalized rating 9.2 ★ for Elena Vance",
+    "details": {
+      "targetName": "Elena Vance",
+      "rating": 9.2,
+      "isFinalized": true,
+      "updatedAt": "2026-10-14T18:27:52.572Z"
+    },
+    "savedAt": "2026-10-14T18:27:52.573Z"
+  },
+  {
     "id": "act-1792002426495-11nci",
     "action": "vote_reset",
     "description": "Reset vote for Elena Vance",
