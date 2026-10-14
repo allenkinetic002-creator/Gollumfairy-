@@ -758,13 +758,6 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             <BookOpen className="w-3.5 h-3.5 text-purple-600" />
             <span>Fairypedia</span>
           </button>
-
-          <button
-            onClick={onBackToFeed}
-            className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-black rounded-full cursor-pointer transition-colors"
-          >
-            Feed
-          </button>
         </div>
       </div>
 
