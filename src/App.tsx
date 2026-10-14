@@ -2204,22 +2204,8 @@ export default function App() {
           {/* SCREEN 1: POST SCREEN (TAB 0 - HOME) */}
           {/* ========================================================================= */}
           {activeNavIndex === 0 && (
-        <>
-          {/* Real-time GitHub & Supabase Repo Sync Status Toast */}
-          {repoSyncStatus?.status === 'syncing' && (
-            <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-indigo-950/95 text-white text-[11px] font-medium px-4 py-2 rounded-full shadow-xl border border-indigo-400/40 flex items-center gap-2 backdrop-blur-md animate-fade-in pointer-events-none">
-              <RefreshCw className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
-              <span>Syncing update to Gollumfairy repo...</span>
-            </div>
-          )}
-          {repoSyncStatus?.status === 'synced' && (
-            <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-emerald-950/95 text-white text-[11px] font-medium px-4 py-2 rounded-full shadow-xl border border-emerald-400/40 flex items-center gap-2 backdrop-blur-md animate-fade-in pointer-events-none">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Updates saved & pushed to GitHub main ✓</span>
-            </div>
-          )}
-
-          {/* Top Utility Bar with Sign In Button positioned above the 5 upper header icons */}
+            <>
+              {/* Top Utility Bar with Sign In Button positioned above the 5 upper header icons */}
           <div className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-slate-50/90 border-b border-slate-100 z-10">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -2292,24 +2278,6 @@ export default function App() {
               <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
                 Fairy
               </h1>
-              {/* GitHub Repo & Supabase Status Pill */}
-              <button
-                onClick={() => setShowGitHubSyncModal(true)}
-                title="Gollumfairy · Auto-Sync to GitHub & Supabase Active"
-                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200/80 border border-slate-200/90 text-[10px] font-medium text-slate-700 transition-all cursor-pointer shadow-2xs ml-0.5 active:scale-95"
-              >
-                <GitBranch className="w-2.5 h-2.5 text-indigo-600 shrink-0" />
-                <span className="font-mono text-[9px] font-semibold text-slate-800">Gollumfairy</span>
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    repoSyncStatus?.status === 'syncing'
-                      ? 'bg-amber-400 animate-spin'
-                      : repoSyncStatus?.status === 'error'
-                      ? 'bg-rose-500'
-                      : 'bg-emerald-500 animate-pulse'
-                  }`}
-                />
-              </button>
             </div>
 
             <div className="flex items-center gap-3">
