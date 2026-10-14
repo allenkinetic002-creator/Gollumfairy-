@@ -86,7 +86,7 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { SignInModal } from './components/SignInModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
-import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend } from './lib/realtimeSync';
+import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend, submitVoteToBackend } from './lib/realtimeSync';
 
 
 export interface FeedPost {
@@ -1799,6 +1799,7 @@ export default function App() {
       ...prev,
       [rank]: (prev[rank] || 0) + 1,
     }));
+    syncActivityToRepo('support_honey_jar', `Gave Honey Jar pot support to creator Rank #${rank}`, { rank }, true);
   };
 
   // 3rd Icon: Control Screen Sub-tab ('fairy-control' by default or 'dm-control' or 'matches')
@@ -2020,6 +2021,17 @@ export default function App() {
         [newPostId]: true,
       }));
     }
+
+    // Persist published challenge to Supabase & auto-push to GitHub repo
+    syncPostToSupabase(newPost).catch((err) =>
+      console.warn('[Supabase] Failed to sync challenge post:', err)
+    );
+    syncActivityToRepo(
+      'publish_challenge',
+      `Arena Challenge published: "${payload.challengerName} vs ${payload.opponentName}" (${payload.totalParticipants} fighters)`,
+      { challenger: payload.challengerName, opponent: payload.opponentName, participants: payload.totalParticipants },
+      true
+    );
   };
 
   const handleTogglePhoneReaction = (id: string) => {
@@ -2039,10 +2051,12 @@ export default function App() {
       prev.map((c) => {
         if (c.id === id) {
           const next = !c.isLiked;
+          const nextCount = next ? c.likes + 1 : Math.max(0, c.likes - 1);
+          syncActivityToRepo('like_comment', `${next ? 'Liked' : 'Unliked'} comment by ${c.username}`, { commentId: id, liked: next });
           return {
             ...c,
             isLiked: next,
-            likes: next ? c.likes + 1 : c.likes - 1,
+            likes: nextCount,
           };
         }
         return c;
@@ -2078,10 +2092,13 @@ export default function App() {
       const updatedList = list.map((c) => {
         if (c.rank === rank) {
           const nextUpvoted = !c.isUpvoted;
+          const nextCount = nextUpvoted ? c.upvotes + 1 : c.upvotes - 1;
+          submitVoteToBackend(c.name, nextUpvoted ? 'like' : 'dislike', nextCount);
+          syncActivityToRepo('upvote_creator', `${nextUpvoted ? 'Upvoted' : 'Removed upvote on'} creator ${c.name} (#${rank})`, { creator: c.name, rank }, true);
           return {
             ...c,
             isUpvoted: nextUpvoted,
-            upvotes: nextUpvoted ? c.upvotes + 1 : c.upvotes - 1,
+            upvotes: nextCount,
           };
         }
         return c;
@@ -2095,9 +2112,11 @@ export default function App() {
       const list = prev[categoryKey] || [];
       const updatedList = list.map((c) => {
         if (c.rank === rank) {
+          const nextFollowing = !c.isFollowing;
+          syncActivityToRepo('toggle_follow', `${nextFollowing ? 'Followed' : 'Unfollowed'} creator ${c.name} (#${rank})`, { creator: c.name, rank }, true);
           return {
             ...c,
-            isFollowing: !c.isFollowing,
+            isFollowing: nextFollowing,
           };
         }
         return c;
@@ -2175,6 +2194,10 @@ export default function App() {
 
       const newRank = rankedList.find((c) => c.name === personName)?.rank || oldRank;
 
+      // Submit vote to backend & auto-sync to GitHub
+      submitVoteToBackend(personName, voteType, target.tieBreakerLikes, target.tieBreakerDislikes);
+      syncActivityToRepo('tie_breaker_vote', `Tie-breaker vote on ${personName}: ${voteType === 'like' ? '+1 Like' : '-1 Like'} (Rank #${newRank})`, { person: personName, voteType, rank: newRank }, true);
+
       if (newRank < oldRank) {
         setTieBreakerToast(`▲ Tie-Breaker: ${personName} moved UP to Rank #${newRank}! (+1 flame like)`);
       } else if (newRank > oldRank) {
@@ -2222,6 +2245,9 @@ export default function App() {
         return p;
       })
     );
+
+    submitVoteToBackend(authorName, voteType);
+    syncActivityToRepo('feed_post_tiebreaker', `${voteType === 'like' ? 'Upvoted (+1)' : 'Downvoted (-1)'} feed post by ${authorName}`, { postId, voteType }, true);
 
     if (voteType === 'like' && newVote === 'like') {
       setTieBreakerToast(`▲ ${authorName} flame like +1 (Tie-Breaker UP)`);

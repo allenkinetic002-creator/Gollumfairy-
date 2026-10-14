@@ -28,6 +28,8 @@ import {
   voteStarStampOutcome,
 } from '../data/starStamps';
 import { CreateStarStampModal } from './CreateStarStampModal';
+import { syncStarStampToSupabase } from '../lib/fairyBackend';
+import { syncActivityToRepo } from '../lib/repoSync';
 
 interface StarStampsScreenProps {
   onBackToFeed: () => void;
@@ -69,12 +71,22 @@ export function StarStampsScreen({
   const handleRate = (stampId: string, rating: number) => {
     const updated = rateStarStamp(stampId, rating);
     setStamps(updated);
+    const targetStamp = updated.find((s) => s.id === stampId);
+    if (targetStamp) {
+      syncStarStampToSupabase(targetStamp);
+      syncActivityToRepo('rate_star_stamp', `Rated ${rating} stars on Star Stamp #${targetStamp.stampNumber} (${targetStamp.promiserName})`, { stampId, rating }, true);
+    }
     showToast(`Rated ${rating} stars on verbal commitment!`);
   };
 
   const handleVote = (stampId: string, voteType: 'fulfilled' | 'active' | 'broken') => {
     const updated = voteStarStampOutcome(stampId, voteType);
     setStamps(updated);
+    const targetStamp = updated.find((s) => s.id === stampId);
+    if (targetStamp) {
+      syncStarStampToSupabase(targetStamp);
+      syncActivityToRepo('vote_star_stamp_outcome', `Voted "${voteType}" on Star Stamp #${targetStamp.stampNumber} (${targetStamp.promiserName})`, { stampId, voteType }, true);
+    }
     showToast(`Recorded outcome vote: ${voteType}!`);
   };
 
@@ -92,6 +104,12 @@ export function StarStampsScreen({
     setStamps(updated);
     setCommentInputs((prev) => ({ ...prev, [stampId]: '' }));
     setRatingInputs((prev) => ({ ...prev, [stampId]: 0 }));
+
+    const targetStamp = updated.find((s) => s.id === stampId);
+    if (targetStamp) {
+      syncStarStampToSupabase(targetStamp);
+      syncActivityToRepo('comment_star_stamp', `Added proof comment to Star Stamp #${targetStamp.stampNumber} (${targetStamp.promiserName})`, { stampId, text }, true);
+    }
     showToast('Feedback and proof posted to Star Stamp!');
   };
 

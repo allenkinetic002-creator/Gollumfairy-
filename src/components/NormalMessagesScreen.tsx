@@ -27,6 +27,7 @@ import {
 import { AeriRaygunIcon } from './AeriRaygunIcon';
 import elenaAvatar from '../assets/images/creator_portrait_elena_1791014499312.jpg';
 import { sendRemoteMessage } from '../lib/fairyBackend';
+import { syncActivityToRepo } from '../lib/repoSync';
 
 
 import {
@@ -381,6 +382,8 @@ export function NormalMessagesScreen({
       message: `Score Boosted! +5% ADDED to ${target.name} (${oldScore}% → ${newScore}%)`,
     });
 
+    syncActivityToRepo('dm_rating_boost', `Rated positive reply for ${target.name} (+5% score boost)`, { person: target.name, newScore }, true);
+
     setShowTimesUpDialog(false);
     setDialogConv(null);
   };
@@ -429,6 +432,8 @@ export function NormalMessagesScreen({
       message: `Score Penalized! -50% SUBTRACTED from ${target.name} (${oldScore}% → ${newScore}%)`,
     });
 
+    syncActivityToRepo('dm_rating_penalty', `Rated negative reply for ${target.name} (-50% score penalty)`, { person: target.name, newScore }, true);
+
     setShowTimesUpDialog(false);
     setDialogConv(null);
   };
@@ -444,6 +449,8 @@ export function NormalMessagesScreen({
       time: 'Just now',
     };
 
+    const targetConv = conversations.find((c) => c.id === selectedConvId);
+
     const updatedConvs = conversations.map((c) => {
       if (c.id === selectedConvId) {
         return {
@@ -456,13 +463,15 @@ export function NormalMessagesScreen({
     setConversations(updatedConvs);
     saveSharedPeople(updatedConvs);
 
-    // Sync sent message to Supabase
+    // Sync sent message to Supabase & GitHub repository
     sendRemoteMessage({
       id: newMsg.id,
       sender_id: 'me',
       receiver_id: selectedConvId,
       text: newMsg.text,
     }).catch((err) => console.warn('[Supabase] Failed to sync message:', err));
+
+    syncActivityToRepo('send_dm_message', `Sent DM message to ${targetConv?.name || 'chat'}: "${inputText.trim().slice(0, 35)}"`, { receiverId: selectedConvId }, true);
 
     setInputText('');
 

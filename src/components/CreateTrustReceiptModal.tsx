@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { SharedPerson } from '../data/sharedPeople';
 import { TrustReceipt, saveTrustReceipts, loadTrustReceipts } from '../data/trustReceipts';
+import { syncTrustReceiptToSupabase } from '../lib/fairyBackend';
+import { syncActivityToRepo } from '../lib/repoSync';
 
 interface CreateTrustReceiptModalProps {
   isOpen: boolean;
@@ -207,6 +209,10 @@ export function CreateTrustReceiptModal({
     const currentReceipts = loadTrustReceipts();
     const updated = [newReceipt, ...currentReceipts];
     saveTrustReceipts(updated);
+
+    // Sync to Supabase backend & GitHub repository
+    syncTrustReceiptToSupabase(newReceipt);
+    syncActivityToRepo('create_trust_receipt', `Issued Trust Receipt #${receiptNumber} to ${selectedPerson.name}`, { receiptNumber, promiser: selectedPerson.name }, true);
 
     onReceiptCreated(newReceipt);
     onClose();

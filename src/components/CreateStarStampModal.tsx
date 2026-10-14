@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Star, Sparkles, ShieldCheck, Quote, Calendar, User, Tag } from 'lucide-react';
 import { StarStamp, StarStampCategory, addStarStamp } from '../data/starStamps';
+import { syncStarStampToSupabase } from '../lib/fairyBackend';
+import { syncActivityToRepo } from '../lib/repoSync';
 
 interface CreateStarStampModalProps {
   isOpen: boolean;
@@ -121,6 +123,16 @@ export function CreateStarStampModal({
     };
 
     addStarStamp(newStamp);
+
+    // Sync to Supabase & GitHub repository
+    syncStarStampToSupabase(newStamp);
+    syncActivityToRepo(
+      'create_star_stamp',
+      `Issued Star Stamp #${newStamp.stampNumber} to ${newStamp.promiserName}: "${newStamp.verbalCommitment.slice(0, 45)}"`,
+      { stampNumber: newStamp.stampNumber, promiser: newStamp.promiserName },
+      true
+    );
+
     onCreated?.(newStamp);
 
     setTimeout(() => {

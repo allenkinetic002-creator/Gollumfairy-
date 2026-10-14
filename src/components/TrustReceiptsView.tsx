@@ -29,6 +29,8 @@ import {
 } from '../data/trustReceipts';
 import { SharedPerson } from '../data/sharedPeople';
 import { AcknowledgeReceiptModal } from './AcknowledgeReceiptModal';
+import { syncTrustReceiptToSupabase } from '../lib/fairyBackend';
+import { syncActivityToRepo } from '../lib/repoSync';
 
 interface TrustReceiptsViewProps {
   availablePeople: SharedPerson[];
@@ -129,9 +131,10 @@ export function TrustReceiptsView({
 
   // Acknowledge confirm
   const handleConfirmAcknowledge = (receiptId: string) => {
+    let targetReceipt: TrustReceipt | null = null;
     const updated = receipts.map((r) => {
       if (r.id === receiptId) {
-        return {
+        const acked = {
           ...r,
           acknowledgedAt: Date.now(),
           acknowledgedBy: r.promiserName,
@@ -146,19 +149,27 @@ export function TrustReceiptsView({
             },
           ],
         };
+        targetReceipt = acked;
+        return acked;
       }
       return r;
     });
     setReceipts(updated);
     saveTrustReceipts(updated);
     setAcknowledgingReceipt(null);
+
+    if (targetReceipt) {
+      syncTrustReceiptToSupabase(targetReceipt);
+      syncActivityToRepo('acknowledge_receipt', `Acknowledged Trust Receipt #${(targetReceipt as TrustReceipt).receiptNumber} (${(targetReceipt as TrustReceipt).promiserName})`, { receiptId }, true);
+    }
   };
 
   // Outcome recording: Fulfilled or Not Fulfilled
   const handleRecordOutcome = (receiptId: string, outcome: 'fulfilled' | 'not_fulfilled') => {
+    let targetReceipt: TrustReceipt | null = null;
     const updated = receipts.map((r) => {
       if (r.id === receiptId) {
-        return {
+        const outcomed = {
           ...r,
           outcome,
           outcomeRecordedAt: Date.now(),
@@ -177,11 +188,18 @@ export function TrustReceiptsView({
             },
           ],
         };
+        targetReceipt = outcomed;
+        return outcomed;
       }
       return r;
     });
     setReceipts(updated);
     saveTrustReceipts(updated);
+
+    if (targetReceipt) {
+      syncTrustReceiptToSupabase(targetReceipt);
+      syncActivityToRepo('record_receipt_outcome', `Recorded outcome "${outcome}" on Trust Receipt #${(targetReceipt as TrustReceipt).receiptNumber}`, { receiptId, outcome }, true);
+    }
   };
 
   // Filter receipts
