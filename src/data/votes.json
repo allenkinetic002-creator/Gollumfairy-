@@ -1,10 +1,10 @@
 {
   "Elena Vance": {
     "personName": "Elena Vance",
-    "vote": null,
-    "isFinal": false,
-    "likes": 100,
+    "vote": "like",
+    "isFinal": true,
+    "likes": 101,
     "dislikes": 0,
-    "updatedAt": "2026-10-14T18:12:00.000Z"
+    "updatedAt": "2026-10-14T18:27:06.467Z"
   }
 }

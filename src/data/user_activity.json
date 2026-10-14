@@ -1,5 +1,19 @@
 [
   {
+    "id": "act-1792002426467-t2cso",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for Elena Vance",
+    "details": {
+      "personName": "Elena Vance",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 101,
+      "dislikes": 0,
+      "updatedAt": "2026-10-14T18:27:06.467Z"
+    },
+    "savedAt": "2026-10-14T18:27:06.467Z"
+  },
+  {
     "id": "act-1792002418094-q6ndo",
     "action": "rating_reset",
     "description": "Reset rating for Elena Vance to rate again",
