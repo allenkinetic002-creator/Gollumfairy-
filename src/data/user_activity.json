@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792002426495-11nci",
+    "action": "vote_reset",
+    "description": "Reset vote for Elena Vance",
+    "details": {
+      "personName": "Elena Vance",
+      "isFinal": false,
+      "vote": null,
+      "updatedAt": "2026-10-14T18:27:06.495Z"
+    },
+    "savedAt": "2026-10-14T18:27:06.495Z"
+  },
+  {
     "id": "act-1792002426467-t2cso",
     "action": "vote_submitted",
     "description": "Finalized UP vote for Elena Vance",
