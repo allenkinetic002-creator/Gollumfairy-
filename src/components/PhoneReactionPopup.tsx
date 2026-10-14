@@ -8,109 +8,158 @@ export interface PhoneReactionWidgetProps {
   isOpen?: boolean;
   onClose?: () => void;
   postAuthor?: string;
+  personName?: string;
+  isTied?: boolean;
+  tiedWith?: string;
+  currentRank?: number;
+  onVote?: (type: 'like' | 'dislike', newVote: 'like' | 'dislike' | null) => void;
 }
 
 /**
  * Pure Reaction Widget for Phone Hand Icon:
- * - Red button at the left end with wrist line thumbs-up icon
+ * - Serves as a live Tie-Breaker indicator to move a person up or down in Top 10
+ * - Red button at the left end with wrist line thumbs-up icon (adds +1, moves person UP)
  * - Centered writing: Likes | Dislikes
- * - Blue button at the right end with wrist line thumbs-up icon facing left
- * - Sized and styled matching the broken pencil faceoff position
+ * - Blue button at the right end with wrist line thumbs-up icon facing left (subtracts -1, moves person DOWN)
  * - Wide double yellow horizontal line spanning across with upward yellow triangle
  */
 export function PhoneReactionPopup({
-  initialLikes = 230789,
-  initialDislikes = 90099,
+  initialLikes = 100,
+  initialDislikes = 0,
   className = '',
+  personName,
+  isTied = false,
+  tiedWith,
+  currentRank,
+  onVote,
 }: PhoneReactionWidgetProps) {
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [dislikes, setDislikes] = useState<number>(initialDislikes);
 
+  React.useEffect(() => {
+    setLikes(initialLikes);
+  }, [initialLikes]);
+
   const handleVote = (type: 'like' | 'dislike') => {
+    let nextVote: 'like' | 'dislike' | null = null;
     if (userVote === type) {
-      setUserVote(null);
-      if (type === 'like') {
-        setLikes((prev) => Math.max(initialLikes, prev - 1));
-      } else {
-        setDislikes((prev) => Math.max(initialDislikes, prev - 1));
-      }
+      // Toggle off -> restore base likes
+      nextVote = null;
+      setLikes(initialLikes);
+      setDislikes(initialDislikes);
     } else {
+      nextVote = type;
       if (type === 'like') {
-        setLikes((prev) => prev + 1);
-        if (userVote === 'dislike') {
-          setDislikes((prev) => Math.max(initialDislikes, prev - 1));
-        }
+        // Red button: +1 like -> moves person UP in Top 10
+        setLikes(initialLikes + 1);
+        setDislikes(initialDislikes);
       } else {
-        setDislikes((prev) => prev + 1);
-        if (userVote === 'like') {
-          setLikes((prev) => Math.max(initialLikes, prev - 1));
-        }
+        // Blue button: subtracts like (-1) -> moves person DOWN in Top 10
+        setLikes(Math.max(0, initialLikes - 1));
+        setDislikes(initialDislikes + 1);
       }
-      setUserVote(type);
+    }
+    setUserVote(nextVote);
+    if (onVote) {
+      onVote(type, nextVote);
     }
   };
 
   return (
-    <div className={`w-full max-w-[420px] mx-auto flex flex-col items-center select-none pt-0.5 pb-2 px-1 sm:px-2 ${className}`}>
+    <div className={`w-full max-w-[430px] mx-auto flex flex-col items-center select-none pt-0.5 pb-2 px-1 sm:px-2 ${className}`}>
+      {/* Tie Breaker Indicator Banner */}
+      <div className="w-full flex items-center justify-between mb-1.5 px-2 py-1 rounded-lg bg-amber-50/90 border border-amber-300 text-[10.5px] shadow-2xs">
+        <div className="flex items-center gap-1.5 font-bold text-amber-950 truncate">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+          <span className="uppercase tracking-wider text-[9.5px] font-black text-amber-900">Tie-Breaker:</span>
+          <span className="font-semibold text-slate-800 truncate">
+            {isTied && tiedWith
+              ? `Tied with ${tiedWith} · Red ▲ moves UP, Blue ▼ moves DOWN`
+              : personName
+              ? `${personName} · Red ▲ (+1 like) moves UP, Blue ▼ (-1 like) moves DOWN`
+              : 'Red ▲ (+1 like) moves UP, Blue ▼ (-1 like) moves DOWN'}
+          </span>
+        </div>
+        {userVote && (
+          <span
+            className={`font-black text-[10px] px-2 py-0.5 rounded-md shrink-0 shadow-2xs ${
+              userVote === 'like'
+                ? 'bg-red-600 text-white'
+                : 'bg-blue-600 text-white'
+            }`}
+          >
+            {userVote === 'like' ? '▲ Moved UP (+1 like)' : '▼ Moved DOWN (-1 like)'}
+          </span>
+        )}
+      </div>
+
       {/* Top row: Red Like button at left end, centered writing, Blue button at right end with thumbsup facing left */}
       <div className="w-full flex items-center justify-between gap-2 mt-0.5">
-        {/* Red Like Button (matching broken position on left) */}
+        {/* Red Like Button (moves person UP in Top 10) */}
         <button
           type="button"
           onClick={() => handleVote('like')}
-          className={`cursor-pointer w-[56px] sm:w-[62px] h-[28px] rounded-[8px] flex items-center justify-center transition-all active:scale-90 shrink-0 ${
+          className={`cursor-pointer w-[58px] sm:w-[64px] h-[30px] rounded-[8px] flex items-center justify-center transition-all active:scale-90 shrink-0 shadow-xs ${
             userVote === 'like'
-              ? 'bg-[#E51E2B] ring-2 ring-red-400 ring-offset-1'
+              ? 'bg-[#E51E2B] ring-3 ring-red-400 ring-offset-1 scale-105'
               : 'bg-[#E51E2B] hover:bg-[#D41825]'
           }`}
-          title="Likes"
-          aria-label="Like"
+          title="Vote Up: Move UP in Top 10 rankings"
+          aria-label="Move Up"
         >
-          <AeriBattleThumbsUpIcon className="w-3.5 h-3.5" contrastColor="#E51E2B" facing="right" />
+          <div className="flex items-center gap-1">
+            <AeriBattleThumbsUpIcon className="w-3.5 h-3.5" contrastColor="#E51E2B" facing="right" />
+            <span className="text-[10px] font-black text-white">▲</span>
+          </div>
         </button>
 
         {/* Centered Writing: Likes | Dislikes matching broken position */}
         <div className="flex-1 flex items-center justify-center gap-2 shrink-0">
           <div className="text-center min-w-[50px]">
-            <div className="text-[12px] sm:text-[12.5px] font-bold text-black tabular-nums leading-none">
+            <div className={`text-[12px] sm:text-[12.5px] font-bold tabular-nums leading-none ${userVote === 'like' ? 'text-[#E51E2B]' : 'text-black'}`}>
               {likes.toLocaleString()}
             </div>
-            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5">
-              Likes
+            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5 flex items-center justify-center gap-0.5">
+              <span>Likes</span>
+              <span className="text-[9px] text-red-600 font-bold">▲</span>
             </div>
           </div>
 
           <div className="w-[1px] h-6 bg-slate-300 shrink-0" />
 
           <div className="text-center min-w-[50px]">
-            <div className="text-[12px] sm:text-[12.5px] font-bold text-black tabular-nums leading-none">
+            <div className={`text-[12px] sm:text-[12.5px] font-bold tabular-nums leading-none ${userVote === 'dislike' ? 'text-[#1D3D8F]' : 'text-black'}`}>
               {dislikes.toLocaleString()}
             </div>
-            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5">
-              Dislikes
+            <div className="text-[10px] font-medium text-slate-700 leading-tight mt-0.5 flex items-center justify-center gap-0.5">
+              <span>Dislikes</span>
+              <span className="text-[9px] text-blue-700 font-bold">▼</span>
             </div>
           </div>
         </div>
 
-        {/* Blue Dislike Button (matching broken position on right, with thumbsup flipped up to down) */}
+        {/* Blue Dislike Button (moves person DOWN in Top 10) */}
         <button
           type="button"
           onClick={() => handleVote('dislike')}
-          className={`cursor-pointer w-[56px] sm:w-[62px] h-[28px] rounded-[8px] flex items-center justify-center transition-all active:scale-90 shrink-0 ${
+          className={`cursor-pointer w-[58px] sm:w-[64px] h-[30px] rounded-[8px] flex items-center justify-center transition-all active:scale-90 shrink-0 shadow-xs ${
             userVote === 'dislike'
-              ? 'bg-[#1D3D8F] ring-2 ring-blue-400 ring-offset-1'
+              ? 'bg-[#1D3D8F] ring-3 ring-blue-400 ring-offset-1 scale-105'
               : 'bg-[#1D3D8F] hover:bg-[#183275]'
           }`}
-          title="Dislikes"
-          aria-label="Dislike"
+          title="Vote Down: Move DOWN in Top 10 rankings"
+          aria-label="Move Down"
         >
-          <AeriBattleThumbsUpIcon className="w-3.5 h-3.5" contrastColor="#1D3D8F" facing="left" direction="down" />
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-black text-white">▼</span>
+            <AeriBattleThumbsUpIcon className="w-3.5 h-3.5" contrastColor="#1D3D8F" facing="left" direction="down" />
+          </div>
         </button>
       </div>
 
       {/* Yellow stuff: Double yellow line with upward yellow triangle matching broken position */}
-      <div className="w-full mt-2.5 relative pt-1">
+      <div className="w-full mt-2 relative pt-1">
         {/* Wide double yellow lines */}
         <div className="w-full flex flex-col gap-[2.5px]">
           <div className="w-full h-[3px] bg-[#F5C21B] rounded-full" />

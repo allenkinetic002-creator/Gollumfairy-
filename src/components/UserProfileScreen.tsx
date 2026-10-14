@@ -1434,7 +1434,18 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             {/* Reaction Widget moved to the very top of post if triggered */}
             {activePhoneReaction && (
               <div className="w-full flex justify-center pt-0 pb-1 -mt-0.5">
-                <PhoneReactionPopup />
+                <PhoneReactionPopup
+                  personName={wikiData.name}
+                  initialLikes={100}
+                  onVote={(type, newVote) => {
+                    if (type === 'like' && newVote === 'like') {
+                      setToastMessage(`▲ ${wikiData.name} gained +1 flame like (Tie-Breaker UP in rankings)`);
+                    } else if (type === 'dislike' && newVote === 'dislike') {
+                      setToastMessage(`▼ ${wikiData.name} lost -1 flame like (Tie-Breaker DOWN in rankings)`);
+                    }
+                    setTimeout(() => setToastMessage(null), 3000);
+                  }}
+                />
               </div>
             )}
 

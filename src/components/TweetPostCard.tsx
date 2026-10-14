@@ -162,7 +162,10 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
       {/* Top phone reaction popup if active */}
       {isPhoneReactionActive && (
         <div className="w-full flex justify-center pb-1">
-          <PhoneReactionPopup />
+          <PhoneReactionPopup
+            personName={post.authorName}
+            initialLikes={post.likeCount || 100}
+          />
         </div>
       )}
 

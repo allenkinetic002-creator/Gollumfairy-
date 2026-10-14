@@ -145,6 +145,10 @@ interface Creator {
   role: string;
   location?: string;
   upvotes: number;
+  rating?: number;
+  tieBreakerScore?: number;
+  tieBreakerLikes?: number;
+  tieBreakerDislikes?: number;
   isUpvoted: boolean;
   isFollowing: boolean;
   category: 'new_artists' | 'comedians' | 'photographers' | 'character_designers' | 'us_top' | 'innovators';
@@ -215,7 +219,9 @@ const ALL_TOP_CREATORS: Record<string, Creator[]> = {
       avatarInitial: 'E',
       role: 'Debut Oil & Mixed Media',
       location: 'Berlin / NYC',
-      upvotes: 48290,
+      upvotes: 100,
+      rating: 9.0,
+      tieBreakerScore: 0,
       isUpvoted: false,
       isFollowing: true,
       category: 'new_artists',
@@ -223,7 +229,7 @@ const ALL_TOP_CREATORS: Record<string, Creator[]> = {
         title: 'Twilight Pavilion — Light & brutalist geometry',
         imageUrl: topPostPhoto,
         gradientBg: 'from-amber-600 to-indigo-900',
-        likes: '12.4k',
+        likes: '100',
         comments: '640',
         hasAudio: true,
         audioTitle: 'Solitude Ambient No. 4',
@@ -237,7 +243,9 @@ const ALL_TOP_CREATORS: Record<string, Creator[]> = {
       avatarBg: 'bg-purple-600',
       avatarInitial: 'M',
       role: 'Kinetic Glass & Resin',
-      upvotes: 41200,
+      upvotes: 100,
+      rating: 9.0,
+      tieBreakerScore: 0,
       isUpvoted: false,
       isFollowing: false,
       category: 'new_artists',
@@ -1185,7 +1193,9 @@ const ALL_TOP_CREATORS: Record<string, Creator[]> = {
       avatarInitial: 'A',
       role: 'Brain-Computer Sound Synthesis',
       location: 'MIT Media Lab',
-      upvotes: 58200,
+      upvotes: 100,
+      rating: 9.0,
+      tieBreakerScore: 0,
       isUpvoted: false,
       isFollowing: true,
       category: 'innovators',
@@ -1193,7 +1203,7 @@ const ALL_TOP_CREATORS: Record<string, Creator[]> = {
         title: 'Generating Ambient Harmonies from Real-Time Alpha Waves',
         imageUrl: topPostPhoto,
         gradientBg: 'from-violet-800 to-indigo-950',
-        likes: '29.3k',
+        likes: '100',
         comments: '1.2k',
         hasAudio: true,
         audioTitle: 'Neural Frequency No. 7',
@@ -1208,14 +1218,16 @@ const ALL_TOP_CREATORS: Record<string, Creator[]> = {
       avatarInitial: 'S',
       role: 'WebGPU Quantum Visualizer',
       location: 'CERN / Stanford',
-      upvotes: 51700,
+      upvotes: 100,
+      rating: 9.0,
+      tieBreakerScore: 0,
       isUpvoted: true,
       isFollowing: false,
       category: 'innovators',
       topPost: {
         title: 'Visualizing 64-Qubit Entanglement in 120 FPS WebAssembly',
         gradientBg: 'from-cyan-600 to-blue-900',
-        likes: '24.1k',
+        likes: '100',
         comments: '890',
         tag: 'Quantum Tech',
       },
@@ -1520,7 +1532,7 @@ export default function App() {
     profession?: string;
     bio?: string;
     avatarUrl?: string;
-  }>(() => {
+  } | null>(() => {
     try {
       const saved = localStorage.getItem('fairy_current_user');
       if (saved) {
@@ -1634,9 +1646,9 @@ export default function App() {
   const handlePublishTweet = (payload: NewTweetPayload) => {
     const newTweet: FeedPost = {
       id: 'tweet-' + Date.now(),
-      authorName: currentUser.name,
-      authorHandle: currentUser.handle,
-      authorAvatar: currentUser.avatarUrl || elenaAvatar,
+      authorName: currentUser?.name || 'Anonymous User',
+      authorHandle: currentUser?.handle || '@user',
+      authorAvatar: currentUser?.avatarUrl || elenaAvatar,
       isVerified: true,
       timeAgo: 'Just now',
       isTweet: true,
@@ -1674,9 +1686,9 @@ export default function App() {
   const handlePublishPost = (payload: NewPostPayload) => {
     const newPost: FeedPost = {
       id: 'post-' + Date.now(),
-      authorName: currentUser.name,
-      authorHandle: currentUser.handle,
-      authorAvatar: currentUser.avatarUrl || elenaAvatar,
+      authorName: currentUser?.name || 'Anonymous User',
+      authorHandle: currentUser?.handle || '@user',
+      authorAvatar: currentUser?.avatarUrl || elenaAvatar,
       isVerified: true,
       timeAgo: 'Just now',
       location: payload.location,
@@ -1743,6 +1755,7 @@ export default function App() {
   const [honeyJarCounts, setHoneyJarCounts] = useState<Record<number, number>>({});
   // Floating Honey Jar FAB state (triggered by clicking Nacho Cheese icon, pops up at bottom left like Twitter's feather icon)
   const [showFloatingHoneyJar, setShowFloatingHoneyJar] = useState(false);
+  const [tieBreakerToast, setTieBreakerToast] = useState<string | null>(null);
 
   const toggleLikedCreatorPost = (rank: number) => {
     setLikedCreatorPosts((prev) => ({
@@ -1995,8 +2008,144 @@ export default function App() {
     });
   };
 
+  // Handphone Tie-Breaker: Red button moves UP (+1), Blue button moves DOWN (-1)
+  const handleHandphoneTieBreakerVote = (
+    categoryKey: string,
+    personName: string,
+    voteType: 'like' | 'dislike',
+    newVote: 'like' | 'dislike' | null
+  ) => {
+    setCreatorsData((prev) => {
+      const list = (prev[categoryKey] || []).map((c) => ({ ...c }));
+      const targetIndex = list.findIndex((c) => c.name === personName);
+      if (targetIndex === -1) return prev;
+
+      const target = list[targetIndex];
+      const prevScore = target.tieBreakerScore || 0;
+      let newScore = prevScore;
+
+      if (voteType === 'like') {
+        if (newVote === 'like') {
+          // Upvote (+1 like)
+          target.upvotes = (target.upvotes || 0) + 1;
+          newScore += 1;
+          target.tieBreakerLikes = (target.tieBreakerLikes || 0) + 1;
+        } else {
+          // Unvoted like (-1 like)
+          target.upvotes = Math.max(0, (target.upvotes || 0) - 1);
+          newScore -= 1;
+          target.tieBreakerLikes = Math.max(0, (target.tieBreakerLikes || 0) - 1);
+        }
+      } else if (voteType === 'dislike') {
+        if (newVote === 'dislike') {
+          // Downvote: subtract a like (-1 like)
+          target.upvotes = Math.max(0, (target.upvotes || 0) - 1);
+          newScore -= 1;
+          target.tieBreakerDislikes = (target.tieBreakerDislikes || 0) + 1;
+        } else {
+          // Unvoted dislike (+1 like)
+          target.upvotes = (target.upvotes || 0) + 1;
+          newScore += 1;
+          target.tieBreakerDislikes = Math.max(0, (target.tieBreakerDislikes || 0) - 1);
+        }
+      }
+
+      target.tieBreakerScore = newScore;
+      list[targetIndex] = target;
+
+      const oldRank = target.rank;
+
+      // Re-sort creators by:
+      // 1. upvotes DESC (so red button +1 moves UP, blue button -1 moves DOWN)
+      // 2. rating DESC (e.g. 9.5 vs 9.0)
+      // 3. tieBreakerScore DESC
+      list.sort((a, b) => {
+        const upDiff = (b.upvotes || 0) - (a.upvotes || 0);
+        if (upDiff !== 0) return upDiff;
+
+        const ratingDiff = (b.rating ?? 9.0) - (a.rating ?? 9.0);
+        if (ratingDiff !== 0) return ratingDiff;
+
+        return (b.tieBreakerScore || 0) - (a.tieBreakerScore || 0);
+      });
+
+      // Re-assign ranks 1..N
+      const rankedList = list.map((item, idx) => ({
+        ...item,
+        rank: idx + 1,
+      }));
+
+      const newRank = rankedList.find((c) => c.name === personName)?.rank || oldRank;
+
+      if (newRank < oldRank) {
+        setTieBreakerToast(`▲ Tie-Breaker: ${personName} moved UP to Rank #${newRank}! (+1 flame like)`);
+      } else if (newRank > oldRank) {
+        setTieBreakerToast(`▼ Tie-Breaker: ${personName} moved DOWN to Rank #${newRank}! (-1 flame like subtracted)`);
+      } else {
+        if (voteType === 'like') {
+          setTieBreakerToast(`▲ Handphone upvote recorded for ${personName} (+1 like)`);
+        } else {
+          setTieBreakerToast(`▼ Handphone downvote recorded for ${personName} (-1 like subtracted)`);
+        }
+      }
+      setTimeout(() => {
+        setTieBreakerToast(null);
+      }, 3500);
+
+      return {
+        ...prev,
+        [categoryKey]: rankedList,
+      };
+    });
+  };
+
+  const handleFeedPostTieBreakerVote = (
+    postId: string,
+    authorName: string,
+    voteType: 'like' | 'dislike',
+    newVote: 'like' | 'dislike' | null
+  ) => {
+    setFeedPosts((prev) =>
+      prev.map((p) => {
+        if (p.id === postId) {
+          const currentLikes = p.likeCount || 100;
+          let delta = 0;
+          if (voteType === 'like') {
+            delta = newVote === 'like' ? 1 : -1;
+          } else {
+            delta = newVote === 'dislike' ? -1 : 1;
+          }
+          const nextLikes = Math.max(0, currentLikes + delta);
+          return {
+            ...p,
+            likeCount: nextLikes,
+          };
+        }
+        return p;
+      })
+    );
+
+    if (voteType === 'like' && newVote === 'like') {
+      setTieBreakerToast(`▲ ${authorName} flame like +1 (Tie-Breaker UP)`);
+    } else if (voteType === 'dislike' && newVote === 'dislike') {
+      setTieBreakerToast(`▼ ${authorName} flame like -1 (Tie-Breaker DOWN)`);
+    }
+    setTimeout(() => {
+      setTieBreakerToast(null);
+    }, 3000);
+  };
+
   return (
-    <div className="w-full max-w-full h-screen max-h-screen overflow-x-hidden overflow-y-hidden bg-white flex flex-col justify-between text-slate-900 font-sans antialiased select-none">
+    <div className="w-full max-w-full h-screen max-h-screen overflow-x-hidden overflow-y-hidden bg-white flex flex-col justify-between text-slate-900 font-sans antialiased select-none relative">
+      {/* Tie-Breaker Toast Notification */}
+      {tieBreakerToast && (
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[90vw] flex justify-center animate-fadeIn pointer-events-none">
+          <div className="bg-slate-900/95 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl backdrop-blur-xs flex items-center gap-2 border border-amber-400/60">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0" />
+            <span>{tieBreakerToast}</span>
+          </div>
+        </div>
+      )}
       {showStarStampsScreen ? (
         <div className="flex-1 min-h-0 w-full overflow-hidden">
           <StarStampsScreen
@@ -2314,7 +2463,14 @@ export default function App() {
                 {/* Reaction Widget moved upper to the very top of post */}
                 {activePhoneReactionId === post.id && (
                   <div className="w-full flex justify-center pt-0 pb-1 -mt-0.5">
-                    <PhoneReactionPopup />
+                    <PhoneReactionPopup
+                      personName={post.authorName}
+                      postAuthor={post.authorName}
+                      initialLikes={post.likeCount || 342}
+                      onVote={(type, newVote) => {
+                        handleFeedPostTieBreakerVote(post.id, post.authorName, type, newVote);
+                      }}
+                    />
                   </div>
                 )}
 
@@ -2919,10 +3075,16 @@ export default function App() {
               const isLiked = !!likedCreatorPosts[person.rank];
               const honeyCount = honeyJarCounts[person.rank] || 0;
               const rankStyle = getRankBadgeStyle(person.rank);
+              const tiedOpponent = currentCreators.find(
+                (other) =>
+                  other.name !== person.name &&
+                  other.upvotes === person.upvotes &&
+                  (other.rating ?? 9.0) === (person.rating ?? 9.0)
+              );
 
               return (
                 <div
-                  key={person.rank}
+                  key={person.name}
                   id={`creator-rank-card-${person.rank}`}
                   className="scroll-mt-3"
                 >
@@ -2953,8 +3115,50 @@ export default function App() {
                   >
                     {/* Reaction Widget placed directly on top of the profile pic */}
                     {activePhoneReactionId === `person-${person.name}` && (
-                      <div className="w-full flex justify-center py-2 bg-white border-b border-slate-100">
-                        <PhoneReactionPopup />
+                      <div className="w-full flex justify-center py-2 bg-slate-50/70 border-b border-slate-100">
+                        <PhoneReactionPopup
+                          personName={person.name}
+                          isTied={Boolean(tiedOpponent)}
+                          tiedWith={tiedOpponent ? `${tiedOpponent.name} (${tiedOpponent.upvotes.toLocaleString()} likes · ${tiedOpponent.rating ?? 9.0}/10)` : undefined}
+                          currentRank={person.rank}
+                          initialLikes={person.upvotes}
+                          onVote={(type, newVote) => {
+                            handleHandphoneTieBreakerVote(selectedCategory, person.name, type, newVote);
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Tie-Breaker Active Banner if tied */}
+                    {tiedOpponent && (
+                      <div className="mx-3.5 my-2 px-3 py-1.5 rounded-xl bg-amber-50/90 border border-amber-300 text-amber-950 text-xs flex items-center justify-between shadow-2xs animate-fadeIn">
+                        <div className="flex items-center gap-1.5 font-bold truncate">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+                          <span className="truncate">
+                            ⚡ Tied with <span className="underline decoration-amber-400 font-extrabold">{tiedOpponent.name}</span> ({person.upvotes.toLocaleString()} likes · {person.rating ?? 9.0}/10)
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleTogglePhoneReaction(`person-${person.name}`)}
+                          className="shrink-0 ml-2 px-2.5 py-0.5 text-[10.5px] font-black text-amber-900 bg-amber-200 hover:bg-amber-300 border border-amber-400 rounded-lg transition-colors cursor-pointer"
+                        >
+                          Break Tie
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Tie-Breaker Status if votes applied */}
+                    {person.tieBreakerScore !== undefined && person.tieBreakerScore !== 0 && (
+                      <div className="mx-3.5 my-2 px-3 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+                        <span className={`font-bold flex items-center gap-1 text-[11px] ${person.tieBreakerScore > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                          {person.tieBreakerScore > 0 ? '▲ Moved UP in Top 10' : '▼ Moved DOWN in Top 10'}
+                          <span className="font-normal text-slate-500">
+                            (Handphone Net: {person.tieBreakerScore > 0 ? `+${person.tieBreakerScore}` : person.tieBreakerScore})
+                          </span>
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          Rank #{person.rank}
+                        </span>
                       </div>
                     )}
 
@@ -3007,8 +3211,12 @@ export default function App() {
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      <span className="text-[10px] font-black text-purple-700 bg-purple-50 border border-purple-100/80 px-2 py-0.5 rounded-full">
-                        {CATEGORY_TABS.find((t) => t.id === selectedCategory)?.label}
+                      <span className="text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-200/90 px-2 py-0.5 rounded-full flex items-center gap-0.5" title="Community Rating">
+                        <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500 inline" />
+                        {person.rating ?? 9.0}/10
+                      </span>
+                      <span className="text-[10px] font-black text-purple-700 bg-purple-50 border border-purple-100/80 px-2 py-0.5 rounded-full" title="Flame Likes">
+                        {person.upvotes.toLocaleString()} likes
                       </span>
                       {Boolean(morphedPosts[`person-${person.name}`]) ? (
                         <div
@@ -3580,7 +3788,7 @@ export default function App() {
           onOpenPastChallengesModal={() => setShowPastChallengesModal(true)}
           setRaygunTarget={setRaygunTarget}
           viewUser={selectedProfileUser}
-          currentUser={currentUser}
+          currentUser={currentUser || undefined}
           onClearViewUser={() => setSelectedProfileUser(null)}
           onOpenSettings={() => setShowSettingsScreen(true)}
         />
