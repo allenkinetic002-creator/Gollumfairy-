@@ -1,5 +1,16 @@
 [
   {
+    "id": "act-1791999392877-uh5tf",
+    "action": "rate_masked_eyes",
+    "description": "Rated 1.0 on Elena Vance via 2 eyes mask",
+    "details": {
+      "rating": 1,
+      "targetName": "Elena Vance"
+    },
+    "timestamp": "2026-10-14T17:36:31.300Z",
+    "savedAt": "2026-10-14T17:36:32.877Z"
+  },
+  {
     "id": "act-1791998291943-pmphs",
     "action": "app_check",
     "description": "Verified auto-sync and Supabase live integration",
