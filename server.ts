@@ -28,9 +28,20 @@ function runGitQueued<T>(fn: () => Promise<T>): Promise<T> {
 async function configureGitRemote() {
   try {
     await execAsync('git config --global --add safe.directory "*"');
+    try {
+      await execAsync('git rev-parse --is-inside-work-tree');
+    } catch {
+      await execAsync('git init');
+      await execAsync('git branch -M main');
+    }
     const token = process.env.GITHUB_TOKEN;
     if (token) {
-      await execAsync(`git remote set-url origin "https://allenkinetic002-creator:${token}@github.com/${GITHUB_REPO}.git"`);
+      const remoteUrl = `https://allenkinetic002-creator:${token}@github.com/${GITHUB_REPO}.git`;
+      try {
+        await execAsync(`git remote set-url origin "${remoteUrl}"`);
+      } catch {
+        await execAsync(`git remote add origin "${remoteUrl}"`);
+      }
     }
     await execAsync('git config user.name "allenkinetic002-creator"');
     await execAsync('git config user.email "casperthefriendlyghost90212@gmail.com"');
