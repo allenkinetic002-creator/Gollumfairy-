@@ -1,5 +1,11 @@
 [
   {
+    "id": "act-1792001723925-mug9j",
+    "action": "test_sync",
+    "description": "AI Studio connected and sync verified",
+    "savedAt": "2026-10-14T18:15:23.925Z"
+  },
+  {
     "id": "act-1791999392877-uh5tf",
     "action": "rate_masked_eyes",
     "description": "Rated 1.0 on Elena Vance via 2 eyes mask",
