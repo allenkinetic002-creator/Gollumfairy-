@@ -1,5 +1,23 @@
 [
   {
+    "id": "act-1792092443955-1mqcb",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-karak",
+    "details": {
+      "userId": "user-karak",
+      "switches": {
+        "support": false,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": false,
+        "updatedAt": "2026-10-15T19:27:23.955Z",
+        "activatedBy": "user-karak"
+      }
+    },
+    "savedAt": "2026-10-15T19:27:23.955Z"
+  },
+  {
     "id": "act-1792092441303-j5u5e",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-karak",
@@ -1320,18 +1338,6 @@
   },
   {
     "id": "act-1792066776041-k20v9",
-    "action": "tie_breaker_vote",
-    "description": "Tie-breaker vote on Elena Rostova: +1 Like (Rank #9)",
-    "details": {
-      "person": "Elena Rostova",
-      "voteType": "like",
-      "rank": 9
-    },
-    "timestamp": "2026-10-15T12:19:34.241Z",
-    "savedAt": "2026-10-15T12:19:36.041Z"
-  },
-  {
-    "id": "act-1792066776041-81oyk",
     "action": "tie_breaker_vote",
     "description": "Tie-breaker vote on Elena Rostova: +1 Like (Rank #9)",
     "details": {
