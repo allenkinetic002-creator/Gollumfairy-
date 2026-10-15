@@ -1,5 +1,47 @@
 [
   {
+    "id": "act-1792091170617-0c6h1",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": true,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:10.617Z"
+    },
+    "savedAt": "2026-10-15T19:06:10.617Z"
+  },
+  {
+    "id": "act-1792091170113-jh6co",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": false,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:10.113Z"
+    },
+    "savedAt": "2026-10-15T19:06:10.113Z"
+  },
+  {
+    "id": "act-1792091170110-o3vth",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": false,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:10.109Z"
+    },
+    "savedAt": "2026-10-15T19:06:10.110Z"
+  },
+  {
     "id": "act-1792091169705-xudop",
     "action": "fairy_switches_updated",
     "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
@@ -1235,44 +1277,5 @@
       "updatedAt": "2026-10-15T12:18:54.915Z"
     },
     "savedAt": "2026-10-15T12:18:54.915Z"
-  },
-  {
-    "id": "act-1792066734912-hq10g",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": false,
-      "likeCount": 1,
-      "updatedAt": "2026-10-15T12:18:54.912Z"
-    },
-    "savedAt": "2026-10-15T12:18:54.912Z"
-  },
-  {
-    "id": "act-1792066733312-mylcm",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T12:18:53.311Z"
-    },
-    "savedAt": "2026-10-15T12:18:53.312Z"
-  },
-  {
-    "id": "act-1792066733309-z7o2p",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T12:18:53.309Z"
-    },
-    "savedAt": "2026-10-15T12:18:53.309Z"
   }
 ]
