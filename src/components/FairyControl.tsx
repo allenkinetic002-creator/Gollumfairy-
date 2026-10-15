@@ -265,27 +265,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
   >('all');
   const [drawerSearch, setDrawerSearch] = useState('');
 
-  // Baseline community numbers
-  const TOTAL_COMMUNITY_MEMBERS = 30000;
-  const TOTAL_TRENDING_MEMBERS = 45000;
-
-  const sampleSupportActive = activators.filter((p) => p.activatedFeatures.support).length;
-  const sampleFavoriteActive = activators.filter((p) => p.activatedFeatures.favorite).length;
-  const sampleTrendingActive = activators.filter((p) => p.activatedFeatures.trending).length;
-  const sampleLoyaltyActive = activators.filter((p) => p.activatedFeatures.loyalty).length;
-  const sampleGenreActive = activators.filter((p) => p.activatedFeatures.genre).length;
-
-  const supportUsersCount = 18420 + (supportEnabled ? 1 : 0) + (sampleSupportActive - 6) * 45;
-  const favoriteUsersCount = 24190 + (favoriteEnabled ? 1 : 0) + (sampleFavoriteActive - 5) * 60;
-  const trendingUsersCount = 31850 + (trendingEnabled ? 1 : 0) + (sampleTrendingActive - 4) * 80;
-  const loyaltyUsersCount = 12740 + (loyaltyEnabled ? 1 : 0) + (sampleLoyaltyActive - 4) * 35;
-  const genreUsersCount = 16930 + (genreEnabled ? 1 : 0) + (sampleGenreActive - 6) * 50;
-
-  const supportInactiveCount = Math.max(0, TOTAL_COMMUNITY_MEMBERS - supportUsersCount);
-  const favoriteInactiveCount = Math.max(0, TOTAL_COMMUNITY_MEMBERS - favoriteUsersCount);
-  const trendingInactiveCount = Math.max(0, TOTAL_TRENDING_MEMBERS - trendingUsersCount);
-  const loyaltyInactiveCount = Math.max(0, TOTAL_COMMUNITY_MEMBERS - loyaltyUsersCount);
-  const genreInactiveCount = Math.max(0, TOTAL_COMMUNITY_MEMBERS - genreUsersCount);
+  // System active counts (real states only)
+  const supportUsersCount = supportEnabled ? 1 : 0;
+  const favoriteUsersCount = favoriteEnabled ? 1 : 0;
+  const trendingUsersCount = trendingEnabled ? 1 : 0;
+  const loyaltyUsersCount = loyaltyEnabled ? 1 : 0;
+  const genreUsersCount = genreEnabled ? 1 : 0;
 
   // Toggle person feature activation interactively
   const togglePersonFeature = (
@@ -358,19 +343,15 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
     return matchesFeature && matchesStatus;
   });
 
-  // Reusable helper to render activation status, user numbers, and people drawer inside each card
+  // Reusable helper to render activation status and people drawer inside each card
   const renderCardActivationDrawer = (
     systemKey: 'support' | 'favorite' | 'trending' | 'loyalty' | 'genre',
     systemName: string,
     circleColor: string,
-    activeCount: number,
-    inactiveCount: number,
-    totalBase: number,
+    isSystemActive: boolean,
     metricColor: string
   ) => {
     const isExpanded = expandedCardDrawer === systemKey;
-    const activePeopleCount = activators.filter((p) => p.activatedFeatures[systemKey]).length;
-    const inactivePeopleCount = activators.filter((p) => !p.activatedFeatures[systemKey]).length;
 
     const drawerPeople = activators.filter((p) => {
       if (cardDrawerFilter === 'activated' && !p.activatedFeatures[systemKey]) return false;
@@ -386,9 +367,6 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
       return true;
     });
 
-    const activePercent = Math.min(100, Math.max(0, (activeCount / totalBase) * 100)).toFixed(1);
-    const inactivePercent = Math.min(100, Math.max(0, (inactiveCount / totalBase) * 100)).toFixed(1);
-
     return (
       <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2">
         {/* Header row with activation status and toggle */}
@@ -396,11 +374,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
           <div className="flex items-center gap-1.5 flex-wrap">
             <Users className="w-3.5 h-3.5 text-slate-600 shrink-0" />
             <span className="font-extrabold text-slate-800">
-              User Numbers &amp; Activation:
+              Activation Status:
             </span>
             <span className="text-[10px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-full border border-slate-200 shadow-2xs">
-              <strong className="text-emerald-700">{activeCount.toLocaleString()}</strong> Activated ·{' '}
-              <strong className="text-slate-500">{inactiveCount.toLocaleString()}</strong> Not Activated
+              <strong className={isSystemActive ? 'text-emerald-700' : 'text-slate-500'}>
+                {isSystemActive ? 'Active for You' : 'Inactive'}
+              </strong>
             </span>
           </div>
 
@@ -414,12 +393,10 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                 ? 'bg-slate-900 text-white'
                 : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-100'
             }`}
-            title="Inspect users who activated or did not activate this feature"
+            title="Inspect users preference settings"
           >
             <Eye className="w-3 h-3" />
-            {isExpanded
-              ? 'Hide Users'
-              : `See Users (${activePeopleCount} Activated · ${inactivePeopleCount} Inactive)`}
+            {isExpanded ? 'Hide Users' : 'See Users'}
           </button>
         </div>
 
@@ -428,21 +405,20 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
           <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
             <div
               className={`${circleColor} h-full transition-all duration-300`}
-              style={{ width: `${activePercent}%` }}
+              style={{ width: isSystemActive ? '100%' : '0%' }}
             />
             <div
               className="bg-slate-300 h-full transition-all duration-300"
-              style={{ width: `${inactivePercent}%` }}
+              style={{ width: isSystemActive ? '0%' : '100%' }}
             />
           </div>
           <div className="flex items-center justify-between text-[9.5px] text-slate-500 font-semibold">
             <span className="flex items-center gap-1 font-bold text-slate-800">
               <span className={`w-1.5 h-1.5 rounded-full ${circleColor}`} />
-              {activePercent}% Activated ({activeCount.toLocaleString()})
+              {isSystemActive ? 'Active' : 'Inactive'}
             </span>
             <span className="flex items-center gap-1 text-slate-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              {inactivePercent}% Not Activated ({inactiveCount.toLocaleString()})
+              Personalized Feed Preference
             </span>
           </div>
         </div>
@@ -460,7 +436,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  All ({activators.length})
+                  All
                 </button>
                 <button
                   onClick={() => setCardDrawerFilter('activated')}
@@ -471,7 +447,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Activated ({activePeopleCount}) · With User Numbers
+                  Activated
                 </button>
                 <button
                   onClick={() => setCardDrawerFilter('not_activated')}
@@ -482,12 +458,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                  Not Activated ({inactivePeopleCount})
+                  Not Activated
                 </button>
               </div>
 
               <span className="text-[9.5px] text-slate-500 font-medium">
-                Toggle to test live numbers
+                Feature activation
               </span>
             </div>
 
@@ -514,28 +490,6 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             <div className="space-y-1.5 max-h-56 overflow-y-auto scrollbar-thin pr-1">
               {drawerPeople.map((person) => {
                 const isFeatureActive = person.activatedFeatures[systemKey];
-                let userNumberText = '';
-                if (systemKey === 'support') {
-                  userNumberText = isFeatureActive
-                    ? `${person.metrics.supporters.toLocaleString()} supporters`
-                    : '0 supporters';
-                } else if (systemKey === 'favorite') {
-                  userNumberText = isFeatureActive
-                    ? `${person.metrics.favorites.toLocaleString()} favorites`
-                    : '0 favorites';
-                } else if (systemKey === 'trending') {
-                  userNumberText = isFeatureActive
-                    ? `${(person.metrics.trendScore / 1000).toFixed(1)}k trend velocity`
-                    : '0 velocity';
-                } else if (systemKey === 'loyalty') {
-                  userNumberText = isFeatureActive
-                    ? `${person.metrics.loyaltyMembers.toLocaleString()} loyalty members`
-                    : '0 loyalty members';
-                } else if (systemKey === 'genre') {
-                  userNumberText = isFeatureActive
-                    ? `${person.metrics.genrePosts} classified genre posts`
-                    : '0 posts';
-                }
 
                 return (
                   <div
@@ -566,12 +520,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                           {isFeatureActive ? (
                             <span className={`text-[9.5px] font-extrabold px-1.5 py-0.2 rounded-md ${metricColor} flex items-center gap-1 shadow-2xs`}>
                               <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                              Activated · 👥 {userNumberText}
+                              Active
                             </span>
                           ) : (
                             <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-md bg-slate-200 text-slate-600 flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                              Not Activated · {userNumberText}
+                              Inactive
                             </span>
                           )}
                           <span className="text-[9.5px] text-slate-400 truncate">
@@ -988,13 +942,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                     }`}
                   >
                     <Users className="w-2.5 h-2.5" />
-                    {supportUsersCount.toLocaleString()} users active {supportEnabled && '· You'}
+                    {supportEnabled ? 'Active · You' : 'Inactive'}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {supportEnabled
-                    ? 'Active · 18,421 supporters backing new & growing people'
-                    : 'Inactive for you · 18,420 other users currently active'}
+                    ? 'Active · Backing new & growing creators in your feed'
+                    : 'Inactive · Dedicated support system'}
                 </p>
               </div>
             </div>
@@ -1026,14 +980,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             </div>
           </div>
 
-          {/* Activation Numbers & People Breakdown (Visible whether activated or not) */}
+          {/* Activation Status & People Breakdown */}
           {renderCardActivationDrawer(
             'support',
             'Support',
             'bg-red-600',
-            supportUsersCount,
-            supportInactiveCount,
-            TOTAL_COMMUNITY_MEMBERS,
+            supportEnabled,
             'bg-red-50 text-red-900 border border-red-200'
           )}
 
@@ -1164,10 +1116,6 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                               <div className="text-[10px] text-slate-500 flex items-center gap-1.5 flex-wrap mt-0.5">
                                 <span className="truncate">{person.bio}</span>
                                 <span>&middot;</span>
-                                <span className="font-extrabold text-red-700 flex items-center gap-0.5">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
-                                  👥 {person.metrics.supporters.toLocaleString()} supporters
-                                </span>
                                 {isSupportActiveOnPerson ? (
                                   <span className="px-1.5 py-0.2 rounded text-[9px] bg-red-50 text-red-700 font-black border border-red-200">
                                     Support Active
@@ -1274,7 +1222,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                             <span>&middot;</span>
                             <span className="text-red-700 font-semibold">{creator.tag}</span>
                             <span>&middot;</span>
-                            <span className="font-extrabold text-slate-800">👥 {creator.followers} supporters</span>
+                            <span className="font-extrabold text-slate-800">Verified Creator</span>
                             <span className="px-1 py-0.2 rounded text-[9px] bg-red-100 text-red-800 font-black">Support Active</span>
                           </div>
                         </div>
@@ -1336,13 +1284,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                     }`}
                   >
                     <Users className="w-2.5 h-2.5" />
-                    {favoriteUsersCount.toLocaleString()} users active {favoriteEnabled && '· You'}
+                    {favoriteEnabled ? 'Active · You' : 'Inactive'}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {favoriteEnabled
-                    ? 'Active · 24,191 users pinning favorite creator feeds'
-                    : 'Inactive for you · 24,190 other users currently active'}
+                    ? 'Active · Pinning favorite creator feeds'
+                    : 'Inactive · Pin your favorite creators and get instant alerts'}
                 </p>
               </div>
             </div>
@@ -1374,14 +1322,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             </div>
           </div>
 
-          {/* Activation Numbers & People Breakdown (Visible whether activated or not) */}
+          {/* Activation Status & People Breakdown */}
           {renderCardActivationDrawer(
             'favorite',
             'Favorite',
             'bg-pink-500',
-            favoriteUsersCount,
-            favoriteInactiveCount,
-            TOTAL_COMMUNITY_MEMBERS,
+            favoriteEnabled,
             'bg-pink-50 text-pink-900 border border-pink-200'
           )}
 
@@ -1521,13 +1467,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                     }`}
                   >
                     <Users className="w-2.5 h-2.5" />
-                    {trendingUsersCount.toLocaleString()} users active {trendingEnabled && '· You'}
+                    {trendingEnabled ? 'Active · You' : 'Inactive'}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {trendingEnabled
-                    ? 'Active · 31,851 users curating and boosting viral trends'
-                    : 'Inactive for you · 31,850 other users currently active'}
+                    ? 'Active · Curating and boosting viral trends in your feed'
+                    : 'Inactive · Discover and boost high-momentum topics'}
                 </p>
               </div>
             </div>
@@ -1559,14 +1505,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             </div>
           </div>
 
-          {/* Activation Numbers & People Breakdown (Visible whether activated or not) */}
+          {/* Activation Status & People Breakdown */}
           {renderCardActivationDrawer(
             'trending',
             'Trending',
             'bg-blue-600',
-            trendingUsersCount,
-            trendingInactiveCount,
-            TOTAL_TRENDING_MEMBERS,
+            trendingEnabled,
             'bg-blue-50 text-blue-900 border border-blue-200'
           )}
 
@@ -1640,8 +1584,6 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                         </div>
                         <div className="text-[10px] text-slate-500 flex items-center gap-1.5 flex-wrap">
                           <span>{(t.velocity / 1000).toFixed(1)}k velocity</span>
-                          <span>&middot;</span>
-                          <span className="text-blue-700 font-extrabold">👥 {Math.floor(t.velocity / 10).toLocaleString()} users boosting</span>
                         </div>
                       </div>
                     </div>
@@ -1696,13 +1638,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                     }`}
                   >
                     <Users className="w-2.5 h-2.5" />
-                    {loyaltyUsersCount.toLocaleString()} users active {loyaltyEnabled && '· You'}
+                    {loyaltyEnabled ? 'Active · You' : 'Inactive'}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {loyaltyEnabled
-                    ? 'Active · 12,741 members building loyalty streaks'
-                    : 'Inactive for you · 12,740 other users currently active'}
+                    ? 'Active · Building loyalty streaks with your core creators'
+                    : 'Inactive · Build streaks and unlock exclusive content'}
                 </p>
               </div>
             </div>
@@ -1734,14 +1676,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             </div>
           </div>
 
-          {/* Activation Numbers & People Breakdown (Visible whether activated or not) */}
+          {/* Activation Status & People Breakdown */}
           {renderCardActivationDrawer(
             'loyalty',
             'Loyalty',
             'bg-amber-400',
-            loyaltyUsersCount,
-            loyaltyInactiveCount,
-            TOTAL_COMMUNITY_MEMBERS,
+            loyaltyEnabled,
             'bg-amber-50 text-amber-950 border border-amber-300'
           )}
 
@@ -1914,13 +1854,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                     }`}
                   >
                     <Users className="w-2.5 h-2.5" />
-                    {genreUsersCount.toLocaleString()} users active {genreEnabled && '· You'}
+                    {genreEnabled ? 'Active · You' : 'Inactive'}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {genreEnabled
-                    ? 'Active · 16,931 creators classifying posts before publishing'
-                    : 'Inactive for you · 16,930 other users currently active'}
+                    ? 'Active · Classifying posts before publishing'
+                    : 'Inactive · Group content by artistic craft and domain'}
                 </p>
               </div>
             </div>
@@ -1952,14 +1892,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             </div>
           </div>
 
-          {/* Activation Numbers & People Breakdown (Visible whether activated or not) */}
+          {/* Activation Status & People Breakdown */}
           {renderCardActivationDrawer(
             'genre',
             'Genre',
             'bg-purple-600',
-            genreUsersCount,
-            genreInactiveCount,
-            TOTAL_COMMUNITY_MEMBERS,
+            genreEnabled,
             'bg-purple-50 text-purple-950 border border-purple-200'
           )}
 
@@ -2169,23 +2107,23 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             <div className="grid grid-cols-5 gap-1 p-2 bg-slate-100 border-b border-slate-200 text-center">
               <div className="bg-white p-1.5 rounded-lg border border-red-100">
                 <span className="text-[9px] font-black text-red-600 block uppercase">Support</span>
-                <span className="text-xs font-black text-slate-900">{supportUsersCount.toLocaleString()}</span>
+                <span className="text-xs font-black text-slate-900">{supportEnabled ? 'ACTIVE' : 'OFF'}</span>
               </div>
               <div className="bg-white p-1.5 rounded-lg border border-pink-100">
                 <span className="text-[9px] font-black text-pink-600 block uppercase">Favorite</span>
-                <span className="text-xs font-black text-slate-900">{favoriteUsersCount.toLocaleString()}</span>
+                <span className="text-xs font-black text-slate-900">{favoriteEnabled ? 'ACTIVE' : 'OFF'}</span>
               </div>
               <div className="bg-white p-1.5 rounded-lg border border-blue-100">
                 <span className="text-[9px] font-black text-blue-600 block uppercase">Trending</span>
-                <span className="text-xs font-black text-slate-900">{trendingUsersCount.toLocaleString()}</span>
+                <span className="text-xs font-black text-slate-900">{trendingEnabled ? 'ACTIVE' : 'OFF'}</span>
               </div>
               <div className="bg-white p-1.5 rounded-lg border border-amber-100">
                 <span className="text-[9px] font-black text-amber-700 block uppercase">Loyalty</span>
-                <span className="text-xs font-black text-slate-900">{loyaltyUsersCount.toLocaleString()}</span>
+                <span className="text-xs font-black text-slate-900">{loyaltyEnabled ? 'ACTIVE' : 'OFF'}</span>
               </div>
               <div className="bg-white p-1.5 rounded-lg border border-purple-100">
                 <span className="text-[9px] font-black text-purple-700 block uppercase">Genre</span>
-                <span className="text-xs font-black text-slate-900">{genreUsersCount.toLocaleString()}</span>
+                <span className="text-xs font-black text-slate-900">{genreEnabled ? 'ACTIVE' : 'OFF'}</span>
               </div>
             </div>
 
@@ -2212,7 +2150,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  All Features ({activators.length})
+                  All Features
                 </button>
                 <button
                   onClick={() => setActivatorFilter('support')}
@@ -2223,7 +2161,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                  Support ({activators.filter((c) => c.activatedFeatures.support).length})
+                  Support
                 </button>
                 <button
                   onClick={() => setActivatorFilter('favorite')}
@@ -2234,7 +2172,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-pink-500" />
-                  Favorite ({activators.filter((c) => c.activatedFeatures.favorite).length})
+                  Favorite
                 </button>
                 <button
                   onClick={() => setActivatorFilter('trending')}
@@ -2245,7 +2183,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                  Trending ({activators.filter((c) => c.activatedFeatures.trending).length})
+                  Trending
                 </button>
                 <button
                   onClick={() => setActivatorFilter('loyalty')}
@@ -2256,7 +2194,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  Loyalty ({activators.filter((c) => c.activatedFeatures.loyalty).length})
+                  Loyalty
                 </button>
                 <button
                   onClick={() => setActivatorFilter('genre')}
@@ -2267,11 +2205,11 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
-                  Genre ({activators.filter((c) => c.activatedFeatures.genre).length})
+                  Genre
                 </button>
               </div>
 
-              {/* Status Filter Tabs: All | Activated Only (with User Numbers) | Not Activated Only */}
+              {/* Status Filter Tabs */}
               <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-slate-100 text-[10px] font-extrabold flex-wrap">
                 <div className="flex items-center gap-1 flex-wrap">
                   <span className="text-slate-400 font-semibold mr-0.5">Status Filter:</span>
@@ -2283,7 +2221,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    All ({activators.length})
+                    All
                   </button>
                   <button
                     onClick={() => setActivatorStatusFilter('activated')}
@@ -2294,7 +2232,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                     }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Activated · With Numbers
+                    Activated
                   </button>
                   <button
                     onClick={() => setActivatorStatusFilter('not_activated')}
@@ -2368,9 +2306,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                           <span className="truncate">Support</span>
                         </span>
                         <span className="shrink-0 ml-1">
-                          {person.activatedFeatures.support
-                            ? `👥 ${person.metrics.supporters.toLocaleString()}`
-                            : 'Off (0)'}
+                          {person.activatedFeatures.support ? 'Active' : 'Off'}
                         </span>
                       </button>
 
@@ -2393,9 +2329,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                           <span className="truncate">Favorite</span>
                         </span>
                         <span className="shrink-0 ml-1">
-                          {person.activatedFeatures.favorite
-                            ? `👥 ${person.metrics.favorites.toLocaleString()}`
-                            : 'Off (0)'}
+                          {person.activatedFeatures.favorite ? 'Active' : 'Off'}
                         </span>
                       </button>
 
@@ -2418,9 +2352,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                           <span className="truncate">Trending</span>
                         </span>
                         <span className="shrink-0 ml-1">
-                          {person.activatedFeatures.trending
-                            ? `🚀 ${(person.metrics.trendScore / 1000).toFixed(1)}k`
-                            : 'Off (0)'}
+                          {person.activatedFeatures.trending ? 'Active' : 'Off'}
                         </span>
                       </button>
 
@@ -2443,9 +2375,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                           <span className="truncate">Loyalty</span>
                         </span>
                         <span className="shrink-0 ml-1">
-                          {person.activatedFeatures.loyalty
-                            ? `👥 ${person.metrics.loyaltyMembers.toLocaleString()}`
-                            : 'Off (0)'}
+                          {person.activatedFeatures.loyalty ? 'Active' : 'Off'}
                         </span>
                       </button>
 
@@ -2468,9 +2398,7 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                           <span className="truncate">Genre</span>
                         </span>
                         <span className="shrink-0 ml-1">
-                          {person.activatedFeatures.genre
-                            ? `🏷️ ${person.metrics.genrePosts} posts`
-                            : 'Off (0)'}
+                          {person.activatedFeatures.genre ? 'Active' : 'Off'}
                         </span>
                       </button>
                     </div>

@@ -832,9 +832,6 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
                   <span className="hidden sm:inline">Reset</span>
                 </button>
               )}
-              <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10.5px] font-extrabold rounded-full shrink-0">
-                {filteredPeople.length}/{people.length}
-              </span>
             </>
           )}
         </div>
@@ -852,13 +849,6 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
             }`}
           >
             <span>Integrity Score</span>
-            <span
-              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                matchScreenTab === 'matches' ? 'bg-white/20 text-white' : 'bg-slate-300 text-slate-700'
-              }`}
-            >
-              {filteredPeople.length}
-            </span>
           </button>
 
           <button
@@ -956,7 +946,7 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  All ({people.length})
+                  All
                 </button>
                 <button
                   onClick={() => setSelectedFilter('receipts')}
@@ -968,7 +958,7 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
                   title="Show matches with recent Trust Receipts"
                 >
                   <FileCheck className="w-3 h-3 text-amber-500" />
-                  <span>With Receipts ({peopleWithReceiptsCount})</span>
+                  <span>With Receipts</span>
                 </button>
                 <button
                   onClick={() => setSelectedFilter('high')}
@@ -1075,18 +1065,14 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
                           {person.name}
                         </h3>
                         <span
-                          className={`text-[10px] font-black px-1.5 py-0.2 rounded-full shrink-0 ${
-                            isGreenPercent
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-rose-50 text-rose-700 border border-rose-200'
-                          }`}
-                          title={`${person.percent}% Integrity Score`}
+                          className="text-[10px] font-black px-1.5 py-0.2 rounded-full shrink-0 bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          title="Verified Integrity Profile"
                         >
-                          {person.percent}%
+                          Verified
                         </span>
                       </div>
                       <p className="text-[10.5px] sm:text-[11px] text-slate-500 font-medium truncate mt-0.5">
-                        Vibe coder &middot; {person.city} &middot; <span className="font-semibold text-slate-700">{person.approval}</span>
+                        Vibe coder &middot; {person.city} &middot; <span className="font-semibold text-slate-700">Verified</span>
                       </p>
                     </div>
                   </div>

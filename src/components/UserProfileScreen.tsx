@@ -923,7 +923,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
           <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[11px] text-slate-600 font-medium">
             <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              {wikiData.trustScore}% Integrity
+              Verified Integrity
             </span>
             <span>&middot;</span>
             <span className="inline-flex items-center gap-1 text-purple-700 font-bold">
@@ -1112,7 +1112,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                 <tr className="hover:bg-slate-50">
                   <th className="py-2 px-3.5 font-bold text-slate-700 bg-slate-50/50">Integrity Score</th>
                   <td className="py-2 px-3.5 text-emerald-700 font-bold">
-                    {wikiData.trustScore}% Verified
+                    Verified
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50">

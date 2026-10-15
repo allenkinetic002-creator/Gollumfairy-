@@ -290,7 +290,7 @@ export function UserSearchModal({
                             title="Integrity Score"
                           >
                             <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                            {user.integrityScore}%
+                            Verified
                           </span>
                         </div>
                       </div>
