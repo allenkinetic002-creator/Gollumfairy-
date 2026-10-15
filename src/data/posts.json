@@ -1,5 +1,25 @@
 [
   {
+    "id": "post-1792066294285",
+    "authorName": "karak",
+    "authorHandle": "@karak",
+    "authorAvatar": "/src/assets/images/creator_portrait_elena_1791014499312.jpg",
+    "isVerified": true,
+    "timeAgo": "Just now",
+    "location": "Kyoto, Japan",
+    "mediaType": "image",
+    "mediaUrl": "/uploads/1792066274363-post_1792066273908_xh7e4u.jpg",
+    "caption": "am a bad kid",
+    "tags": [
+      "#fairy",
+      "#autumnlight"
+    ],
+    "audioTitle": "Original Audio",
+    "likeCount": 1,
+    "isLiked": true,
+    "isTrending": true
+  },
+  {
     "id": "post-1792060584588",
     "authorName": "Anonymous User",
     "authorHandle": "@user",
