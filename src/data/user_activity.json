@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792074171348-55wku",
+    "action": "post_action",
+    "description": "Post action: like on post-1792060584588",
+    "details": {
+      "postId": "post-1792060584588",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T14:22:51.347Z"
+    },
+    "savedAt": "2026-10-15T14:22:51.348Z"
+  },
+  {
+    "id": "act-1792074171338-vwgws",
+    "action": "post_action",
+    "description": "Post action: like on post-1792060584588",
+    "details": {
+      "postId": "post-1792060584588",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T14:22:51.337Z"
+    },
+    "savedAt": "2026-10-15T14:22:51.338Z"
+  },
+  {
     "id": "act-1792073733610-wpt9l",
     "action": "phone_hand_vote",
     "description": "Phone Hand vote for karak: like (5 likes)",
@@ -1246,29 +1272,5 @@
     },
     "timestamp": "2026-10-15T09:55:24.668Z",
     "savedAt": "2026-10-15T09:55:24.277Z"
-  },
-  {
-    "id": "act-1792002562613-1omkp",
-    "action": "rating_reset",
-    "description": "Reset rating for Elena Vance to rate again",
-    "details": {
-      "targetName": "Elena Vance",
-      "isFinalized": false,
-      "rating": 9.6,
-      "updatedAt": "2026-10-14T18:29:22.613Z"
-    },
-    "savedAt": "2026-10-14T18:29:22.613Z"
-  },
-  {
-    "id": "act-1792002562588-qprpv",
-    "action": "rating_submitted",
-    "description": "Finalized rating 9.6 ★ for Elena Vance",
-    "details": {
-      "targetName": "Elena Vance",
-      "rating": 9.6,
-      "isFinalized": true,
-      "updatedAt": "2026-10-14T18:29:22.587Z"
-    },
-    "savedAt": "2026-10-14T18:29:22.588Z"
   }
 ]
