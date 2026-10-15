@@ -8,9 +8,18 @@
       "genre": false,
       "updatedAt": "2026-10-15T19:18:03.369Z",
       "activatedBy": "user-karak"
+    },
+    "user-kinetic": {
+      "support": true,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:18:36.673Z",
+      "activatedBy": "user-kinetic"
     }
   },
-  "lastActiveUser": "user-karak",
+  "lastActiveUser": "user-kinetic",
   "globalFallback": {
     "support": false,
     "favorite": false,
