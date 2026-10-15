@@ -2315,20 +2315,6 @@ export default function App() {
           {/* ========================================================================= */}
           {activeNavIndex === 0 && (
             <>
-              {/* Top bar: Only displays Sign In when logged out. When logged in, completely disappears. No Fairy Live, no email, no logout */}
-              {(!currentUser || isLoggedOut) && (
-                <div className="w-full px-4 py-1.5 flex items-center justify-end shrink-0 bg-slate-50/95 border-b border-slate-100 z-10 animate-fadeIn">
-                  <button
-                    onClick={() => setShowSignInModal(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
-                    title="Sign in to your account"
-                  >
-                    <User className="w-3.5 h-3.5 stroke-[2.2]" />
-                    <span>Sign In</span>
-                  </button>
-                </div>
-              )}
-
           {/* Header */}
           <header className="w-full px-4 pt-2.5 pb-1 flex items-center justify-between shrink-0 bg-white z-10 border-b border-slate-50">
 
@@ -2342,6 +2328,18 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Only show Sign In button when logged out. When logged in, it completely disappears */}
+              {(!currentUser || isLoggedOut) && (
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11.5px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer mr-1 shrink-0 animate-fadeIn"
+                  title="Sign in to your account"
+                >
+                  <User className="w-3.5 h-3.5 stroke-[2.2]" />
+                  <span>Sign In</span>
+                </button>
+              )}
+
               {/* 1st header icon: Guacamole Bowl / Nacho Cheese icon (toggles far-right floating honeyjar icon) */}
               <button
                 onClick={() => setShowFloatingHoneyJar((prev) => !prev)}
