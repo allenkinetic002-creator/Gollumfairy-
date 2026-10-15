@@ -77,6 +77,41 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
     setAutoSyncEnabled(checked);
   };
 
+  const [pulling, setPulling] = useState(false);
+
+  const handlePull = async () => {
+    try {
+      setPulling(true);
+      setStatusMessage(null);
+      const res = await fetch('/api/github/pull', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatusMessage({
+          type: 'success',
+          text: data.updated
+            ? `Pulled new updates from GitHub! (${data.lastCommit})`
+            : `Already up to date with origin/main (${data.lastCommit})`,
+        });
+        fetchStatus();
+      } else {
+        setStatusMessage({
+          type: 'error',
+          text: data.error || 'Failed to pull from GitHub',
+        });
+      }
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err.message || 'Network error pulling from GitHub',
+      });
+    } finally {
+      setPulling(false);
+    }
+  };
+
   const handlePush = async () => {
     try {
       setSyncing(true);
@@ -124,7 +159,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
             </div>
             <div>
               <h2 className="text-base font-bold leading-tight flex items-center gap-1.5">
-                GitHub & Supabase Sync
+                GitHub Live Repo Sync
               </h2>
               <p className="text-xs text-slate-300 font-mono">
                 allenkinetic002-creator/Gollumfairy-
@@ -166,9 +201,9 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
                 <Zap className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-bold text-indigo-950">Auto-Update Repo on Use</div>
+                <div className="text-xs font-bold text-indigo-950">Two-Way Live Repo Sync Active</div>
                 <div className="text-[11px] text-indigo-700">
-                  Automatically commits & pushes to main when creating posts, tweets, receipts, or voting
+                  Auto-pulls whenever you update GitHub & auto-pushes app changes to main
                 </div>
               </div>
             </div>
@@ -212,7 +247,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
                   {gitStatus?.clean ? (
                     <>
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                      <span className="text-emerald-700">Clean</span>
+                      <span className="text-emerald-700">Synced & Clean</span>
                     </>
                   ) : (
                     <>
@@ -230,7 +265,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
               <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 text-xs">
                 <div className="text-[10px] text-slate-400 font-medium mb-1 flex items-center gap-1">
                   <GitCommit className="w-3 h-3 text-slate-400" />
-                  Last Commit
+                  Latest Synced Commit
                 </div>
                 <div className="font-mono text-slate-700 text-[11px] truncate">
                   {gitStatus.lastCommit}
@@ -248,7 +283,6 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
               <div>
                 <div className="font-semibold text-emerald-950 flex items-center gap-1">
                   {supabaseStatus?.name || "allenkinetic002-creator's Project"}
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
                 <div className="text-[11px] text-emerald-800 font-mono">
                   {supabaseStatus?.projectRef || 'khixsxyyulxpwlkxtaag'} ({supabaseStatus?.region || 'eu-west-1'})
@@ -256,7 +290,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
               </div>
             </div>
             <div className="text-right">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800">
                 <ShieldCheck className="w-3 h-3 text-emerald-600" /> Active & Healthy
               </span>
             </div>
@@ -313,25 +347,27 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({ isOpen, onClos
 
           <div className="flex items-center gap-2">
             <button
-              onClick={onClose}
-              className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 transition-colors"
+              onClick={handlePull}
+              disabled={pulling || syncing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
-              Close
+              <RefreshCw className={`w-3.5 h-3.5 ${pulling ? 'animate-spin' : ''}`} />
+              {pulling ? 'Pulling...' : 'Pull Latest'}
             </button>
             <button
               onClick={handlePush}
-              disabled={syncing}
+              disabled={syncing || pulling}
               className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {syncing ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  Pushing to repo...
+                  Pushing...
                 </>
               ) : (
                 <>
                   <UploadCloud className="w-3.5 h-3.5" />
-                  Push Updates Now
+                  Push Updates
                 </>
               )}
             </button>

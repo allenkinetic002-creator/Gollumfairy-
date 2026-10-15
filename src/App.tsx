@@ -1878,6 +1878,9 @@ export default function App() {
           return [data.comment, ...prev];
         });
         setTotalComments((cnt) => cnt + 1);
+      } else if (event === 'repo_updated') {
+        setTweetSuccessToast(`↻ Synced latest update from GitHub: ${data?.lastCommit || 'origin/main'}`);
+        setTimeout(() => setTweetSuccessToast(null), 4500);
       }
     });
 
@@ -2307,7 +2310,6 @@ export default function App() {
               {/* Top Utility Bar with Sign In Button positioned above the 5 upper header icons */}
           <div className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-slate-50/90 border-b border-slate-100 z-10">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[11px] font-bold tracking-tight text-slate-500 uppercase">
                 Fairy Live
               </span>
@@ -2316,6 +2318,20 @@ export default function App() {
                   · {currentUser.name}
                 </span>
               )}
+              <button
+                onClick={() => setShowGitHubSyncModal(true)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-md text-[10.5px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                title="GitHub Live Sync (allenkinetic002-creator/Gollumfairy-)"
+              >
+                <GitBranch className={`w-3 h-3 ${repoSyncStatus?.status === 'syncing' ? 'animate-spin' : ''}`} />
+                <span>
+                  {repoSyncStatus?.status === 'syncing'
+                    ? 'Syncing Repo...'
+                    : repoSyncStatus?.status === 'synced'
+                    ? 'Repo Synced'
+                    : 'GitHub Sync'}
+                </span>
+              </button>
             </div>
 
             <div className="flex items-center gap-2">

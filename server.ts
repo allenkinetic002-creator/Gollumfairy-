@@ -25,6 +25,9 @@ function runGitQueued<T>(fn: () => Promise<T>): Promise<T> {
   return result;
 }
 
+let lastCheckedRemoteAt: string = new Date().toISOString();
+let lastKnownHeadSha: string = '';
+
 async function configureGitRemote() {
   try {
     await execAsync('git config --global --add safe.directory "*"');
@@ -44,12 +47,20 @@ async function configureGitRemote() {
       } catch {
         await execAsync(`git remote add origin "${remoteUrl}"`);
       }
+    } else {
+      // Ensure origin exists if not already configured in .git/config
+      try {
+        await execAsync('git remote get-url origin');
+      } catch {
+        await execAsync(`git remote add origin "https://github.com/${GITHUB_REPO}.git"`);
+      }
     }
     await execAsync('git config user.name "allenkinetic002-creator"');
     await execAsync('git config user.email "casperthefriendlyghost90212@gmail.com"');
 
     try {
-      await execAsync('git rev-parse HEAD');
+      const { stdout: headOut } = await execAsync('git rev-parse HEAD');
+      lastKnownHeadSha = headOut.trim();
     } catch {
       needsFetch = true;
     }
@@ -58,6 +69,8 @@ async function configureGitRemote() {
       try {
         await execAsync('git fetch origin main --depth=10');
         await execAsync('git reset --mixed origin/main');
+        const { stdout: headOut } = await execAsync('git rev-parse HEAD');
+        lastKnownHeadSha = headOut.trim();
       } catch (fErr: any) {
         console.warn('[Git] Auto-fetch notice:', fErr.message);
       }
@@ -77,6 +90,79 @@ async function startServer() {
 
   app.use(express.json({ limit: '10mb' }));
 
+  // --- REAL-TIME SERVER-SENT EVENTS (SSE) & STORAGE HELPERS ---
+  const sseClients = new Set<express.Response>();
+
+  function broadcastRealtime(eventType: string, payload: any) {
+    const message = `event: ${eventType}\ndata: ${JSON.stringify(payload)}\n\n`;
+    for (const client of sseClients) {
+      try {
+        client.write(message);
+      } catch {
+        sseClients.delete(client);
+      }
+    }
+  }
+
+  // Check remote repo for updates and auto-pull if origin/main is ahead
+  async function checkAndPullRemoteUpdates(forcePull = false): Promise<{
+    updated: boolean;
+    lastCommit: string;
+    branch: string;
+    output?: string;
+  }> {
+    return runGitQueued(async () => {
+      await configureGitRemote();
+      await execAsync('git fetch origin main --depth=20');
+      lastCheckedRemoteAt = new Date().toISOString();
+
+      const { stdout: behindOut } = await execAsync('git rev-list HEAD..origin/main --count').catch(() => ({ stdout: '0' }));
+      const behindCount = parseInt(behindOut.trim(), 10) || 0;
+
+      let pullOutput = '';
+      let updated = false;
+
+      if (behindCount > 0 || forcePull) {
+        const { stdout: pullOut, stderr: pullErr } = await execAsync('git pull --rebase --autostash origin main');
+        pullOutput = (pullOut || pullErr || 'Pulled latest changes from origin/main').trim();
+        const { stdout: newHeadOut } = await execAsync('git rev-parse HEAD');
+        const newHead = newHeadOut.trim();
+        if (newHead !== lastKnownHeadSha || behindCount > 0) {
+          updated = true;
+          lastKnownHeadSha = newHead;
+        }
+      }
+
+      const { stdout: logOut } = await execAsync('git log -1 --pretty=format:"%h - %s (%cr) <%an>"');
+      const { stdout: branchOut } = await execAsync('git rev-parse --abbrev-ref HEAD');
+      const lastCommit = logOut.trim();
+
+      if (updated) {
+        console.log(`[Git Auto-Sync] Pulled new update from ${GITHUB_REPO}: ${lastCommit}`);
+        broadcastRealtime('repo_updated', {
+          repo: GITHUB_REPO,
+          branch: branchOut.trim(),
+          lastCommit,
+          pulledAt: new Date().toISOString(),
+        });
+      }
+
+      return {
+        updated,
+        lastCommit,
+        branch: branchOut.trim(),
+        output: pullOutput || 'Already up to date with origin/main',
+      };
+    });
+  }
+
+  // Background watcher: poll allenkinetic002-creator/Gollumfairy- every 12 seconds for any new commits
+  setInterval(() => {
+    checkAndPullRemoteUpdates(false).catch((err) => {
+      console.warn('[Git Auto-Sync] Background check warning:', err.message);
+    });
+  }, 12000);
+
   // Git status endpoint
   app.get('/api/github/status', async (_req, res) => {
     try {
@@ -91,6 +177,21 @@ async function startServer() {
         clean: statusOut.trim().length === 0,
         uncommittedChanges: statusOut.trim().split('\n').filter(Boolean),
         lastCommit: logOut.trim(),
+        autoPullActive: true,
+        lastCheckedRemoteAt,
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Manual Git pull endpoint
+  app.post('/api/github/pull', async (_req, res) => {
+    try {
+      const result = await checkAndPullRemoteUpdates(true);
+      res.json({
+        success: true,
+        ...result,
       });
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
@@ -116,6 +217,8 @@ async function startServer() {
         }
         const { stdout: pushOut, stderr: pushErr } = await execAsync('git push origin main');
         const { stdout: lastCommit } = await execAsync('git log -1 --pretty=format:"%h - %s"');
+        const { stdout: headOut } = await execAsync('git rev-parse HEAD');
+        lastKnownHeadSha = headOut.trim();
         res.json({
           success: true,
           committed,
@@ -127,20 +230,6 @@ async function startServer() {
       }
     });
   });
-
-  // --- REAL-TIME SERVER-SENT EVENTS (SSE) & STORAGE HELPERS ---
-  const sseClients = new Set<express.Response>();
-
-  function broadcastRealtime(eventType: string, payload: any) {
-    const message = `event: ${eventType}\ndata: ${JSON.stringify(payload)}\n\n`;
-    for (const client of sseClients) {
-      try {
-        client.write(message);
-      } catch {
-        sseClients.delete(client);
-      }
-    }
-  }
 
   function readJsonFile<T>(relPath: string, defaultValue: T): T {
     try {

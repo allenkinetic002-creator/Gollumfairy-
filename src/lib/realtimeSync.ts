@@ -98,6 +98,15 @@ export function initRealtimeStream() {
       }
     });
 
+    eventSource.addEventListener('repo_updated', (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        notifyListeners('repo_updated', data);
+      } catch (err) {
+        console.warn('[Realtime] Failed to parse repo_updated event:', err);
+      }
+    });
+
     eventSource.onerror = () => {
       isConnected = false;
       eventSource?.close();
