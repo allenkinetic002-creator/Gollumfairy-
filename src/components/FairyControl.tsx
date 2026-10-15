@@ -69,7 +69,18 @@ export const FAIRY_SHARED_CATEGORIES: FairyCategoryItem[] = [
 ];
 
 export const SUPPORT_CATEGORIES = FAIRY_SHARED_CATEGORIES;
-export const GENRE_CATEGORIES = FAIRY_SHARED_CATEGORIES;
+export const GENRE_CATEGORIES: FairyCategoryItem[] = [
+  { id: 'artist', label: 'Artist', desc: 'Visual art, paintings, illustrators & digital creators', userCount: 14200 },
+  { id: 'music', label: 'Music', desc: 'Producers, vocalists, beatmakers & sonic composers', userCount: 11800 },
+  { id: 'gaming', label: 'Gaming', desc: 'Streamers, gameplay, competitive gaming & game devs', userCount: 9500 },
+  { id: 'tech', label: 'Tech & Code', desc: 'Software developers, AI builders & tech creators', userCount: 8900 },
+  { id: 'fashion', label: 'Fashion & Style', desc: 'Designers, streetwear styling & aesthetic fits', userCount: 7600 },
+  { id: 'photography', label: 'Photography', desc: 'Portraits, landscape, cinematic & film captures', userCount: 8200 },
+  { id: 'writing', label: 'Writing & Lore', desc: 'Fiction writers, poets, essayists & lore keepers', userCount: 5400 },
+  { id: 'anime', label: 'Anime & Animation', desc: 'Manga creators, 2D/3D animators & motion designers', userCount: 9100 },
+  { id: 'food', label: 'Food & Culinary', desc: 'Chefs, recipes, bakeries & culinary styling', userCount: 6700 },
+  { id: 'fitness', label: 'Fitness & Wellness', desc: 'Athletes, fitness trainers & wellness coaches', userCount: 6100 },
+];
 
 export interface CommunityMemberActivation {
   id: string;
@@ -2204,7 +2215,7 @@ export function FairyControl({
                       Choose Your Primary Genre:
                     </label>
                     <span className="text-[10px] text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200">
-                      Same categories as Support
+                      Top 10 Genres (e.g. Artist, Music, Gaming)
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">

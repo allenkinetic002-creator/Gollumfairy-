@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { X, Trash2, User, Loader2 } from 'lucide-react';
+import { X, Trash2, User, Loader2, Palette, CheckCircle2 } from 'lucide-react';
 import { processAndUploadImage } from '../lib/imageUpload';
+import { TOP_10_GENRES, getGenreInfo } from '../lib/genres';
 
 export interface NewTweetPayload {
   text: string;
   mediaUrl?: string;
   tags?: string[];
+  genre?: string;
 }
 
 interface CreateTweetModalProps {
@@ -15,6 +17,7 @@ interface CreateTweetModalProps {
   authorAvatar: string;
   authorName?: string;
   authorHandle?: string;
+  genreEnabled?: boolean;
 }
 
 const SAMPLE_TWEET_IMAGES = [
@@ -41,9 +44,12 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
   authorAvatar,
   authorName = 'Elena Vance',
   authorHandle = '@elena_aeri',
+  genreEnabled = false,
 }) => {
   const [tweetText, setTweetText] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedGenre, setSelectedGenre] = useState<string>('');
+  const [showGenrePicker, setShowGenrePicker] = useState(false);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -94,11 +100,13 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
       text: tweetText.trim(),
       mediaUrl: selectedImage || undefined,
       tags: extractedTags,
+      genre: genreEnabled && selectedGenre ? selectedGenre : undefined,
     });
 
     // Reset and close
     setTweetText('');
     setSelectedImage(null);
+    setSelectedGenre('');
     setShowPreview(false);
     onClose();
   };
@@ -307,6 +315,62 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
           )}
         </div>
 
+        {/* Genre Selector Banner (When Genre is ON) */}
+        {genreEnabled && showGenrePicker && (
+          <div className="px-4 py-3 bg-purple-50/90 border-t border-purple-200/80 animate-fadeIn space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5 text-purple-700" />
+                <span className="text-xs font-black text-purple-950">
+                  Select Genre (Top 10)
+                </span>
+                <span className="text-[9px] font-black text-purple-700 bg-purple-200/70 px-1.5 py-0.2 rounded-full">
+                  Genre ON
+                </span>
+              </div>
+              {selectedGenre && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedGenre('')}
+                  className="text-[10px] text-purple-700 hover:text-purple-900 font-bold underline cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 max-h-[140px] overflow-y-auto scrollbar-thin">
+              {TOP_10_GENRES.map((g) => {
+                const isSelected = selectedGenre === g.name;
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedGenre('');
+                      } else {
+                        setSelectedGenre(g.name);
+                        setShowGenrePicker(false);
+                      }
+                    }}
+                    className={`p-1.5 rounded-lg text-left text-[11px] font-bold border transition-all cursor-pointer flex items-center justify-between ${
+                      isSelected
+                        ? 'bg-purple-600 border-purple-700 text-white shadow-2xs'
+                        : 'bg-white hover:bg-purple-100/60 border-slate-200 text-slate-800'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1 truncate">
+                      <span>{g.icon}</span>
+                      <span className="truncate">{g.name}</span>
+                    </span>
+                    {isSelected && <CheckCircle2 className="w-3 h-3 text-white shrink-0 ml-1" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Bottom toolbar */}
         <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -326,6 +390,27 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
             >
               {selectedImage ? 'Change Image' : 'Add Image'}
             </button>
+
+            {/* Genre Button (Only shows when user has Genre switched ON) */}
+            {genreEnabled && (
+              <button
+                type="button"
+                onClick={() => setShowGenrePicker((prev) => !prev)}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  selectedGenre
+                    ? 'bg-purple-600 text-white border-purple-700 shadow-2xs'
+                    : 'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200'
+                }`}
+                title="Select from Top 10 Genres (e.g. Artist, Music, Gaming)"
+              >
+                <Palette className="w-3 h-3" />
+                <span>
+                  {selectedGenre
+                    ? `${getGenreInfo(selectedGenre)?.icon || '🎨'} ${selectedGenre}`
+                    : 'Select Genre (Top 10)'}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Right side: Character counter indicator ring & Post CTA */}

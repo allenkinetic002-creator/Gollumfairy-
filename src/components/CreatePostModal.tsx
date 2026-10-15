@@ -14,8 +14,10 @@ import {
   Smile,
   Hash,
   User,
+  Palette,
 } from 'lucide-react';
 import { BrokenPencilIcon } from './BrokenPencilIcon';
+import { TOP_10_GENRES, getGenreInfo } from '../lib/genres';
 
 import { processAndUploadImage, DEFAULT_FALLBACK_IMAGE } from '../lib/imageUpload';
 import { Loader2 } from 'lucide-react';
@@ -27,6 +29,7 @@ export interface NewPostPayload {
   tags: string[];
   audioTitle: string;
   location: string;
+  genre?: string;
   faceoffConfig?: {
     battleQuestion?: string;
     redParticipant?: {
@@ -49,6 +52,7 @@ interface CreatePostModalProps {
   authorAvatar: string;
   authorName?: string;
   authorHandle?: string;
+  genreEnabled?: boolean;
 }
 
 // Preset creative medias for quick 1-click selection if user doesn't have a local file ready
@@ -89,11 +93,13 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   authorAvatar,
   authorName = 'Elena Vance',
   authorHandle = '@elena_aeri',
+  genreEnabled = false,
 }) => {
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [mediaUrl, setMediaUrl] = useState<string>('');
   const [caption, setCaption] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>(['#fairy', '#autumnlight']);
+  const [selectedGenre, setSelectedGenre] = useState<string>('');
   const [audioTitle, setAudioTitle] = useState<string>('Original Audio');
   const [location, setLocation] = useState<string>('Kyoto, Japan');
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
@@ -172,6 +178,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         tags: selectedTags,
         audioTitle: audioTitle.trim() || 'Original Audio',
         location: location.trim() || 'Kyoto, Japan',
+        genre: genreEnabled && selectedGenre ? selectedGenre : undefined,
         faceoffConfig: attachFaceoff
           ? {
               battleQuestion: faceoffQuestion.trim(),
@@ -435,6 +442,100 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               })}
             </div>
           </div>
+
+          {/* Genre Selection Section - Appears ONLY when user has Genre switched ON */}
+          {genreEnabled && (
+            <div className="pt-2 border-t border-purple-100 bg-gradient-to-br from-purple-50/80 via-indigo-50/40 to-white p-3 rounded-2xl border border-purple-200/90 shadow-2xs space-y-2 animate-fadeIn">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-purple-600 text-white flex items-center justify-center text-xs shadow-2xs shrink-0">
+                    <Palette className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11.5px] font-black text-slate-900 leading-tight">
+                        Select Post Genre
+                      </span>
+                      <span className="text-[9px] font-black text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded-full border border-purple-200">
+                        Genre ON
+                      </span>
+                    </div>
+                    <span className="text-[9.5px] text-slate-500 font-medium">
+                      Pick from Top 10 genres (e.g. Artist, Music, Gaming)
+                    </span>
+                  </div>
+                </div>
+
+                {selectedGenre ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedGenre('')}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-2xs cursor-pointer"
+                    title="Click to clear selected genre"
+                  >
+                    <span>{getGenreInfo(selectedGenre)?.icon || '🎨'}</span>
+                    <span>{selectedGenre}</span>
+                    <X className="w-2.5 h-2.5 ml-0.5" />
+                  </button>
+                ) : (
+                  <span className="text-[9.5px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                    Top 10 Available
+                  </span>
+                )}
+              </div>
+
+              {/* Top 10 Genre Grid */}
+              <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                {TOP_10_GENRES.map((g) => {
+                  const isSelected = selectedGenre === g.name;
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedGenre('');
+                        } else {
+                          setSelectedGenre(g.name);
+                          if (!selectedTags.includes(g.tag)) {
+                            setSelectedTags([...selectedTags, g.tag]);
+                          }
+                        }
+                      }}
+                      className={`p-2 rounded-xl text-left transition-all cursor-pointer border flex items-center justify-between gap-1.5 ${
+                        isSelected
+                          ? 'bg-purple-600 border-purple-700 text-white shadow-sm ring-2 ring-purple-400'
+                          : 'bg-white hover:bg-purple-50/70 border-slate-200 text-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-sm shrink-0">{g.icon}</span>
+                        <div className="min-w-0">
+                          <span
+                            className={`text-[11px] font-black block truncate leading-tight ${
+                              isSelected ? 'text-white' : 'text-slate-900'
+                            }`}
+                          >
+                            {g.name}
+                          </span>
+                          <span
+                            className={`text-[8.5px] block truncate ${
+                              isSelected ? 'text-purple-100' : 'text-slate-400'
+                            }`}
+                          >
+                            {g.tag}
+                          </span>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-white shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Sound & Location Meta */}
           <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">

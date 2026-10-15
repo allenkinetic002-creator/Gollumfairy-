@@ -90,6 +90,13 @@ import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
 import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend, submitVoteToBackend, fetchRemoteVotes } from './lib/realtimeSync';
 import { getSafeMediaUrl, DEFAULT_FALLBACK_IMAGE, TEA_AND_TEA_IMAGE } from './lib/imageUpload';
+import { getGenreInfo } from './lib/genres';
+import {
+  getStoredFairySwitchesForUser,
+  subscribeToFairySwitches,
+  FairySystemSwitches,
+  DEFAULT_FAIRY_SWITCHES,
+} from './lib/fairySwitches';
 
 export interface FeedPost {
   id: string;
@@ -105,6 +112,7 @@ export interface FeedPost {
   mediaUrl?: string;
   caption: string;
   tags: string[];
+  genre?: string;
   audioTitle?: string;
   likeCount: number;
   isLiked: boolean;
@@ -634,6 +642,20 @@ export default function App() {
     }, 3500);
   };
 
+  const [fairySwitches, setFairySwitches] = useState<FairySystemSwitches>(() =>
+    getStoredFairySwitchesForUser(currentUser)
+  );
+
+  useEffect(() => {
+    setFairySwitches(getStoredFairySwitchesForUser(isLoggedIn ? currentUser : null));
+  }, [isLoggedIn, currentUser?.id, currentUser?.handle]);
+
+  useEffect(() => {
+    return subscribeToFairySwitches((switches) => {
+      setFairySwitches(switches);
+    });
+  }, []);
+
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
   const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
   const [repoSyncStatus, setRepoSyncStatus] = useState<SyncStatus | null>(null);
@@ -661,6 +683,7 @@ export default function App() {
       mediaUrl: postImage,
       caption: "Welcome to Fairy Social Feed! Verified trust receipts, real community creators, and live GitHub sync are active 🧚✨",
       tags: ["#fairy", "#creators", "#trustreceipts"],
+      genre: "Artist",
       audioTitle: "Original Audio",
       likeCount: 42,
       isLiked: false,
@@ -678,6 +701,7 @@ export default function App() {
       mediaType: "tweet",
       caption: "Fairy ecosystem is live.",
       tags: ["#design", "#creators", "#build"],
+      genre: "Tech & Code",
       audioTitle: "Original Audio",
       likeCount: 38,
       isLiked: false,
@@ -717,6 +741,7 @@ export default function App() {
         mediaUrl: safeMedia,
         caption: p.caption || p.tweet_content || '',
         tags: p.tags || [],
+        genre: p.genre || undefined,
         audioTitle: p.audioTitle || p.audio_title || 'Original Audio',
         likeCount: p.likeCount ?? p.like_count ?? 1,
         isLiked: false,
@@ -835,6 +860,7 @@ export default function App() {
       mediaUrl: payload.mediaUrl,
       caption: payload.text,
       tags: payload.tags && payload.tags.length > 0 ? payload.tags : ['#creators', '#design'],
+      genre: payload.genre,
       audioTitle: 'Original Audio',
       likeCount: 1,
       isLiked: true,
@@ -897,6 +923,7 @@ export default function App() {
       mediaUrl: payload.mediaUrl,
       caption: payload.caption,
       tags: payload.tags,
+      genre: payload.genre,
       audioTitle: payload.audioTitle,
       likeCount: 1,
       isLiked: true,
@@ -1839,6 +1866,7 @@ export default function App() {
                   onPhoneVote={(postId, authorName, type, newLikes, newDislikes) => {
                     handleFeedPostTieBreakerVote(postId, authorName, type, newLikes, newDislikes);
                   }}
+                  userGenreEnabled={Boolean(fairySwitches.genre)}
                 />
               ) : (
               <div key={post.id} className="space-y-1.5 shrink-0">
@@ -1919,12 +1947,19 @@ export default function App() {
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <div className="flex items-center gap-1.5 leading-none">
+                      <div className="flex items-center gap-1.5 leading-none flex-wrap">
                         <span className="text-[13px] font-black text-slate-900 tracking-tight">
                           {post.authorName}
                         </span>
                         {post.isVerified && (
                           <CheckCircle2 className="w-3.5 h-3.5 text-purple-600 fill-purple-100" />
+                        )}
+                        {/* Genre badge appears ONLY when viewing user has Genre ON */}
+                        {fairySwitches.genre && post.genre && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200/90 shadow-2xs">
+                            <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
+                            <span>{post.genre}</span>
+                          </span>
                         )}
                       </div>
                       <span className="text-[10.5px] font-medium text-slate-500 mt-0.5">
@@ -2137,6 +2172,15 @@ export default function App() {
                       <User className="w-3 h-3 text-slate-400 stroke-[1.8]" />
                     </div>
                     <div className="flex-1 min-w-0">
+                      {fairySwitches.genre && post.genre && (
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-400">Genre</span>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200/90 shadow-2xs">
+                            <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
+                            <span>{post.genre}</span>
+                          </span>
+                        </div>
+                      )}
                       <p className="text-[12px] leading-snug text-slate-800">
                         <span className="font-extrabold text-slate-900 mr-1.5">
                           {post.authorHandle}
@@ -3494,6 +3538,7 @@ export default function App() {
         authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : ''}
         authorName={currentUser && !isLoggedOut ? currentUser.name : (isLoggedIn ? "You" : "Anonymous User")}
         authorHandle={currentUser && !isLoggedOut ? currentUser.handle : (isLoggedIn ? "@user" : "@user")}
+        genreEnabled={Boolean(fairySwitches.genre)}
       />
 
       {/* Create Post Modal (Allows posting video, pic, and writing) */}
@@ -3504,6 +3549,7 @@ export default function App() {
         authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : ''}
         authorName={currentUser && !isLoggedOut ? currentUser.name : (isLoggedIn ? "You" : "Anonymous User")}
         authorHandle={currentUser && !isLoggedOut ? currentUser.handle : (isLoggedIn ? "@user" : "@user")}
+        genreEnabled={Boolean(fairySwitches.genre)}
       />
 
       {/* Raygun Action Modals (Verb: Past Challenges / Adverb: Challenge Person to Online Fight) */}

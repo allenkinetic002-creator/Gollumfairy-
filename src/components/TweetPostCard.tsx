@@ -13,6 +13,7 @@ import { InfluenceRatingModal } from './InfluenceRatingModal';
 import { RaygunActionModal } from './RaygunActionModal';
 import { User } from 'lucide-react';
 import { getSafeMediaUrl, DEFAULT_FALLBACK_IMAGE } from '../lib/imageUpload';
+import { getGenreInfo } from '../lib/genres';
 
 export interface TweetPostItem {
   id: string;
@@ -28,6 +29,7 @@ export interface TweetPostItem {
   mediaUrl?: string;
   caption?: string;
   tags?: string[];
+  genre?: string;
   audioTitle?: string;
   likeCount: number;
   isLiked: boolean;
@@ -79,6 +81,7 @@ interface TweetPostCardProps {
   authorPhoneLikes?: number;
   authorRank?: number;
   onPhoneVote?: (postId: string, authorName: string, type: 'like' | 'dislike' | 'unvote' | 'reset', newLikes: number, newDislikes: number) => void;
+  userGenreEnabled?: boolean;
 }
 
 export const TweetPostCard: React.FC<TweetPostCardProps> = ({
@@ -108,6 +111,7 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
   authorPhoneLikes = 0,
   authorRank,
   onPhoneVote,
+  userGenreEnabled = false,
 }) => {
   const [isRetweeted, setIsRetweeted] = useState(Boolean(post.isRetweeted));
   const [retweetCount, setRetweetCount] = useState(post.retweetCount ?? 14);
@@ -219,6 +223,13 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
               <span className="text-xs text-slate-400 font-medium">{post.authorHandle}</span>
               <span className="text-xs text-slate-300">&middot;</span>
               <span className="text-xs text-slate-400 font-medium">{post.timeAgo}</span>
+              {/* Genre badge appears ONLY when viewing user has Genre ON */}
+              {userGenreEnabled && post.genre && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200/90 shadow-2xs">
+                  <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
+                  <span>{post.genre}</span>
+                </span>
+              )}
             </div>
             {post.location && (
               <span className="text-[10.5px] text-slate-400 font-normal">{post.location}</span>
