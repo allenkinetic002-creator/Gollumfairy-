@@ -39,15 +39,20 @@ async function configureGitRemote() {
       await execAsync('git branch -M main');
       needsFetch = true;
     }
-    let token = process.env.GITHUB_TOKEN;
-    if (!token) {
-      const tokenFile = path.resolve(__dirname, '.git', 'github_token');
-      if (fs.existsSync(tokenFile)) {
-        token = fs.readFileSync(tokenFile, 'utf-8').trim();
+    let token = '';
+    const tokenFile = path.resolve(__dirname, '.git', 'github_token');
+    if (fs.existsSync(tokenFile)) {
+      token = fs.readFileSync(tokenFile, 'utf-8').trim();
+    }
+    if (!token || token.length < 15) {
+      const envTok = (process.env.GITHUB_TOKEN || '').trim();
+      if (envTok.length >= 15) {
+        token = envTok;
       }
     }
+
     if (token) {
-      const remoteUrl = `https://x-access-token:${token}@github.com/${GITHUB_REPO}.git`;
+      const remoteUrl = `https://${token}@github.com/${GITHUB_REPO}.git`;
       try {
         await execAsync(`git remote set-url origin "${remoteUrl}"`);
       } catch {
