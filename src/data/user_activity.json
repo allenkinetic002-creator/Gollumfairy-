@@ -1,5 +1,28 @@
 [
   {
+    "id": "act-1792071699945-us7up",
+    "action": "phone_hand_reset",
+    "description": "Reset Phone Hand likes for karak to 0",
+    "details": {
+      "personName": "karak"
+    },
+    "timestamp": "2026-10-15T13:41:38.409Z",
+    "savedAt": "2026-10-15T13:41:39.945Z"
+  },
+  {
+    "id": "act-1792071699945-7z6pe",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand Vote: karak now has 0 likes (Ranked on leaderboard)",
+    "details": {
+      "personName": "karak",
+      "voteType": "reset",
+      "likes": 0,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T13:41:38.409Z",
+    "savedAt": "2026-10-15T13:41:39.945Z"
+  },
+  {
     "id": "act-1792071697943-2ipxc",
     "action": "vote_reset",
     "description": "Reset vote for karak",
