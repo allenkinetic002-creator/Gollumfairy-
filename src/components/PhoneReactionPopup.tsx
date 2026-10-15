@@ -227,7 +227,7 @@ export function PhoneReactionPopup({
         <div className="flex-1 flex items-center justify-center gap-3 shrink-0">
           <div className="text-center min-w-[55px]">
             <div className="text-[13px] sm:text-[14px] font-black tabular-nums leading-none text-[#E51E2B]">
-              {likes}
+              {likes.toLocaleString()}
             </div>
             <div className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">
               Phone Likes
@@ -238,7 +238,7 @@ export function PhoneReactionPopup({
 
           <div className="text-center min-w-[55px]">
             <div className="text-[13px] sm:text-[14px] font-black tabular-nums leading-none text-[#1D3D8F]">
-              {dislikes}
+              {dislikes.toLocaleString()}
             </div>
             <div className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">
               Dislikes
@@ -262,7 +262,7 @@ export function PhoneReactionPopup({
       <div className="w-full flex items-center justify-between mt-2 pt-1 border-t border-slate-200/80 px-1">
         <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
           <ThumbsUp className="w-2.5 h-2.5 text-red-500" />
-          <span>Top likes = #1 (e.g. 3 likes is 1st, 2 is 2nd)</span>
+          <span>Whoever has the most likes takes #1</span>
         </span>
 
         {(likes > 0 || dislikes > 0) && (

@@ -1409,9 +1409,9 @@ export default function App() {
       if (voteType === 'reset') {
         setTieBreakerToast(`🔄 Phone hand likes reset to 0 for ${personName}`);
       } else if (updatedRank === 1) {
-        setTieBreakerToast(`🏆 NUMBER ONE! ${personName} moves to #1 on Leaderboard with ${newLikes} Phone Hand ${newLikes === 1 ? 'like' : 'likes'}!`);
+        setTieBreakerToast(`🏆 NUMBER ONE! ${personName} moves to #1 on Leaderboard with ${newLikes.toLocaleString()} Phone Hand ${newLikes === 1 ? 'like' : 'likes'}!`);
       } else {
-        setTieBreakerToast(`▲ ${personName} moves to Rank #${updatedRank} with ${newLikes} Phone Hand ${newLikes === 1 ? 'like' : 'likes'}!`);
+        setTieBreakerToast(`▲ ${personName} moves to Rank #${updatedRank} with ${newLikes.toLocaleString()} Phone Hand ${newLikes === 1 ? 'like' : 'likes'}!`);
       }
 
       setTimeout(() => {
