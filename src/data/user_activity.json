@@ -1,5 +1,93 @@
 [
   {
+    "id": "act-1792092561056-j2rdf",
+    "action": "like_post",
+    "description": "Liked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": true
+    },
+    "timestamp": "2026-10-15T19:29:18.447Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
+    "id": "act-1792092561056-vy3nt",
+    "action": "like_post",
+    "description": "Liked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": true
+    },
+    "timestamp": "2026-10-15T19:29:18.447Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
+    "id": "act-1792092561056-q0n1b",
+    "action": "like_post",
+    "description": "Unliked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": false
+    },
+    "timestamp": "2026-10-15T19:29:17.884Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
+    "id": "act-1792092561056-6xg2c",
+    "action": "like_post",
+    "description": "Unliked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": false
+    },
+    "timestamp": "2026-10-15T19:29:17.884Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
+    "id": "act-1792092561056-kgp7d",
+    "action": "like_post",
+    "description": "Liked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": true
+    },
+    "timestamp": "2026-10-15T19:29:17.190Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
+    "id": "act-1792092561056-74219",
+    "action": "like_post",
+    "description": "Liked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": true
+    },
+    "timestamp": "2026-10-15T19:29:17.190Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
+    "id": "act-1792092561056-09ub4",
+    "action": "like_post",
+    "description": "Unliked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": false
+    },
+    "timestamp": "2026-10-15T19:29:16.844Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
+    "id": "act-1792092561056-s0763",
+    "action": "like_post",
+    "description": "Unliked post @karak",
+    "details": {
+      "postId": "post-1792066294285",
+      "isLiked": false
+    },
+    "timestamp": "2026-10-15T19:29:16.844Z",
+    "savedAt": "2026-10-15T19:29:21.056Z"
+  },
+  {
     "id": "act-1792092557895-hc9gb",
     "action": "post_action",
     "description": "Post action: like on post-1792066294285",
@@ -1231,110 +1319,5 @@
     },
     "timestamp": "2026-10-15T13:54:37.478Z",
     "savedAt": "2026-10-15T13:54:38.665Z"
-  },
-  {
-    "id": "act-1792072478665-ka142",
-    "action": "phone_hand_vote",
-    "description": "Phone Hand Vote: karak like (now 5 likes)",
-    "details": {
-      "personName": "karak",
-      "voteType": "like",
-      "likes": 5,
-      "dislikes": 0
-    },
-    "timestamp": "2026-10-15T13:54:37.478Z",
-    "savedAt": "2026-10-15T13:54:38.665Z"
-  },
-  {
-    "id": "act-1792072477009-zyzx5",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for karak (5 phone hand likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 5,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T13:54:37.009Z"
-    },
-    "savedAt": "2026-10-15T13:54:37.009Z"
-  },
-  {
-    "id": "act-1792072476999-nuahz",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for karak (5 phone hand likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 5,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T13:54:36.999Z"
-    },
-    "savedAt": "2026-10-15T13:54:36.999Z"
-  },
-  {
-    "id": "act-1792071708519-s1o1f",
-    "action": "phone_hand_vote",
-    "description": "Phone Hand vote for karak: +1 Like (Total: 4)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "likes": 4,
-      "dislikes": 0
-    },
-    "timestamp": "2026-10-15T13:41:46.980Z",
-    "savedAt": "2026-10-15T13:41:48.519Z"
-  },
-  {
-    "id": "act-1792071708519-rxunp",
-    "action": "phone_hand_vote",
-    "description": "Phone Hand Vote: karak now has 4 likes (Ranked on leaderboard)",
-    "details": {
-      "personName": "karak",
-      "voteType": "like",
-      "likes": 4,
-      "dislikes": 0
-    },
-    "timestamp": "2026-10-15T13:41:46.980Z",
-    "savedAt": "2026-10-15T13:41:48.519Z"
-  },
-  {
-    "id": "act-1792071706473-wh70g",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for karak (4 phone hand likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 4,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T13:41:46.472Z"
-    },
-    "savedAt": "2026-10-15T13:41:46.473Z"
-  },
-  {
-    "id": "act-1792071706466-8eatu",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for karak (4 phone hand likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 4,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T13:41:46.466Z"
-    },
-    "savedAt": "2026-10-15T13:41:46.466Z"
-  },
-  {
-    "id": "act-1792071699945-us7up",
-    "action": "phone_hand_reset",
-    "description": "Reset Phone Hand likes for karak to 0",
-    "details": {
-      "personName": "karak"
-    },
-    "timestamp": "2026-10-15T13:41:38.409Z",
-    "savedAt": "2026-10-15T13:41:39.945Z"
   }
 ]
