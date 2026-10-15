@@ -1,5 +1,16 @@
 [
   {
+    "id": "act-1792058651738-93xwy",
+    "action": "publish_post",
+    "description": "Post published: \"hollow\"",
+    "details": {
+      "id": "post-1792058652301",
+      "mediaType": "image"
+    },
+    "timestamp": "2026-10-15T10:04:12.301Z",
+    "savedAt": "2026-10-15T10:04:11.738Z"
+  },
+  {
     "id": "act-1792058124277-enh51",
     "action": "publish_post",
     "description": "Post published: \"tea and tea\"",
