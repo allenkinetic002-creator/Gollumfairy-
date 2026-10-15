@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { initializeTrustReceiptsSync } from './data/trustReceipts';
 import { initializeStarStampsSync } from './data/starStamps';
 import { fetchRemotePosts, syncPostToSupabase } from './lib/fairyBackend';
@@ -711,6 +711,28 @@ export default function App() {
       viewCount: "1.2K",
     },
   ]);
+
+  // Priority Feed Sorting:
+  // When user has Support ON with a chosen supportedGenre, matching posts are pinned first (first post you see)!
+  const sortedFeedPosts = useMemo(() => {
+    if (!fairySwitches.support || !fairySwitches.supportedGenre) {
+      return feedPosts;
+    }
+    const target = fairySwitches.supportedGenre.toLowerCase().trim();
+    const supportedPosts: FeedPost[] = [];
+    const regularPosts: FeedPost[] = [];
+
+    feedPosts.forEach((p) => {
+      const pGenre = (p.genre || '').toLowerCase().trim();
+      if (pGenre && (pGenre === target || pGenre.includes(target))) {
+        supportedPosts.push(p);
+      } else {
+        regularPosts.push(p);
+      }
+    });
+
+    return [...supportedPosts, ...regularPosts];
+  }, [feedPosts, fairySwitches.support, fairySwitches.supportedGenre]);
 
   // Initialize Supabase backend sync and real-time listeners on mount
   useEffect(() => {
@@ -1785,7 +1807,7 @@ export default function App() {
               </div>
             )}
 
-            {feedPosts.map((post) =>
+            {sortedFeedPosts.map((post) =>
               post.isTweet ? (
                 <TweetPostCard
                   key={post.id}
@@ -1867,9 +1889,23 @@ export default function App() {
                     handleFeedPostTieBreakerVote(postId, authorName, type, newLikes, newDislikes);
                   }}
                   userGenreEnabled={Boolean(fairySwitches.genre)}
+                  supportedGenre={fairySwitches.support ? fairySwitches.supportedGenre : undefined}
                 />
               ) : (
               <div key={post.id} className="space-y-1.5 shrink-0">
+                {/* Priority Pin Banner when genre is tied with active Support */}
+                {post.genre && fairySwitches.support && fairySwitches.supportedGenre && post.genre.toLowerCase().trim() === fairySwitches.supportedGenre.toLowerCase().trim() && (
+                  <div className="flex items-center justify-between px-2.5 py-1 rounded-xl bg-gradient-to-r from-red-500/15 via-rose-500/20 to-red-500/10 border border-red-300 text-red-700 text-[10px] font-black mb-1 shadow-2xs animate-fadeIn">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-600 animate-ping shrink-0" />
+                      <span className="tracking-tight">First in Feed &bull; Supported Genre: {getGenreInfo(post.genre)?.icon || '🎨'} {post.genre}</span>
+                    </div>
+                    <span className="px-1.5 py-0.2 bg-red-600 text-white rounded text-[8.5px] uppercase tracking-wider font-extrabold">
+                      Priority Pinned #1
+                    </span>
+                  </div>
+                )}
+
                 {/* Reaction Widget moved upper to the very top of post */}
                 {activePhoneReactionId === post.id && (
                   <div className="w-full flex justify-center pt-0 pb-1 -mt-0.5">
@@ -1954,13 +1990,18 @@ export default function App() {
                         {post.isVerified && (
                           <CheckCircle2 className="w-3.5 h-3.5 text-purple-600 fill-purple-100" />
                         )}
-                        {/* Genre badge appears ONLY when viewing user has Genre ON */}
-                        {fairySwitches.genre && post.genre && (
+                        {/* If genre matches active Support: show in RED! Else if Genre switch ON: show in purple */}
+                        {post.genre && fairySwitches.support && fairySwitches.supportedGenre && post.genre.toLowerCase().trim() === fairySwitches.supportedGenre.toLowerCase().trim() ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-red-600 to-rose-600 text-white border border-red-700 shadow-xs ring-1 ring-red-400 animate-pulse">
+                            <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
+                            <span>{post.genre} &bull; Supported</span>
+                          </span>
+                        ) : (fairySwitches.genre && post.genre) ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200/90 shadow-2xs">
                             <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
                             <span>{post.genre}</span>
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <span className="text-[10.5px] font-medium text-slate-500 mt-0.5">
                         {post.authorHandle} &middot; {post.timeAgo} {post.location ? `· ${post.location}` : ''}
@@ -2172,7 +2213,18 @@ export default function App() {
                       <User className="w-3 h-3 text-slate-400 stroke-[1.8]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      {fairySwitches.genre && post.genre && (
+                      {/* If genre matches active Support: show in RED! Else if Genre switch ON: show in purple */}
+                      {post.genre && fairySwitches.support && fairySwitches.supportedGenre && post.genre.toLowerCase().trim() === fairySwitches.supportedGenre.toLowerCase().trim() ? (
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-red-600 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span> Supported Genre
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black bg-gradient-to-r from-red-600 to-rose-600 text-white border border-red-700 shadow-xs">
+                            <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
+                            <span>{post.genre}</span>
+                          </span>
+                        </div>
+                      ) : (fairySwitches.genre && post.genre) ? (
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-400">Genre</span>
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200/90 shadow-2xs">
@@ -2180,7 +2232,7 @@ export default function App() {
                             <span>{post.genre}</span>
                           </span>
                         </div>
-                      )}
+                      ) : null}
                       <p className="text-[12px] leading-snug text-slate-800">
                         <span className="font-extrabold text-slate-900 mr-1.5">
                           {post.authorHandle}

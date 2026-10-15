@@ -34,6 +34,7 @@ import {
   getActiveUsersForFeature,
   FairyUserProfile,
 } from '../lib/fairySwitches';
+import { TOP_10_GENRES, getGenreInfo } from '../lib/genres';
 
 interface FairyControlProps {
   onBackToFeed: () => void;
@@ -361,6 +362,23 @@ export function FairyControl({
       setSwitches(updated);
       saveStoredFairySwitchesForUser(currentUser, updated);
       showToastNotice(`✨ ${displayName} switch turned ON for ${currentUser?.name || 'your account'}! It remains active even if you log out.`);
+    }
+  };
+
+  const handleSelectSupportedGenre = (genreName: string) => {
+    const nextGenre = switches.supportedGenre === genreName ? '' : genreName;
+    const updated: FairySystemSwitches = {
+      ...switches,
+      supportedGenre: nextGenre || undefined,
+      updatedAt: new Date().toISOString(),
+      activatedBy: normalizeUserKey(currentUser) || 'guest',
+    };
+    setSwitches(updated);
+    saveStoredFairySwitchesForUser(currentUser, updated);
+    if (nextGenre) {
+      showToastNotice(`❤️ Support tied to "${nextGenre}"! Posts with ${nextGenre} will show in RED and be pinned first in your feed.`);
+    } else {
+      showToastNotice(`Support genre filter cleared.`);
     }
   };
 
@@ -1232,6 +1250,98 @@ export function FairyControl({
           {/* Sub-options: Hidden when OFF, Active when ON */}
           {supportEnabled && (
             <div className="mt-3.5 pt-3 border-t border-red-100 space-y-3">
+              {/* TOP 10 GENRES TIED WITH SUPPORT */}
+              <div className="bg-red-50/80 p-3.5 rounded-2xl border border-red-200/90 shadow-2xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-red-600 text-white flex items-center justify-center text-xs shadow-2xs shrink-0">
+                      <Tag className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-red-950 uppercase tracking-wide">
+                          Support a Primary Genre (Top 10)
+                        </span>
+                        <span className="text-[9px] font-black text-red-700 bg-red-100 px-1.5 py-0.5 rounded-full border border-red-200">
+                          Priority Pin #1
+                        </span>
+                      </div>
+                      <p className="text-[10.5px] text-slate-600 font-medium">
+                        Select a genre to support (e.g. Artist). Matching posts will show the genre badge in <strong className="text-red-700 font-black">RED</strong> and will always be the <strong className="text-red-700 font-black">first post you see</strong>.
+                      </p>
+                    </div>
+                  </div>
+
+                  {switches.supportedGenre ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSupportedGenre('')}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-red-600 text-white hover:bg-red-700 transition-colors shadow-2xs cursor-pointer shrink-0"
+                      title="Click to clear supported genre"
+                    >
+                      <span>{getGenreInfo(switches.supportedGenre)?.icon || '🎨'}</span>
+                      <span>{switches.supportedGenre}</span>
+                      <X className="w-3 h-3 ml-0.5" />
+                    </button>
+                  ) : (
+                    <span className="text-[9.5px] font-extrabold text-red-700 bg-white border border-red-200 px-2 py-0.5 rounded-full shadow-2xs shrink-0">
+                      Choose 1 Genre
+                    </span>
+                  )}
+                </div>
+
+                {/* Top 10 Genre Grid */}
+                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                  {TOP_10_GENRES.map((g) => {
+                    const isSelected = switches.supportedGenre === g.name;
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => handleSelectSupportedGenre(g.name)}
+                        className={`p-2 rounded-xl text-left transition-all cursor-pointer border flex items-center justify-between gap-1.5 ${
+                          isSelected
+                            ? 'bg-red-600 border-red-700 text-white shadow-sm ring-2 ring-red-400'
+                            : 'bg-white hover:bg-red-100/70 border-red-200 text-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-sm shrink-0">{g.icon}</span>
+                          <div className="min-w-0">
+                            <span
+                              className={`text-[11px] font-black block truncate leading-tight ${
+                                isSelected ? 'text-white' : 'text-slate-900'
+                              }`}
+                            >
+                              {g.name}
+                            </span>
+                            <span
+                              className={`text-[8.5px] block truncate ${
+                                isSelected ? 'text-red-100' : 'text-slate-400'
+                              }`}
+                            >
+                              {g.tag} &bull; Pin to #1
+                            </span>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {switches.supportedGenre && (
+                  <div className="p-2 rounded-xl bg-white border border-red-200 flex items-center gap-2 text-[10.5px] text-red-900 font-bold shadow-2xs">
+                    <span className="text-sm">❤️</span>
+                    <span>
+                      Active: Posts with <strong className="text-red-700 font-black">{switches.supportedGenre}</strong> will display their genre badge in <strong className="text-red-700 font-black">RED</strong> and be pinned to the top of your feed!
+                    </span>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-extrabold uppercase text-red-800 tracking-wider">
                   Support Categories ({selectedSupportCategories.length} Selected)

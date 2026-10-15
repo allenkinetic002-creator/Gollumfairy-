@@ -9,6 +9,7 @@ export interface FairySystemSwitches {
   trending: boolean;
   loyalty: boolean;
   genre: boolean;
+  supportedGenre?: string;
   updatedAt?: string;
   activatedBy?: string;
 }
@@ -172,6 +173,7 @@ export function getStoredFairySwitchesForUser(user?: { id?: string; handle?: str
         trending: Boolean(s.trending),
         loyalty: Boolean(s.loyalty),
         genre: Boolean(s.genre),
+        supportedGenre: typeof s.supportedGenre === 'string' ? s.supportedGenre : undefined,
         updatedAt: s.updatedAt,
         activatedBy: key,
       };
@@ -192,6 +194,7 @@ export function getStoredFairySwitchesForUser(user?: { id?: string; handle?: str
       trending: Boolean(s.trending),
       loyalty: Boolean(s.loyalty),
       genre: Boolean(s.genre),
+      supportedGenre: typeof s.supportedGenre === 'string' ? s.supportedGenre : undefined,
       updatedAt: s.updatedAt,
       activatedBy: lastKey,
     };
@@ -219,6 +222,7 @@ export function saveStoredFairySwitchesForUser(
     trending: Boolean(safeSwitches.trending),
     loyalty: Boolean(safeSwitches.loyalty),
     genre: Boolean(safeSwitches.genre),
+    supportedGenre: typeof safeSwitches.supportedGenre === 'string' ? safeSwitches.supportedGenre : undefined,
     updatedAt: new Date().toISOString(),
     activatedBy: key,
   };
@@ -281,6 +285,7 @@ export async function fetchServerFairySwitches(userKey?: string): Promise<FairyS
           trending: Boolean(data.switches.trending),
           loyalty: Boolean(data.switches.loyalty),
           genre: Boolean(data.switches.genre),
+          supportedGenre: typeof data.switches.supportedGenre === 'string' ? data.switches.supportedGenre : undefined,
           updatedAt: data.switches.updatedAt,
           activatedBy: data.switches.activatedBy || userKey,
         };

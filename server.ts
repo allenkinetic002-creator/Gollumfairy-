@@ -572,6 +572,7 @@ async function startServer() {
         trending: Boolean(switches.trending),
         loyalty: Boolean(switches.loyalty),
         genre: Boolean(switches.genre),
+        supportedGenre: typeof switches.supportedGenre === 'string' ? switches.supportedGenre : (userSwitchesMap[key]?.supportedGenre || undefined),
         updatedAt: new Date().toISOString(),
         activatedBy: key,
       };

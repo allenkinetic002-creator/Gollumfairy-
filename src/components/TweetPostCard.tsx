@@ -82,6 +82,7 @@ interface TweetPostCardProps {
   authorRank?: number;
   onPhoneVote?: (postId: string, authorName: string, type: 'like' | 'dislike' | 'unvote' | 'reset', newLikes: number, newDislikes: number) => void;
   userGenreEnabled?: boolean;
+  supportedGenre?: string;
 }
 
 export const TweetPostCard: React.FC<TweetPostCardProps> = ({
@@ -112,6 +113,7 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
   authorRank,
   onPhoneVote,
   userGenreEnabled = false,
+  supportedGenre,
 }) => {
   const [isRetweeted, setIsRetweeted] = useState(Boolean(post.isRetweeted));
   const [retweetCount, setRetweetCount] = useState(post.retweetCount ?? 14);
@@ -223,13 +225,18 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
               <span className="text-xs text-slate-400 font-medium">{post.authorHandle}</span>
               <span className="text-xs text-slate-300">&middot;</span>
               <span className="text-xs text-slate-400 font-medium">{post.timeAgo}</span>
-              {/* Genre badge appears ONLY when viewing user has Genre ON */}
-              {userGenreEnabled && post.genre && (
+              {/* If genre matches active Support: show in RED! Else if Genre switch ON: show in purple */}
+              {post.genre && supportedGenre && post.genre.toLowerCase().trim() === supportedGenre.toLowerCase().trim() ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-red-600 to-rose-600 text-white border border-red-700 shadow-xs ring-1 ring-red-400 animate-pulse">
+                  <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
+                  <span>{post.genre} &bull; Supported</span>
+                </span>
+              ) : (userGenreEnabled && post.genre) ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200/90 shadow-2xs">
                   <span>{getGenreInfo(post.genre)?.icon || '🎨'}</span>
                   <span>{post.genre}</span>
                 </span>
-              )}
+              ) : null}
             </div>
             {post.location && (
               <span className="text-[10.5px] text-slate-400 font-normal">{post.location}</span>
