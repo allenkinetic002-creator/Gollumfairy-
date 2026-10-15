@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792073733610-wpt9l",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand vote for karak: like (5 likes)",
+    "details": {
+      "personName": "karak",
+      "vote": "like",
+      "likes": 5,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T14:15:16.627Z",
+    "savedAt": "2026-10-15T14:15:33.610Z"
+  },
+  {
+    "id": "act-1792073733610-tkss4",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand Vote: karak like (now 5 likes)",
+    "details": {
+      "personName": "karak",
+      "voteType": "like",
+      "likes": 5,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T14:15:16.627Z",
+    "savedAt": "2026-10-15T14:15:33.610Z"
+  },
+  {
     "id": "act-1792073725625-ym203",
     "action": "phone_hand_vote",
     "description": "Phone Hand vote for karak: unclicked vote (4 likes)",
@@ -1244,29 +1270,5 @@
       "updatedAt": "2026-10-14T18:29:22.587Z"
     },
     "savedAt": "2026-10-14T18:29:22.588Z"
-  },
-  {
-    "id": "act-1792002472573-sffwv",
-    "action": "rating_submitted",
-    "description": "Finalized rating 9.2 ★ for Elena Vance",
-    "details": {
-      "targetName": "Elena Vance",
-      "rating": 9.2,
-      "isFinalized": true,
-      "updatedAt": "2026-10-14T18:27:52.572Z"
-    },
-    "savedAt": "2026-10-14T18:27:52.573Z"
-  },
-  {
-    "id": "act-1792002426495-11nci",
-    "action": "vote_reset",
-    "description": "Reset vote for Elena Vance",
-    "details": {
-      "personName": "Elena Vance",
-      "isFinal": false,
-      "vote": null,
-      "updatedAt": "2026-10-14T18:27:06.495Z"
-    },
-    "savedAt": "2026-10-14T18:27:06.495Z"
   }
 ]
