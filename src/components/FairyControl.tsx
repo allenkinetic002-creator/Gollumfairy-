@@ -78,6 +78,8 @@ export interface CommunityMemberActivation {
   };
 }
 
+const INACTIVE_SWITCH_FEATURES = { support: false, favorite: false, trending: false, loyalty: false, genre: false };
+
 export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
   {
     id: 'act-1',
@@ -86,8 +88,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-rose-500',
     avatarInitial: 'E',
     bio: 'Fashion worldbuilder & visual designer',
-    activatedFeatures: { support: true, favorite: true, trending: true, loyalty: true, genre: true },
-    metrics: { supporters: 1840, favorites: 4810, trendScore: 48200, loyaltyMembers: 1240, genrePosts: 24 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 1840, favorites: 4810, trendScore: 48200, loyaltyMembers: 1240, genrePosts: 24 },
   },
   {
@@ -97,8 +99,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-indigo-600',
     avatarInitial: 'M',
     bio: '3D concept art & real-time lighting',
-    activatedFeatures: { support: true, favorite: true, trending: false, loyalty: true, genre: true },
-    metrics: { supporters: 920, favorites: 2350, trendScore: 0, loyaltyMembers: 610, genrePosts: 19 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 920, favorites: 2350, trendScore: 31500, loyaltyMembers: 610, genrePosts: 19 },
   },
   {
@@ -108,8 +110,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-emerald-600',
     avatarInitial: 'C',
     bio: 'Kinetic typography & generative visuals',
-    activatedFeatures: { support: true, favorite: true, trending: true, loyalty: true, genre: false },
-    metrics: { supporters: 1150, favorites: 1890, trendScore: 21900, loyaltyMembers: 860, genrePosts: 0 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 1150, favorites: 1890, trendScore: 21900, loyaltyMembers: 860, genrePosts: 16 },
   },
   {
@@ -119,8 +121,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-amber-600',
     avatarInitial: 'Z',
     bio: 'Modular synthesis & dark ambient sound',
-    activatedFeatures: { support: false, favorite: true, trending: true, loyalty: false, genre: true },
-    metrics: { supporters: 0, favorites: 1430, trendScore: 32600, loyaltyMembers: 0, genrePosts: 32 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 760, favorites: 1430, trendScore: 32600, loyaltyMembers: 480, genrePosts: 32 },
   },
   {
@@ -130,8 +132,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-pink-600',
     avatarInitial: 'M',
     bio: 'Ceramic studies & tactile material design',
-    activatedFeatures: { support: true, favorite: false, trending: false, loyalty: false, genre: true },
-    metrics: { supporters: 340, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 5 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 340, favorites: 890, trendScore: 12400, loyaltyMembers: 220, genrePosts: 5 },
   },
   {
@@ -141,8 +143,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-blue-600',
     avatarInitial: 'L',
     bio: 'Speculative fiction & lore architecture',
-    activatedFeatures: { support: true, favorite: false, trending: true, loyalty: true, genre: true },
-    metrics: { supporters: 780, favorites: 0, trendScore: 14500, loyaltyMembers: 310, genrePosts: 14 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 780, favorites: 960, trendScore: 14500, loyaltyMembers: 310, genrePosts: 14 },
   },
   {
@@ -152,8 +154,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-purple-600',
     avatarInitial: 'N',
     bio: 'Procedural graphics & visual coding',
-    activatedFeatures: { support: true, favorite: true, trending: false, loyalty: true, genre: true },
-    metrics: { supporters: 890, favorites: 1220, trendScore: 0, loyaltyMembers: 420, genrePosts: 17 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 890, favorites: 1220, trendScore: 28400, loyaltyMembers: 420, genrePosts: 17 },
   },
   {
@@ -163,8 +165,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-teal-600',
     avatarInitial: 'L',
     bio: 'Real-time procedural 3D environments',
-    activatedFeatures: { support: false, favorite: true, trending: false, loyalty: true, genre: true },
-    metrics: { supporters: 0, favorites: 1650, trendScore: 0, loyaltyMembers: 540, genrePosts: 12 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 620, favorites: 1650, trendScore: 17800, loyaltyMembers: 540, genrePosts: 12 },
   },
   {
@@ -174,8 +176,8 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-yellow-600',
     avatarInitial: 'A',
     bio: 'Documentary photography & natural light studies',
-    activatedFeatures: { support: true, favorite: false, trending: true, loyalty: false, genre: true },
-    metrics: { supporters: 1420, favorites: 0, trendScore: 19800, loyaltyMembers: 0, genrePosts: 29 },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
+    metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 1420, favorites: 1100, trendScore: 19800, loyaltyMembers: 390, genrePosts: 29 },
   },
   {
@@ -185,7 +187,7 @@ export const COMMUNITY_ACTIVATORS: CommunityMemberActivation[] = [
     avatarBg: 'bg-slate-700',
     avatarInitial: 'F',
     bio: 'Speculative sci-fi worldbuilder',
-    activatedFeatures: { support: false, favorite: false, trending: false, loyalty: false, genre: false },
+    activatedFeatures: { ...INACTIVE_SWITCH_FEATURES },
     metrics: { supporters: 0, favorites: 0, trendScore: 0, loyaltyMembers: 0, genrePosts: 0 },
     defaultMetrics: { supporters: 510, favorites: 720, trendScore: 11200, loyaltyMembers: 190, genrePosts: 8 },
   },
@@ -265,12 +267,12 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
   >('all');
   const [drawerSearch, setDrawerSearch] = useState('');
 
-  // System active counts (real states only)
-  const supportUsersCount = supportEnabled ? 1 : 0;
-  const favoriteUsersCount = favoriteEnabled ? 1 : 0;
-  const trendingUsersCount = trendingEnabled ? 1 : 0;
-  const loyaltyUsersCount = loyaltyEnabled ? 1 : 0;
-  const genreUsersCount = genreEnabled ? 1 : 0;
+  // System active counts (real states only - dynamically driven by switch and active members)
+  const supportUsersCount = (supportEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.support).length;
+  const favoriteUsersCount = (favoriteEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.favorite).length;
+  const trendingUsersCount = (trendingEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.trending).length;
+  const loyaltyUsersCount = (loyaltyEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.loyalty).length;
+  const genreUsersCount = (genreEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.genre).length;
 
   // Toggle person feature activation interactively
   const togglePersonFeature = (
@@ -352,6 +354,8 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
     metricColor: string
   ) => {
     const isExpanded = expandedCardDrawer === systemKey;
+    const activeActivatorsCount = activators.filter((p) => p.activatedFeatures[systemKey]).length;
+    const totalAvailableUsers = (isSystemActive ? 1 : 0) + activeActivatorsCount;
 
     const drawerPeople = activators.filter((p) => {
       if (cardDrawerFilter === 'activated' && !p.activatedFeatures[systemKey]) return false;
@@ -374,12 +378,21 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
           <div className="flex items-center gap-1.5 flex-wrap">
             <Users className="w-3.5 h-3.5 text-slate-600 shrink-0" />
             <span className="font-extrabold text-slate-800">
-              Activation Status:
+              Available Users:
             </span>
-            <span className="text-[10px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-full border border-slate-200 shadow-2xs">
-              <strong className={isSystemActive ? 'text-emerald-700' : 'text-slate-500'}>
-                {isSystemActive ? 'Active for You' : 'Inactive'}
-              </strong>
+            <span
+              className={`text-[10.5px] font-black px-2.5 py-0.5 rounded-full border transition-all shadow-2xs flex items-center gap-1.5 ${
+                totalAvailableUsers > 0
+                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300 ring-2 ring-emerald-500/20 shadow-xs'
+                  : 'bg-slate-100 text-slate-500 border border-slate-200'
+              }`}
+            >
+              {totalAvailableUsers > 0 && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              )}
+              {totalAvailableUsers > 0
+                ? `${totalAvailableUsers} user${totalAvailableUsers === 1 ? '' : 's'} available`
+                : 'No users available'}
             </span>
           </div>
 
@@ -396,7 +409,9 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
             title="Inspect users preference settings"
           >
             <Eye className="w-3 h-3" />
-            {isExpanded ? 'Hide Users' : 'See Users'}
+            {isExpanded
+              ? 'Hide Users'
+              : `See Users (${totalAvailableUsers} Available)`}
           </button>
         </div>
 
@@ -405,20 +420,22 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
           <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
             <div
               className={`${circleColor} h-full transition-all duration-300`}
-              style={{ width: isSystemActive ? '100%' : '0%' }}
+              style={{ width: totalAvailableUsers > 0 ? '100%' : '0%' }}
             />
             <div
               className="bg-slate-300 h-full transition-all duration-300"
-              style={{ width: isSystemActive ? '0%' : '100%' }}
+              style={{ width: totalAvailableUsers > 0 ? '0%' : '100%' }}
             />
           </div>
           <div className="flex items-center justify-between text-[9.5px] text-slate-500 font-semibold">
             <span className="flex items-center gap-1 font-bold text-slate-800">
               <span className={`w-1.5 h-1.5 rounded-full ${circleColor}`} />
-              {isSystemActive ? 'Active' : 'Inactive'}
+              {totalAvailableUsers > 0
+                ? `${totalAvailableUsers} User${totalAvailableUsers === 1 ? '' : 's'} on Switch`
+                : '0 Users on Switch'}
             </span>
             <span className="flex items-center gap-1 text-slate-500">
-              Personalized Feed Preference
+              {isSystemActive ? 'Switch Applied · 1 User Available' : 'Switch Off · 0 Users'}
             </span>
           </div>
         </div>
@@ -426,6 +443,43 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
         {/* Expanded inline people list */}
         {isExpanded && (
           <div className="pt-2 border-t border-slate-200 space-y-2 animate-fadeIn">
+            {/* Show Current User at top if switch is ON */}
+            {isSystemActive && (
+              <div className="p-2 rounded-xl border border-emerald-300 bg-emerald-50/80 shadow-2xs flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white font-black text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
+                    You
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-black text-slate-900 truncate">
+                        You (Current User)
+                      </span>
+                      <span className="text-[10px] text-emerald-800 font-bold bg-white px-1.5 py-0.2 rounded-full border border-emerald-200">
+                        Switch Applied
+                      </span>
+                    </div>
+                    <p className="text-[10.5px] text-slate-600">
+                      Applied on this device · 1 user available
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-700 text-white shrink-0">
+                  Active
+                </span>
+              </div>
+            )}
+
+            {!isSystemActive && activeActivatorsCount === 0 && (
+              <div className="p-3 text-center rounded-xl bg-slate-100/70 border border-dashed border-slate-200 text-slate-500 text-xs">
+                <Users className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+                <p className="font-bold text-slate-700">No users available</p>
+                <p className="text-[10.5px] text-slate-500 mt-0.5">
+                  Click the switch above to apply and make 1 user available.
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center justify-between gap-1 flex-wrap">
               <div className="flex items-center gap-1 text-[10px] font-extrabold">
                 <button
@@ -888,20 +942,50 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
 
         {/* Color Key Bar representing the 5 colors */}
         <div className="flex items-center justify-between gap-1.5 mt-2 px-1 text-[10px] font-bold">
-          <span className="flex items-center gap-1 text-red-600">
-            <span className="w-2 h-2 rounded-full bg-red-600" /> Support
+          <span
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all ${
+              supportUsersCount > 0
+                ? 'bg-red-100 text-red-800 ring-1 ring-red-400 font-extrabold shadow-2xs'
+                : 'text-slate-400'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-red-600 shrink-0" /> Support ({supportUsersCount})
           </span>
-          <span className="flex items-center gap-1 text-pink-600">
-            <span className="w-2 h-2 rounded-full bg-pink-500" /> Favorite
+          <span
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all ${
+              favoriteUsersCount > 0
+                ? 'bg-pink-100 text-pink-800 ring-1 ring-pink-400 font-extrabold shadow-2xs'
+                : 'text-slate-400'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" /> Favorite ({favoriteUsersCount})
           </span>
-          <span className="flex items-center gap-1 text-blue-700">
-            <span className="w-2 h-2 rounded-full bg-blue-600" /> Trending
+          <span
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all ${
+              trendingUsersCount > 0
+                ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-400 font-extrabold shadow-2xs'
+                : 'text-slate-400'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" /> Trending ({trendingUsersCount})
           </span>
-          <span className="flex items-center gap-1 text-amber-700">
-            <span className="w-2 h-2 rounded-full bg-amber-400" /> Loyalty
+          <span
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all ${
+              loyaltyUsersCount > 0
+                ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-400 font-extrabold shadow-2xs'
+                : 'text-slate-400'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" /> Loyalty ({loyaltyUsersCount})
           </span>
-          <span className="flex items-center gap-1 text-purple-700">
-            <span className="w-2 h-2 rounded-full bg-purple-600" /> Genre
+          <span
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all ${
+              genreUsersCount > 0
+                ? 'bg-purple-100 text-purple-900 ring-1 ring-purple-400 font-extrabold shadow-2xs'
+                : 'text-slate-400'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" /> Genre ({genreUsersCount})
           </span>
         </div>
       </header>
@@ -915,10 +999,10 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
         {/* 1. SUPPORT — RED                                                  */}
         {/* ----------------------------------------------------------------- */}
         <div
-          className={`p-3.5 bg-white rounded-2xl border transition-all duration-200 shadow-2xs ${
+          className={`p-3.5 rounded-2xl border transition-all duration-300 ${
             supportEnabled
-              ? 'border-red-200 ring-2 ring-red-500/10'
-              : 'border-slate-200/90'
+              ? 'bg-red-50/50 border-2 border-red-500 shadow-lg ring-4 ring-red-500/15'
+              : 'bg-white border border-slate-200/90 shadow-2xs'
           }`}
         >
           {/* Header Row: [ SYSTEM NAME ]   [ ON/OFF SWITCH ] */}
@@ -934,21 +1018,23 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
                     RED
                   </span>
-                  <span
-                    className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 transition-all ${
-                      supportEnabled
-                        ? 'bg-red-100 text-red-800 border border-red-200 shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                    }`}
-                  >
-                    <Users className="w-2.5 h-2.5" />
-                    {supportEnabled ? 'Active · You' : 'Inactive'}
-                  </span>
+                  {supportUsersCount > 0 ? (
+                    <span className="text-[10.5px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition-all bg-red-600 text-white border border-red-700 shadow-xs ring-2 ring-red-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      <Users className="w-3 h-3 text-white" />
+                      <span>{supportUsersCount} user{supportUsersCount === 1 ? '' : 's'} available</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-all bg-slate-100 text-slate-500 border border-slate-200">
+                      <Users className="w-2.5 h-2.5 text-slate-400" />
+                      <span>0 users available</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {supportEnabled
-                    ? 'Active · Backing new & growing creators in your feed'
-                    : 'Inactive · Dedicated support system'}
+                    ? 'Active · 1 user available backing new & growing creators'
+                    : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -1257,10 +1343,10 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
         {/* 2. FAVORITE — PINK                                                */}
         {/* ----------------------------------------------------------------- */}
         <div
-          className={`p-3.5 bg-white rounded-2xl border transition-all duration-200 shadow-2xs ${
+          className={`p-3.5 rounded-2xl border transition-all duration-300 ${
             favoriteEnabled
-              ? 'border-pink-200 ring-2 ring-pink-500/10'
-              : 'border-slate-200/90'
+              ? 'bg-pink-50/50 border-2 border-pink-500 shadow-lg ring-4 ring-pink-500/15'
+              : 'bg-white border border-slate-200/90 shadow-2xs'
           }`}
         >
           {/* Header Row: [ SYSTEM NAME ]   [ ON/OFF SWITCH ] */}
@@ -1276,21 +1362,23 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-pink-50 text-pink-700 border border-pink-200">
                     PINK
                   </span>
-                  <span
-                    className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 transition-all ${
-                      favoriteEnabled
-                        ? 'bg-pink-100 text-pink-800 border border-pink-200 shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                    }`}
-                  >
-                    <Users className="w-2.5 h-2.5" />
-                    {favoriteEnabled ? 'Active · You' : 'Inactive'}
-                  </span>
+                  {favoriteUsersCount > 0 ? (
+                    <span className="text-[10.5px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition-all bg-pink-500 text-white border border-pink-600 shadow-xs ring-2 ring-pink-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      <Users className="w-3 h-3 text-white" />
+                      <span>{favoriteUsersCount} user{favoriteUsersCount === 1 ? '' : 's'} available</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-all bg-slate-100 text-slate-500 border border-slate-200">
+                      <Users className="w-2.5 h-2.5 text-slate-400" />
+                      <span>0 users available</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {favoriteEnabled
-                    ? 'Active · Pinning favorite creator feeds'
-                    : 'Inactive · Pin your favorite creators and get instant alerts'}
+                    ? 'Active · 1 user available pinning favorite creator feeds'
+                    : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -1440,10 +1528,10 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
         {/* 3. TRENDING — BLUE                                                */}
         {/* ----------------------------------------------------------------- */}
         <div
-          className={`p-3.5 bg-white rounded-2xl border transition-all duration-200 shadow-2xs ${
+          className={`p-3.5 rounded-2xl border transition-all duration-300 ${
             trendingEnabled
-              ? 'border-blue-200 ring-2 ring-blue-500/10'
-              : 'border-slate-200/90'
+              ? 'bg-blue-50/50 border-2 border-blue-600 shadow-lg ring-4 ring-blue-500/15'
+              : 'bg-white border border-slate-200/90 shadow-2xs'
           }`}
         >
           {/* Header Row: [ SYSTEM NAME ]   [ ON/OFF SWITCH ] */}
@@ -1459,21 +1547,23 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                     BLUE
                   </span>
-                  <span
-                    className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 transition-all ${
-                      trendingEnabled
-                        ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                    }`}
-                  >
-                    <Users className="w-2.5 h-2.5" />
-                    {trendingEnabled ? 'Active · You' : 'Inactive'}
-                  </span>
+                  {trendingUsersCount > 0 ? (
+                    <span className="text-[10.5px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition-all bg-blue-600 text-white border border-blue-700 shadow-xs ring-2 ring-blue-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      <Users className="w-3 h-3 text-white" />
+                      <span>{trendingUsersCount} user{trendingUsersCount === 1 ? '' : 's'} available</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-all bg-slate-100 text-slate-500 border border-slate-200">
+                      <Users className="w-2.5 h-2.5 text-slate-400" />
+                      <span>0 users available</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {trendingEnabled
-                    ? 'Active · Curating and boosting viral trends in your feed'
-                    : 'Inactive · Discover and boost high-momentum topics'}
+                    ? 'Active · 1 user available boosting viral trends'
+                    : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -1611,10 +1701,10 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
         {/* 4. LOYALTY — GOLD                                                 */}
         {/* ----------------------------------------------------------------- */}
         <div
-          className={`p-3.5 bg-white rounded-2xl border transition-all duration-200 shadow-2xs ${
+          className={`p-3.5 rounded-2xl border transition-all duration-300 ${
             loyaltyEnabled
-              ? 'border-amber-300 ring-2 ring-amber-400/20'
-              : 'border-slate-200/90'
+              ? 'bg-amber-50/50 border-2 border-amber-500 shadow-lg ring-4 ring-amber-500/15'
+              : 'bg-white border border-slate-200/90 shadow-2xs'
           }`}
         >
           {/* Header Row: [ SYSTEM NAME ]   [ ON/OFF SWITCH ] */}
@@ -1630,21 +1720,23 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
                     GOLD
                   </span>
-                  <span
-                    className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 transition-all ${
-                      loyaltyEnabled
-                        ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                    }`}
-                  >
-                    <Users className="w-2.5 h-2.5" />
-                    {loyaltyEnabled ? 'Active · You' : 'Inactive'}
-                  </span>
+                  {loyaltyUsersCount > 0 ? (
+                    <span className="text-[10.5px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition-all bg-amber-500 text-slate-950 border border-amber-600 shadow-xs ring-2 ring-amber-400/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                      <Users className="w-3 h-3 text-slate-950" />
+                      <span>{loyaltyUsersCount} user{loyaltyUsersCount === 1 ? '' : 's'} available</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-all bg-slate-100 text-slate-500 border border-slate-200">
+                      <Users className="w-2.5 h-2.5 text-slate-400" />
+                      <span>0 users available</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {loyaltyEnabled
-                    ? 'Active · Building loyalty streaks with your core creators'
-                    : 'Inactive · Build streaks and unlock exclusive content'}
+                    ? 'Active · 1 user available building loyalty streaks'
+                    : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -1827,10 +1919,10 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
         {/* 5. GENRE — PURPLE                                                 */}
         {/* ----------------------------------------------------------------- */}
         <div
-          className={`p-3.5 bg-white rounded-2xl border transition-all duration-200 shadow-2xs ${
+          className={`p-3.5 rounded-2xl border transition-all duration-300 ${
             genreEnabled
-              ? 'border-purple-200 ring-2 ring-purple-500/10'
-              : 'border-slate-200/90'
+              ? 'bg-purple-50/50 border-2 border-purple-600 shadow-lg ring-4 ring-purple-500/15'
+              : 'bg-white border border-slate-200/90 shadow-2xs'
           }`}
         >
           {/* Header Row: [ SYSTEM NAME ]   [ ON/OFF SWITCH ] */}
@@ -1846,21 +1938,23 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                   <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
                     PURPLE
                   </span>
-                  <span
-                    className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 transition-all ${
-                      genreEnabled
-                        ? 'bg-purple-100 text-purple-900 border border-purple-200 shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                    }`}
-                  >
-                    <Users className="w-2.5 h-2.5" />
-                    {genreEnabled ? 'Active · You' : 'Inactive'}
-                  </span>
+                  {genreUsersCount > 0 ? (
+                    <span className="text-[10.5px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition-all bg-purple-600 text-white border border-purple-700 shadow-xs ring-2 ring-purple-500/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      <Users className="w-3 h-3 text-white" />
+                      <span>{genreUsersCount} user{genreUsersCount === 1 ? '' : 's'} available</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-all bg-slate-100 text-slate-500 border border-slate-200">
+                      <Users className="w-2.5 h-2.5 text-slate-400" />
+                      <span>0 users available</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {genreEnabled
-                    ? 'Active · Classifying posts before publishing'
-                    : 'Inactive · Group content by artistic craft and domain'}
+                    ? 'Active · 1 user available classifying posts by craft'
+                    : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -2105,25 +2199,55 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
 
             {/* Quick Metrics Bar across the 5 systems */}
             <div className="grid grid-cols-5 gap-1 p-2 bg-slate-100 border-b border-slate-200 text-center">
-              <div className="bg-white p-1.5 rounded-lg border border-red-100">
+              <div className={`p-1.5 rounded-lg border transition-all ${
+                supportUsersCount > 0
+                  ? 'bg-red-50 border-red-300 ring-1 ring-red-400/50 shadow-2xs'
+                  : 'bg-white border-slate-200'
+              }`}>
                 <span className="text-[9px] font-black text-red-600 block uppercase">Support</span>
-                <span className="text-xs font-black text-slate-900">{supportEnabled ? 'ACTIVE' : 'OFF'}</span>
+                <span className={`text-[11px] font-black block ${supportUsersCount > 0 ? 'text-red-900' : 'text-slate-400'}`}>
+                  {supportUsersCount > 0 ? `${supportUsersCount} Available` : '0 Available'}
+                </span>
               </div>
-              <div className="bg-white p-1.5 rounded-lg border border-pink-100">
+              <div className={`p-1.5 rounded-lg border transition-all ${
+                favoriteUsersCount > 0
+                  ? 'bg-pink-50 border-pink-300 ring-1 ring-pink-400/50 shadow-2xs'
+                  : 'bg-white border-slate-200'
+              }`}>
                 <span className="text-[9px] font-black text-pink-600 block uppercase">Favorite</span>
-                <span className="text-xs font-black text-slate-900">{favoriteEnabled ? 'ACTIVE' : 'OFF'}</span>
+                <span className={`text-[11px] font-black block ${favoriteUsersCount > 0 ? 'text-pink-900' : 'text-slate-400'}`}>
+                  {favoriteUsersCount > 0 ? `${favoriteUsersCount} Available` : '0 Available'}
+                </span>
               </div>
-              <div className="bg-white p-1.5 rounded-lg border border-blue-100">
+              <div className={`p-1.5 rounded-lg border transition-all ${
+                trendingUsersCount > 0
+                  ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-400/50 shadow-2xs'
+                  : 'bg-white border-slate-200'
+              }`}>
                 <span className="text-[9px] font-black text-blue-600 block uppercase">Trending</span>
-                <span className="text-xs font-black text-slate-900">{trendingEnabled ? 'ACTIVE' : 'OFF'}</span>
+                <span className={`text-[11px] font-black block ${trendingUsersCount > 0 ? 'text-blue-900' : 'text-slate-400'}`}>
+                  {trendingUsersCount > 0 ? `${trendingUsersCount} Available` : '0 Available'}
+                </span>
               </div>
-              <div className="bg-white p-1.5 rounded-lg border border-amber-100">
+              <div className={`p-1.5 rounded-lg border transition-all ${
+                loyaltyUsersCount > 0
+                  ? 'bg-amber-50 border-amber-300 ring-1 ring-amber-400/50 shadow-2xs'
+                  : 'bg-white border-slate-200'
+              }`}>
                 <span className="text-[9px] font-black text-amber-700 block uppercase">Loyalty</span>
-                <span className="text-xs font-black text-slate-900">{loyaltyEnabled ? 'ACTIVE' : 'OFF'}</span>
+                <span className={`text-[11px] font-black block ${loyaltyUsersCount > 0 ? 'text-amber-900' : 'text-slate-400'}`}>
+                  {loyaltyUsersCount > 0 ? `${loyaltyUsersCount} Available` : '0 Available'}
+                </span>
               </div>
-              <div className="bg-white p-1.5 rounded-lg border border-purple-100">
+              <div className={`p-1.5 rounded-lg border transition-all ${
+                genreUsersCount > 0
+                  ? 'bg-purple-50 border-purple-300 ring-1 ring-purple-400/50 shadow-2xs'
+                  : 'bg-white border-slate-200'
+              }`}>
                 <span className="text-[9px] font-black text-purple-700 block uppercase">Genre</span>
-                <span className="text-xs font-black text-slate-900">{genreEnabled ? 'ACTIVE' : 'OFF'}</span>
+                <span className={`text-[11px] font-black block ${genreUsersCount > 0 ? 'text-purple-900' : 'text-slate-400'}`}>
+                  {genreUsersCount > 0 ? `${genreUsersCount} Available` : '0 Available'}
+                </span>
               </div>
             </div>
 
