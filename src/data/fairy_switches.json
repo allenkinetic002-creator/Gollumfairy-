@@ -5,8 +5,8 @@
       "favorite": false,
       "trending": false,
       "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:56:47.049Z",
+      "genre": true,
+      "updatedAt": "2026-10-15T19:57:46.279Z",
       "activatedBy": "user-karak"
     },
     "user-kinetic": {
