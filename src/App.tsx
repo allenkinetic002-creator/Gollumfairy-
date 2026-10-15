@@ -2300,95 +2300,97 @@ export default function App() {
           {activeNavIndex === 0 && (
             <>
           {/* Header */}
-          <header className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-white z-10 border-b border-slate-50">
-            <div className="flex items-center gap-2">
-              <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
-                <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
-              </div>
-              <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
-                Fairy
-              </h1>
+          <header className="w-full px-4 pt-1.5 pb-1 flex flex-col shrink-0 bg-white z-10 border-b border-slate-50 relative">
+            {/* Top row: Sign in button positioned directly above the Search icon and Messaging icon on the right */}
+            <div className="w-full flex items-center justify-end pr-0.5 pb-1">
+              <button
+                onClick={() => setShowSignInModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                title="Sign In to Fairy"
+                aria-label="Sign In"
+              >
+                <User className="w-3.5 h-3.5 stroke-[2.4]" />
+                <span>Sign In</span>
+              </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* 1st header icon: Guacamole Bowl / Nacho Cheese icon (toggles far-right floating honeyjar icon) */}
-              <button
-                onClick={() => setShowFloatingHoneyJar((prev) => !prev)}
-                aria-label="Guacamole & Nachos"
-                title="Guacamole & Nachos"
-                className="hover:opacity-75 transition-opacity active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
-              >
-                <AeriGuacamoleBowlIcon size={30} className="w-[30px] h-[30px]" />
-              </button>
+            {/* Main Header Row: Logo on left, all 5 icons in a single row on right */}
+            <div className="w-full flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
+                  <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
+                </div>
+                <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
+                  Fairy
+                </h1>
+              </div>
 
-              {/* 2nd header icon: Concentric Circle icon linked to Create Post Modal (Photo, Video & Writing) */}
-              <button
-                onClick={() => setShowCreatePostModal(true)}
-                aria-label="Create Post · Concentric Circle"
-                title="Create Post · Upload video, photo & writing"
-                className="hover:opacity-75 transition-transform active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
-              >
-                <AeriConcentricCircleIcon className="w-[27px] h-[27px] text-black" />
-              </button>
-
-              {/* 3rd header icon: One-Eye Hat Guy icon beside Search */}
-              <button
-                onClick={() => {
-                  setMorphedPosts((prev) => {
-                    const next = !prev['post-default-elena'];
-                    const updated = { ...prev };
-                    feedPosts.forEach((p) => {
-                      updated[p.id] = next;
-                    });
-                    return updated;
-                  });
-                }}
-                aria-label="One-Eye Hat Guy"
-                title="One-Eye Hat Guy"
-                className="hover:opacity-75 transition-opacity cursor-pointer p-0.5 flex items-center justify-center"
-              >
-                <AeriOneEyeHatGuyIcon className="w-[33px] h-[33px] text-black" />
-              </button>
-
-              {/* Column with Sign In button placed directly above the Search icon and Messaging icon */}
-              <div className="flex flex-col items-center sm:items-end gap-1">
+              {/* All 5 Header Icons in a clean single row */}
+              <div className="flex items-center gap-3">
+                {/* 1st header icon: Guacamole Bowl / Nacho Cheese icon (toggles far-right floating honeyjar icon) */}
                 <button
-                  onClick={() => setShowSignInModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                  title="Sign In to Fairy"
-                  aria-label="Sign In"
+                  onClick={() => setShowFloatingHoneyJar((prev) => !prev)}
+                  aria-label="Guacamole & Nachos"
+                  title="Guacamole & Nachos"
+                  className="hover:opacity-75 transition-opacity active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
                 >
-                  <User className="w-3.5 h-3.5 stroke-[2.4]" />
-                  <span>Sign In</span>
+                  <AeriGuacamoleBowlIcon size={30} className="w-[30px] h-[30px]" />
                 </button>
 
-                <div className="flex items-center gap-3">
-                  {/* Search icon */}
-                  <button
-                    onClick={() => {
-                      setShowUserSearchModal(true);
-                    }}
-                    aria-label="Search Creators & Users"
-                    title="Search Creators & Users"
-                    className="hover:opacity-75 transition-opacity cursor-pointer p-0.5 flex items-center justify-center"
-                  >
-                    <AeriSearchIcon className="w-[22px] h-[22px] text-black" />
-                  </button>
+                {/* 2nd header icon: Concentric Circle icon linked to Create Post Modal (Photo, Video & Writing) */}
+                <button
+                  onClick={() => setShowCreatePostModal(true)}
+                  aria-label="Create Post · Concentric Circle"
+                  title="Create Post · Upload video, photo & writing"
+                  className="hover:opacity-75 transition-transform active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
+                >
+                  <AeriConcentricCircleIcon className="w-[27px] h-[27px] text-black" />
+                </button>
 
-                  {/* Messaging icon */}
-                  <button
-                    onClick={() => {
-                      setTargetMessagePerson(null);
-                      setShowNormalMessagesScreen(true);
-                    }}
-                    aria-label="Messages"
-                    title="Messages · Direct messages with normal users"
-                    className="hover:opacity-75 transition-all active:scale-90 cursor-pointer p-0.5 relative text-black flex items-center justify-center"
-                  >
-                    <AeriMessageBubbleIcon size={22} className="w-[22px] h-[22px] text-black" />
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                  </button>
-                </div>
+                {/* 3rd header icon: One-Eye Hat Guy icon beside Search */}
+                <button
+                  onClick={() => {
+                    setMorphedPosts((prev) => {
+                      const next = !prev['post-default-elena'];
+                      const updated = { ...prev };
+                      feedPosts.forEach((p) => {
+                        updated[p.id] = next;
+                      });
+                      return updated;
+                    });
+                  }}
+                  aria-label="One-Eye Hat Guy"
+                  title="One-Eye Hat Guy"
+                  className="hover:opacity-75 transition-opacity cursor-pointer p-0.5 flex items-center justify-center"
+                >
+                  <AeriOneEyeHatGuyIcon className="w-[33px] h-[33px] text-black" />
+                </button>
+
+                {/* 4th header icon: Search icon */}
+                <button
+                  onClick={() => {
+                    setShowUserSearchModal(true);
+                  }}
+                  aria-label="Search Creators & Users"
+                  title="Search Creators & Users"
+                  className="hover:opacity-75 transition-opacity cursor-pointer p-0.5 flex items-center justify-center"
+                >
+                  <AeriSearchIcon className="w-[22px] h-[22px] text-black" />
+                </button>
+
+                {/* 5th header icon: Message icon */}
+                <button
+                  onClick={() => {
+                    setTargetMessagePerson(null);
+                    setShowNormalMessagesScreen(true);
+                  }}
+                  aria-label="Messages"
+                  title="Messages · Direct messages with normal users"
+                  className="hover:opacity-75 transition-all active:scale-90 cursor-pointer p-0.5 relative text-black flex items-center justify-center"
+                >
+                  <AeriMessageBubbleIcon size={22} className="w-[22px] h-[22px] text-black" />
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                </button>
               </div>
             </div>
           </header>
@@ -3036,12 +3038,22 @@ export default function App() {
                 </div>
               </div>
 
-              <button
-                onClick={() => setActiveNavIndex(0)}
-                className="text-[11px] font-bold text-slate-600 hover:text-black px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-              >
-                Back to Feed
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
+                  title="Sign In to Fairy"
+                >
+                  <User className="w-3 h-3 stroke-[2.4]" />
+                  <span>Sign In</span>
+                </button>
+                <button
+                  onClick={() => setActiveNavIndex(0)}
+                  className="text-[11px] font-bold text-slate-600 hover:text-black px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  Back to Feed
+                </button>
+              </div>
             </div>
 
             {/* CATEGORY SELECTOR CAROUSEL (All 6 requested categories) */}
