@@ -1,5 +1,33 @@
 [
   {
+    "id": "act-1792073716136-swsk2",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for karak (5 phone hand likes)",
+    "details": {
+      "personName": "karak",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 5,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T14:15:16.136Z"
+    },
+    "savedAt": "2026-10-15T14:15:16.136Z"
+  },
+  {
+    "id": "act-1792073716134-s2w3z",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for karak (5 phone hand likes)",
+    "details": {
+      "personName": "karak",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 5,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T14:15:16.133Z"
+    },
+    "savedAt": "2026-10-15T14:15:16.134Z"
+  },
+  {
     "id": "act-1792073715072-jh9vj",
     "action": "vote_submitted",
     "description": "Finalized DOWN vote for karak (4 phone hand likes)",
@@ -1240,23 +1268,5 @@
       "updatedAt": "2026-10-14T18:26:58.093Z"
     },
     "savedAt": "2026-10-14T18:26:58.094Z"
-  },
-  {
-    "id": "act-1792002414422-gdsqs",
-    "action": "rating_submitted",
-    "description": "Finalized rating 9.5 ★ for Elena Vance",
-    "details": {
-      "targetName": "Elena Vance",
-      "rating": 9.5,
-      "isFinalized": true,
-      "updatedAt": "2026-10-14T18:26:54.421Z"
-    },
-    "savedAt": "2026-10-14T18:26:54.422Z"
-  },
-  {
-    "id": "act-1792001723925-mug9j",
-    "action": "test_sync",
-    "description": "AI Studio connected and sync verified",
-    "savedAt": "2026-10-14T18:15:23.925Z"
   }
 ]
