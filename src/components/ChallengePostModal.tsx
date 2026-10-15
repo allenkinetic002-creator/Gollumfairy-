@@ -111,7 +111,14 @@ export const ChallengePostModal: React.FC<ChallengePostModalProps> = ({
     if (!file) return;
     const isVid = file.type.startsWith('video/');
     setMediaType(isVid ? 'video' : 'image');
-    setMediaUrl(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        setMediaUrl(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAddExtraFighter = (e: React.FormEvent) => {
@@ -440,14 +447,20 @@ export const ChallengePostModal: React.FC<ChallengePostModalProps> = ({
 
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-32 rounded-xl border-2 border-dashed border-slate-300 hover:border-purple-500 transition-colors cursor-pointer overflow-hidden relative group bg-slate-50 flex items-center justify-center"
+              className="w-full min-h-[160px] max-h-[320px] rounded-xl border-2 border-dashed border-slate-300 hover:border-purple-500 transition-colors cursor-pointer overflow-hidden relative group bg-slate-950 flex items-center justify-center"
             >
-              {mediaType === 'video' ? (
-                <video src={mediaUrl} className="w-full h-full object-cover" muted autoPlay loop playsInline />
-              ) : (
-                <img src={mediaUrl} alt="Post preview" className="w-full h-full object-cover" />
+              {mediaType !== 'video' && mediaUrl && (
+                <div
+                  className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
+                  style={{ backgroundImage: `url(${mediaUrl})` }}
+                />
               )}
-              <div className="absolute bottom-1.5 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-xs rounded-md text-white text-[9.5px] font-bold flex items-center gap-1">
+              {mediaType === 'video' ? (
+                <video src={mediaUrl} className="relative z-10 w-full max-h-[320px] object-contain mx-auto" muted autoPlay loop playsInline />
+              ) : (
+                <img src={mediaUrl} alt="Post preview" className="relative z-10 w-full max-h-[320px] object-contain mx-auto" />
+              )}
+              <div className="absolute bottom-1.5 left-2 z-20 px-2 py-0.5 bg-black/60 backdrop-blur-xs rounded-md text-white text-[9.5px] font-bold flex items-center gap-1">
                 {mediaType === 'video' ? <Video className="w-3 h-3 text-indigo-400" /> : <ImageIcon className="w-3 h-3 text-amber-400" />}
                 <span>Challenge Post Media</span>
               </div>

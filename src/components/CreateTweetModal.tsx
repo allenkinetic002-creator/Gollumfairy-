@@ -58,9 +58,15 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setSelectedImage(url);
-      setShowImagePicker(false);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        if (dataUrl) {
+          setSelectedImage(dataUrl);
+          setShowImagePicker(false);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 

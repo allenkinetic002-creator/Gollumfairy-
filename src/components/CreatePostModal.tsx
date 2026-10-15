@@ -116,9 +116,16 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     if (!file) return;
 
     const isVid = file.type.startsWith('video/');
-    const url = URL.createObjectURL(file);
     setMediaType(isVid ? 'video' : 'image');
-    setMediaUrl(url);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        setMediaUrl(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const toggleTag = (tag: string) => {
