@@ -1,8 +1,26 @@
 {
-  "Elena Vance": {
-    "targetName": "Elena Vance",
+  "Allen Dharak": {
+    "targetName": "Allen Dharak",
+    "rating": 9.8,
+    "isFinalized": true,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "Gollumfairy": {
+    "targetName": "Gollumfairy",
     "rating": 9.6,
-    "isFinalized": false,
-    "updatedAt": "2026-10-14T18:29:22.612Z"
+    "isFinalized": true,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "Kinetic": {
+    "targetName": "Kinetic",
+    "rating": 9.4,
+    "isFinalized": true,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "Karak": {
+    "targetName": "Karak",
+    "rating": 9.2,
+    "isFinalized": true,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
   }
 }

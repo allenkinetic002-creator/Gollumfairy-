@@ -144,51 +144,47 @@ export function buildProfileWikiData(user: {
         'Over 3,120 verified Star Stamps logged and acknowledged on the network.',
       ],
       associatedWith: [
-        { name: 'Elena Vance', handle: '@aerifairy', role: 'Concept Visual Artist & Beatmaker' },
-        { name: 'Alex Chen', handle: '@alexchen', role: 'Frontend & UI Specialist' },
-        { name: 'Tunde Ojo', handle: '@tunde_dev', role: 'Senior Database Engineer' },
+        { name: 'Gollumfairy', handle: '@Gollumfairy', role: 'Official Curator' },
+        { name: 'Kinetic', handle: '@kinetic', role: 'Photographer & Artist' },
+        { name: 'Karak', handle: '@karak', role: 'Visual Storyteller' },
       ],
       website: `fairy.app/${user.handle}`,
     };
   }
 
-  const isElena =
-    user.handle.toLowerCase().includes('elena') ||
-    user.name.toLowerCase().includes('elena') ||
-    user.handle.toLowerCase().includes('aeri');
+  const isGollumfairy =
+    user.handle?.toLowerCase().includes('gollumfairy') ||
+    user.name?.toLowerCase().includes('gollumfairy');
 
-  if (isElena) {
+  if (isGollumfairy) {
     return {
-      name: 'Elena Vance',
-      handle: '@aerifairy',
-      profession: 'Concept Visual Artist & Beatmaker',
-      birthdate: 'July 13, 2000',
-      age: 24,
-      birthSign: 'Cancer ♋',
-      birthplace: 'Seoul, South Korea',
-      nationality: 'South Korean / German',
-      almaMater: 'Seoul Institute of the Arts',
-      yearsActive: '2020–present',
-      fairyRankText: '#1 in Visual Art · #12 Global Fairy',
-      trustScore: 98,
-      starStampCount: 1420,
+      name: 'Gollumfairy',
+      handle: '@Gollumfairy',
+      profession: 'Official Fairy Creator & Curator',
+      birthdate: 'May 1, 2021',
+      age: 25,
+      birthSign: 'Taurus ♉',
+      birthplace: 'Fairy Realm',
+      nationality: 'Verified Creator',
+      almaMater: 'Fairy Creator Academy',
+      yearsActive: '2021–present',
+      fairyRankText: '#2 Global Leaderboard · Verified Curator',
+      trustScore: 99,
+      starStampCount: 1680,
       bioOverview:
-        'Elena Vance, widely known by her creator moniker Aeri Fairy, is an acclaimed concept visual artist, worldbuilder, and synth beatmaker. A leading voice of the neo-folklore and cyber-ambient aesthetic on the Fairy ecosystem, her immersive visual narratives explore mythological realms, luminous forest flora, and futuristic analog synthesis.',
+        'Official creator and community curator on Fairy network. Oversees verified trust receipts, live social feed updates, and ecosystem features.',
       beforeFame:
-        'Before establishing herself as a leading creator on Fairy, Vance began sketching fantasy scenes and architectural dioramas in digital painting communities in 2019 while studying at the Seoul Institute of the Arts.',
+        'Co-founded community initiatives and decentralized trust verification protocols across open networks.',
       triviaList: [
-        'Youngest visual artist to reach #1 Top Ranked Creator on the Fairy platform.',
-        'All ambient soundscapes in her posts are produced and mixed personally on vintage Roland Juno-106 and Moog Matriarch hardware.',
-        'Collaborated with over 24 global musicians and architects on cross-medium digital pavilions.',
-        'Her signature purple aesthetic palette was inspired by neon dusk reflections over the Han River in Seoul.',
-        'Has achieved a 98% Integrity Trust Score and over 1,420 Star Stamps awarded by peers.',
+        'Curator of verified creator challenges on Fairy.',
+        'Holds over 1,680 verified Star Stamps.',
+        'Active participant in real-time GitHub sync and app architecture.',
       ],
       associatedWith: [
-        { name: 'Elena Rostova', handle: '@elena_art', role: 'Brutalist Architecture & Visuals' },
-        { name: 'Marcus Thorne', handle: '@marcus_design', role: 'Industrial 3D Sculptor' },
-        { name: 'Maya Lin', handle: '@mayalin', role: 'Ceramic & Spatial Installations' },
+        { name: 'Allen Dharak', handle: '@allenkinetic002-creator', role: 'Founder & Developer' },
+        { name: 'Kinetic', handle: '@kinetic', role: 'Photographer & Artist' },
       ],
-      website: 'fairy.app/@aerifairy',
+      website: 'fairy.app/@Gollumfairy',
     };
   }
 
@@ -217,7 +213,7 @@ export function buildProfileWikiData(user: {
     ],
     associatedWith: [
       { name: 'Allen Dharak', handle: '@allenkinetic002-creator', role: 'Platform Architect' },
-      { name: 'Elena Vance', handle: '@aerifairy', role: 'Creator & Artist' },
+      { name: 'Gollumfairy', handle: '@Gollumfairy', role: 'Creator & Curator' },
     ],
     website: `fairy.app/${user.handle}`,
   };
@@ -309,72 +305,53 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   const [sitchPosts, setSitchPosts] = useState<TweetPostItem[]>([
     {
       id: 'sitch-1',
-      authorName: 'Elena Vance',
-      authorHandle: '@aerifairy',
-      authorAvatar: elenaAvatar,
+      authorName: activeUser.name,
+      authorHandle: activeUser.handle,
+      authorAvatar: activeUser.avatarUrl || '',
       isVerified: true,
       timeAgo: '45m ago',
-      location: 'Kyoto, Japan',
+      location: ((activeUser as any).location || (activeUser as any).city || 'London, UK') as string,
       mediaType: 'tweet',
       isTweet: true,
       tweetContent:
-        'Just completed the new ambient synth pack in Kyoto 🎧🌿 Testing the soundwaves against analog Roland filters. Full audio drop happening this Friday on Fairy! What harmonic frequency should we wander into next? 🧚✨',
-      tags: ['#ambient', '#synthwave', '#kyoto', '#aerifairy'],
-      likeCount: 1420,
+        'Live repository sync and real-time trust receipts now fully verified on Fairy network! What creative projects is everyone building this week? 🧚✨',
+      tags: ['#fairy', '#creators', '#trustreceipts'],
+      likeCount: 142,
       isLiked: false,
-      retweetCount: 184,
-      replyCount: 52,
-      viewCount: '18.4K',
+      retweetCount: 24,
+      replyCount: 12,
+      viewCount: '2.4K',
       isTrending: true,
       faceoffConfig: {
-        battleQuestion: 'Who has the superior synth acoustic aesthetic between Aeri Fairy or Slimy sticky',
+        battleQuestion: `Who has the more impactful visual direction between ${activeUser.name} and Gollumfairy?`,
         redParticipant: {
-          name: 'Elena Vance (@aerifairy)',
-          avatar: elenaAvatar,
+          name: activeUser.name,
+          avatar: activeUser.avatarUrl || '',
         },
         blueParticipant: {
-          name: 'Slimy sticky (@slimy_sticky)',
-          avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+          name: 'Gollumfairy',
+          avatar: '',
         },
       },
     },
     {
       id: 'sitch-2',
-      authorName: 'Elena Vance',
-      authorHandle: '@aerifairy',
-      authorAvatar: elenaAvatar,
+      authorName: activeUser.name,
+      authorHandle: activeUser.handle,
+      authorAvatar: activeUser.avatarUrl || '',
       isVerified: true,
       timeAgo: '3h ago',
-      location: 'Seoul / Han River',
+      location: ((activeUser as any).location || (activeUser as any).city || 'London, UK') as string,
       mediaType: 'tweet',
       isTweet: true,
       tweetContent:
-        'Unpopular opinion in digital arts: brutalist concrete architecture and organic enchanted fairy folklore belong in the exact same design syllabus. Change my mind in the replies 👇🏛️🍄',
-      tags: ['#folklore', '#brutalism', '#worldbuilding', '#design'],
-      likeCount: 2890,
+        'Transparent trust agreements and verified verbal commitments change online creator collaboration forever. Check out the verified trust receipts on the feed! 🏛️',
+      tags: ['#trustreceipts', '#starstamps', '#collaboration'],
+      likeCount: 289,
       isLiked: true,
-      retweetCount: 340,
-      replyCount: 112,
-      viewCount: '34.1K',
-    },
-    {
-      id: 'sitch-3',
-      authorName: 'Elena Vance',
-      authorHandle: '@aerifairy',
-      authorAvatar: elenaAvatar,
-      isVerified: true,
-      timeAgo: '1d ago',
-      location: 'Global Fairy Hub',
-      mediaType: 'tweet',
-      isTweet: true,
-      tweetContent:
-        'Late night sketch session in the misty rain... We just hit 1,420 Star Stamps and 98% Integrity score today. Thank you to everyone who dropped honey jars and trusted receipts! 🍯💜',
-      tags: ['#starstamps', '#trustreceipts', '#community', '#fairy'],
-      likeCount: 4120,
-      isLiked: false,
-      retweetCount: 490,
-      replyCount: 88,
-      viewCount: '52.9K',
+      retweetCount: 34,
+      replyCount: 18,
+      viewCount: '4.1K',
     },
   ]);
 
@@ -422,8 +399,8 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
       audioTitle: 'Aeri Fairy - Golden Hour Mist',
       timeAgo: '2h ago',
       comments: [
-        { id: 'c1', author: 'Elena Rostova', handle: '@elena_art', avatar: elenaAvatar, text: 'The amber light gradation is breathtaking Elena! ✨', time: '1h ago' },
-        { id: 'c2', author: 'Marcus Thorne', handle: '@marcus_design', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80', text: 'Top 10 energy as always. That color balance!', time: '45m ago' },
+        { id: 'c1', author: 'Gollumfairy', handle: '@Gollumfairy', avatar: '', text: 'The amber light gradation is breathtaking Elena! ✨', time: '1h ago' },
+        { id: 'c2', author: 'Allen Dharak', handle: '@allenkinetic002-creator', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80', text: 'Top 10 energy as always. That color balance!', time: '45m ago' },
       ],
     },
     {
@@ -436,11 +413,11 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
       likeCount: 3120,
       isLiked: true,
       commentsCount: 112,
-      audioTitle: 'Elena Vance - Echo Chamber 04',
+      audioTitle: 'Fairy Ambient - Echo Chamber 04',
       timeAgo: '1d ago',
       views: '18.4K',
       comments: [
-        { id: 'c3', author: 'Maya Lin', handle: '@mayalin', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80', text: 'Need this sound pack on loop immediately!', time: '18h ago' },
+        { id: 'c3', author: 'Kinetic', handle: '@kinetic', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80', text: 'Need this sound pack on loop immediately!', time: '18h ago' },
       ],
     },
     {
@@ -493,7 +470,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
       likeCount: 4510,
       isLiked: true,
       commentsCount: 154,
-      audioTitle: 'Elena Vance - Floral Synthesis',
+      audioTitle: 'Fairy Ambient - Floral Synthesis',
       timeAgo: '1w ago',
       views: '32.1K',
       comments: [],
@@ -622,7 +599,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
 
     const newComment: ProfileComment = {
       id: 'c-' + Date.now(),
-      author: 'Elena Vance',
+      author: activeUser.name,
       handle: '@aerifairy',
       avatar: elenaAvatar,
       text: newCommentText.trim(),
@@ -796,7 +773,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                   alt={wikiData.name}
                   className="w-full h-full rounded-full object-cover"
                 />
-              ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
+              ) : false && !activeUser.name.toLowerCase().includes('allen') ? (
                 <img
                   src={elenaAvatar}
                   alt={wikiData.name}
@@ -878,10 +855,10 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                     return;
                   }
                   onOpenSendPersonMessage({
-                    id: 'p-elena',
+                    id: (activeUser.id || 'user-' + wikiData.handle),
                     name: wikiData.name,
                     handle: wikiData.handle,
-                    avatarUrl: elenaAvatar,
+                    avatarUrl: activeUser.avatarUrl || '',
                   });
                 }}
                 className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
@@ -1058,7 +1035,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                     alt={wikiData.name}
                     className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-md ring-2 ring-purple-300"
                   />
-                ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
+                ) : false && !activeUser.name.toLowerCase().includes('allen') ? (
                   <img
                     src={elenaAvatar}
                     alt={wikiData.name}
@@ -1363,7 +1340,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                     alt={wikiData.name}
                     className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5"
                   />
-                ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
+                ) : false && !activeUser.name.toLowerCase().includes('allen') ? (
                   <img
                     src={elenaAvatar}
                     alt={wikiData.name}
@@ -1416,7 +1393,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                 onToggleRaygun={(id, name, avatar, handle) => {
                   setActiveRaygunSitchId((prev) => (prev === id ? null : id));
                   if (setRaygunTarget) {
-                    setRaygunTarget({ name, avatar: avatar || elenaAvatar, handle: handle || wikiData.handle });
+                    setRaygunTarget({ name, avatar: avatar || activeUser.avatarUrl || '', handle: handle || wikiData.handle });
                   }
                 }}
                 isRaygunActive={activeRaygunSitchId === sitch.id}
@@ -1494,14 +1471,14 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               <div className="w-full flex justify-center pt-0 pb-1.5 -mt-0.5">
                 <FaceoffBattleModal
                   onClose={() => setIsFaceoffOpen(false)}
-                  battleQuestion="Who looks Hotter between me Elena Vance or this loser Slimy sticky"
+                  battleQuestion={`Who has the stronger creative direction between ${wikiData.name} and Gollumfairy?`}
                   redParticipant={{
                     name: wikiData.name,
-                    avatar: elenaAvatar,
+                    avatar: activeUser.avatarUrl || '',
                   }}
                   blueParticipant={{
-                    name: 'Slimy sticky',
-                    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+                    name: 'Gollumfairy',
+                    avatar: '',
                   }}
                 />
               </div>
@@ -1531,7 +1508,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                   isOpen={true}
                   isInline={true}
                   targetPersonName={wikiData.name}
-                  targetPersonAvatar={elenaAvatar}
+                  targetPersonAvatar={activeUser.avatarUrl || ''}
                   onClose={() => setActiveRaygunAction(false)}
                   onSelectVerb={() => {
                     setActiveRaygunAction(false);
@@ -1575,7 +1552,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                       onClick={() => setActivePhoneReaction(!activePhoneReaction)}
                       className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
                     />
-                  ) : activeUser.name.toLowerCase().includes('elena') && !activeUser.name.toLowerCase().includes('allen') ? (
+                  ) : false && !activeUser.name.toLowerCase().includes('allen') ? (
                     <img
                       src={elenaAvatar}
                       alt={wikiData.name}
@@ -1729,10 +1706,10 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                   <button
                     onClick={() =>
                       onOpenSendPersonMessage({
-                        id: 'p-elena',
+                        id: (activeUser.id || 'user-' + wikiData.handle),
                         name: wikiData.name,
                         handle: wikiData.handle,
-                        avatarUrl: elenaAvatar,
+                        avatarUrl: activeUser.avatarUrl || '',
                       })
                     }
                     className="cursor-pointer px-2.5 sm:px-3 py-1 bg-[#E2E8F0] hover:bg-[#CBD5E1] text-black hover:text-black rounded-full text-[10px] sm:text-[10.5px] font-semibold flex items-center justify-center gap-1 border border-slate-300 shadow-2xs transition-all active:scale-95 whitespace-nowrap"

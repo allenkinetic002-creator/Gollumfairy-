@@ -433,6 +433,47 @@ async function startServer() {
     res.json({ success: true, ...eventPayload });
   });
 
+  // --- REAL USERS DIRECTORY ENDPOINTS ---
+  app.get('/api/users', (_req, res) => {
+    const users = readJsonFile('src/data/users.json', []);
+    res.json({ success: true, users });
+  });
+
+  app.post('/api/users', (req, res) => {
+    try {
+      const user = req.body;
+      if (!user || (!user.username && !user.name)) {
+        return res.status(400).json({ success: false, error: 'User data required' });
+      }
+      const users = readJsonFile<any[]>('src/data/users.json', []);
+      const existingIdx = users.findIndex(
+        (u: any) =>
+          (u.id && u.id === user.id) ||
+          (u.username && user.username && u.username.toLowerCase() === user.username.toLowerCase()) ||
+          (u.handle && user.handle && u.handle.toLowerCase() === user.handle.toLowerCase())
+      );
+      if (existingIdx >= 0) {
+        users[existingIdx] = { ...users[existingIdx], ...user };
+      } else {
+        users.push({
+          id: user.id || `user-${Date.now()}`,
+          rank: users.length + 1,
+          rating: user.rating || 9.0,
+          upvotes: user.upvotes || 10,
+          isOfficial: !!user.isOfficial,
+          isVerified: true,
+          ...user,
+        });
+      }
+      writeJsonFile('src/data/users.json', users);
+      broadcastRealtime('user_registered', { user });
+      autoCommitAndPush(`feat(users): register/update user ${user.username || user.name}`);
+      res.json({ success: true, user });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // --- POSTS ACTIONS & COMMENTS ENDPOINTS ---
   app.post('/api/posts/action', (req, res) => {
     const { postId, action, isLiked, likeCount, isRetweeted, retweetCount } = req.body;

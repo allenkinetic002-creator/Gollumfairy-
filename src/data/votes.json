@@ -1,18 +1,34 @@
 {
-  "Elena Vance": {
-    "personName": "Elena Vance",
-    "vote": null,
-    "isFinal": false,
-    "likes": 101,
-    "dislikes": 0,
-    "updatedAt": "2026-10-14T18:27:06.495Z"
-  },
-  "Elena Rostova": {
-    "personName": "Elena Rostova",
+  "Allen Dharak": {
+    "personName": "Allen Dharak",
     "vote": "like",
     "isFinal": true,
-    "likes": 1,
+    "likes": 142,
     "dislikes": 0,
-    "updatedAt": "2026-10-15T12:19:33.894Z"
+    "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "Gollumfairy": {
+    "personName": "Gollumfairy",
+    "vote": "like",
+    "isFinal": true,
+    "likes": 128,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "Kinetic": {
+    "personName": "Kinetic",
+    "vote": "like",
+    "isFinal": true,
+    "likes": 96,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "Karak": {
+    "personName": "Karak",
+    "vote": "like",
+    "isFinal": true,
+    "likes": 84,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
   }
 }

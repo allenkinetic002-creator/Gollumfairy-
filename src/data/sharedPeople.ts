@@ -1,5 +1,3 @@
-import elenaAvatar from '../assets/images/creator_portrait_elena_1791014499312.jpg';
-
 export interface ChatMessageItem {
   id: string;
   sender: 'me' | 'them';
@@ -26,22 +24,21 @@ export interface SharedPerson {
 }
 
 export const FIVE_HOURS_MS = 5 * 60 * 60 * 1000;
-export const STORAGE_SHARED_PEOPLE_KEY = 'vibe_shared_people_v4';
-export const STORAGE_SHARED_TIMERS_KEY = 'vibe_shared_5hr_timers_v4';
+export const STORAGE_SHARED_PEOPLE_KEY = 'vibe_shared_people_v5_real';
+export const STORAGE_SHARED_TIMERS_KEY = 'vibe_shared_5hr_timers_v5_real';
 
 export const INITIAL_SHARED_PEOPLE: SharedPerson[] = [
   {
-    id: 'p-elena',
-    name: 'Elena Rostova',
-    handle: '@elena_art',
-    city: 'Berlin',
-    percent: 91,
-    matchPercent: 91,
-    approval: '85+',
-    avatarBg: 'bg-amber-600',
-    avatarInitial: 'ER',
-    avatarText: 'ER',
-    avatarUrl: elenaAvatar,
+    id: 'user-allen',
+    name: 'Allen Dharak',
+    handle: '@allenkinetic002-creator',
+    city: 'London',
+    percent: 98,
+    matchPercent: 98,
+    approval: '95+',
+    avatarBg: 'bg-indigo-600',
+    avatarInitial: 'AD',
+    avatarText: 'AD',
     isOnline: true,
     unreadCount: 1,
     lastActive: 'Active now',
@@ -49,258 +46,95 @@ export const INITIAL_SHARED_PEOPLE: SharedPerson[] = [
       {
         id: 'm1',
         sender: 'them',
-        text: 'Hey! Loved seeing Fairy trending today on the main feed.',
+        text: 'Welcome to Fairy! Live GitHub sync is active with your repository.',
         time: '10:42 AM',
       },
       {
         id: 'm2',
         sender: 'me',
-        text: 'Thanks Elena! Your latest pavilion post was unbelievable. The brutalist lighting was unreal.',
+        text: 'Awesome! All posts and interactions are syncing in real time.',
         time: '10:45 AM',
-      },
-      {
-        id: 'm3',
-        sender: 'them',
-        text: 'Appreciate it! Doing a new oil study this weekend. Want me to send over the initial WIP drafts?',
-        time: '10:48 AM',
       },
     ],
   },
   {
-    id: 'p-clara',
-    name: 'Clara Vance',
-    handle: '@clara_design',
-    city: 'New York',
-    percent: 88,
-    matchPercent: 88,
-    approval: '54+',
-    avatarBg: 'bg-indigo-600',
-    avatarInitial: 'CV',
-    avatarText: 'CV',
+    id: 'user-gollumfairy',
+    name: 'Gollumfairy',
+    handle: '@Gollumfairy',
+    city: 'Fairy Realm',
+    percent: 96,
+    matchPercent: 96,
+    approval: '92+',
+    avatarBg: 'bg-purple-600',
+    avatarInitial: 'GF',
+    avatarText: 'GF',
     isOnline: true,
     unreadCount: 0,
-    lastActive: 'Active 15m ago',
+    lastActive: 'Active 5m ago',
     messages: [
       {
-        id: 'c1',
+        id: 'gf1',
         sender: 'them',
-        text: 'Hey! Loved your lighting breakdown in the latest Fairy editorial.',
+        text: 'Welcome to Fairy network! Official curator and trust receipts partner.',
         time: '9:15 AM',
       },
       {
-        id: 'c2',
-        sender: 'them',
-        text: 'Would love to collaborate on a spring lookbook project in NYC next month!',
-        time: '9:16 AM',
-      },
-      {
-        id: 'c3',
+        id: 'gf2',
         sender: 'me',
-        text: 'That sounds amazing Clara! I have some moodboards ready to share.',
+        text: 'Glad to connect on the real feed!',
         time: '9:30 AM',
       },
     ],
   },
   {
-    id: 'p-alex',
-    name: 'Alex Rivers',
-    handle: '@alex_rivers',
-    city: 'San Francisco',
+    id: 'user-kinetic',
+    name: 'Kinetic',
+    handle: '@kinetic',
+    city: 'Kyoto',
     percent: 94,
     matchPercent: 94,
-    approval: '68+',
+    approval: '88+',
     avatarBg: 'bg-emerald-600',
-    avatarInitial: 'AR',
-    avatarText: 'AR',
-    isOnline: true,
-    unreadCount: 0,
-    lastActive: 'Active 5m ago',
-    messages: [
-      {
-        id: 'ar1',
-        sender: 'them',
-        text: 'Hey! Saw your vibe profile. Love the clean architecture you build!',
-        time: '11:10 AM',
-      },
-      {
-        id: 'ar2',
-        sender: 'them',
-        text: 'Are you experimenting with any creative UI or reactive animations recently?',
-        time: '11:12 AM',
-      },
-      {
-        id: 'ar3',
-        sender: 'me',
-        text: 'Yes! Implementing live countdown synchronization between match and messaging feeds.',
-        time: '11:15 AM',
-      },
-    ],
-  },
-  {
-    id: 'p-sarah',
-    name: 'Sarah Chen',
-    handle: '@sarah_chen',
-    city: 'New York',
-    percent: 89,
-    matchPercent: 89,
-    approval: '62+',
-    avatarBg: 'bg-purple-600',
-    avatarInitial: 'SC',
-    avatarText: 'SC',
+    avatarInitial: 'K',
+    avatarText: 'K',
     isOnline: true,
     unreadCount: 0,
     lastActive: 'Active 20m ago',
     messages: [
       {
-        id: 'sc1',
+        id: 'k1',
         sender: 'them',
-        text: 'Hi there! Big fan of real-time state management and sleek typography.',
-        time: 'Yesterday',
+        text: 'Hey! Loved the Kyoto photo posts and atmosphere.',
+        time: '11:10 AM',
       },
       {
-        id: 'sc2',
-        sender: 'them',
-        text: 'How do you handle background sync timers in your stacks?',
-        time: 'Yesterday',
-      },
-    ],
-  },
-  {
-    id: 'p-zack',
-    name: 'Zack Thorne',
-    handle: '@zack_beats',
-    city: 'Austin',
-    percent: 76,
-    matchPercent: 76,
-    approval: '42+',
-    avatarBg: 'bg-violet-600',
-    avatarInitial: 'ZT',
-    avatarText: 'ZT',
-    isOnline: false,
-    unreadCount: 0,
-    lastActive: 'Active 2h ago',
-    messages: [
-      {
-        id: 'z1',
-        sender: 'them',
-        text: 'Can I license your original audio track for an indie documentary soundtrack? We can discuss terms!',
-        time: 'Yesterday',
-      },
-      {
-        id: 'z2',
+        id: 'k2',
         sender: 'me',
-        text: 'Hey Zack, absolutely! What timeline are you thinking for the project?',
-        time: 'Yesterday',
+        text: 'Thanks! Capturing quiet tea house moments.',
+        time: '11:15 AM',
       },
     ],
   },
   {
-    id: 'p-maya',
-    name: 'Maya Lin',
-    handle: '@maya_sky',
-    city: 'London',
-    percent: 62,
-    matchPercent: 62,
-    approval: '39+',
-    avatarBg: 'bg-teal-600',
-    avatarInitial: 'ML',
-    avatarText: 'ML',
+    id: 'user-karak',
+    name: 'Karak',
+    handle: '@karak',
+    city: 'Kyoto',
+    percent: 92,
+    matchPercent: 92,
+    approval: '84+',
+    avatarBg: 'bg-amber-600',
+    avatarInitial: 'KK',
+    avatarText: 'KK',
     isOnline: true,
     unreadCount: 0,
-    lastActive: 'Active now',
+    lastActive: 'Active 1h ago',
     messages: [
       {
-        id: 'ml1',
+        id: 'kk1',
         sender: 'them',
-        text: 'Where is that yellow coat from?! The lighting in your shot is immaculate 💛',
+        text: 'Hey! Ready to collaborate on visual stories and street frames.',
         time: 'Yesterday',
-      },
-      {
-        id: 'ml2',
-        sender: 'me',
-        text: 'Haha thank you! Vintage thrift find in SoHo. Golden hour did all the work!',
-        time: 'Yesterday',
-      },
-    ],
-  },
-  {
-    id: 'p-devontae',
-    name: 'Devontae Cole',
-    handle: '@devontae_vibe',
-    city: 'Atlanta',
-    percent: 48, // under 50% -> red badge
-    matchPercent: 48,
-    approval: '27+',
-    avatarBg: 'bg-rose-600',
-    avatarInitial: 'DC',
-    avatarText: 'DC',
-    isOnline: true,
-    unreadCount: 0,
-    lastActive: 'Active 5m ago',
-    messages: [
-      {
-        id: 'dc1',
-        sender: 'them',
-        text: 'Yo! Checked out your latest repository. Loving the snappy transitions.',
-        time: 'Yesterday',
-      },
-      {
-        id: 'dc2',
-        sender: 'me',
-        text: 'Thanks Devontae! Working on the reply timer flow today.',
-        time: 'Yesterday',
-      },
-    ],
-  },
-  {
-    id: 'p-marcus',
-    name: 'Marcus Vance',
-    handle: '@marcus_vision',
-    city: 'San Francisco',
-    percent: 95,
-    matchPercent: 95,
-    approval: '72+',
-    avatarBg: 'bg-blue-600',
-    avatarInitial: 'MV',
-    avatarText: 'MV',
-    isOnline: false,
-    unreadCount: 0,
-    lastActive: 'Active 1d ago',
-    messages: [
-      {
-        id: 'mv1',
-        sender: 'them',
-        text: 'Hey, I just sent over the 35mm film scans for the desert drift series!',
-        time: 'Oct 2',
-      },
-      {
-        id: 'mv2',
-        sender: 'me',
-        text: 'Downloading now Marcus, colors look stunning.',
-        time: 'Oct 2',
-      },
-    ],
-  },
-  {
-    id: 'p-jordan',
-    name: 'Jordan Taylor',
-    handle: '@jordan_code',
-    city: 'Seattle',
-    percent: 45, // under 50% -> red badge
-    matchPercent: 45,
-    approval: '19+',
-    avatarBg: 'bg-slate-700',
-    avatarInitial: 'JT',
-    avatarText: 'JT',
-    isOnline: false,
-    unreadCount: 0,
-    lastActive: 'Active 3h ago',
-    messages: [
-      {
-        id: 'jt1',
-        sender: 'them',
-        text: 'Hey! Seattle cloud developer here. Down to chat about distributed state sync.',
-        time: 'Oct 1',
       },
     ],
   },
@@ -313,13 +147,25 @@ export function loadSharedPeople(): SharedPerson[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((p) => ({
-          ...p,
-          percent: p.percent ?? p.matchPercent ?? 75,
-          matchPercent: p.matchPercent ?? p.percent ?? 75,
-          avatarInitial: p.avatarInitial ?? p.avatarText ?? 'U',
-          avatarText: p.avatarText ?? p.avatarInitial ?? 'U',
-        }));
+        // filter out any lingering fake users from old localstorage
+        const filtered = parsed.filter(
+          (p) =>
+            p &&
+            !['p-elena', 'p-clara', 'p-alex', 'p-sarah', 'p-maya', 'p-liam', 'p-james', 'p-nina', 'user-elena'].includes(
+              p.id
+            ) &&
+            !p.name?.includes('Rostova') &&
+            !p.name?.includes('Elena')
+        );
+        if (filtered.length > 0) {
+          return filtered.map((p) => ({
+            ...p,
+            percent: p.percent ?? p.matchPercent ?? 85,
+            matchPercent: p.matchPercent ?? p.percent ?? 85,
+            avatarInitial: p.avatarInitial ?? p.avatarText ?? 'U',
+            avatarText: p.avatarText ?? p.avatarInitial ?? 'U',
+          }));
+        }
       }
     }
   } catch (e) {
@@ -333,8 +179,8 @@ export function saveSharedPeople(people: SharedPerson[]) {
   try {
     const normalized = people.map((p) => ({
       ...p,
-      percent: p.percent ?? p.matchPercent ?? 75,
-      matchPercent: p.matchPercent ?? p.percent ?? 75,
+      percent: p.percent ?? p.matchPercent ?? 85,
+      matchPercent: p.matchPercent ?? p.percent ?? 85,
       avatarInitial: p.avatarInitial ?? p.avatarText ?? 'U',
       avatarText: p.avatarText ?? p.avatarInitial ?? 'U',
     }));
@@ -364,10 +210,9 @@ export function loadSharedTimers(): Record<string, number> {
   } catch (e) {
     console.warn('Failed to load shared timers:', e);
   }
-  // Default running timers for Elena & Clara so user immediately sees live timers!
   const defaultTimers: Record<string, number> = {
-    'p-elena': Date.now() - 3600000, // 1 hr ago -> 4 hours remaining
-    'p-clara': Date.now() - 7200000, // 2 hrs ago -> 3 hours remaining
+    'user-allen': Date.now() - 3600000,
+    'user-gollumfairy': Date.now() - 7200000,
   };
   return defaultTimers;
 }

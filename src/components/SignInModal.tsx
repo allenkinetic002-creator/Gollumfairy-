@@ -44,6 +44,17 @@ export interface RegisteredAccount {
 
 const DEFAULT_REGISTERED_ACCOUNTS: RegisteredAccount[] = [
   {
+    id: 'user-allen',
+    username: 'allenkinetic002-creator',
+    handle: '@allenkinetic002-creator',
+    name: 'Allen Dharak',
+    email: 'allenkinetic002@gmail.com',
+    location: 'London, UK',
+    profession: 'Creative Developer & Founder',
+    bio: 'Creative developer, founder & digital artist on Fairy. Building verified trust receipts and live social networks.',
+    isOfficial: true,
+  },
+  {
     id: 'user-gollumfairy',
     username: 'Gollumfairy',
     handle: '@Gollumfairy',
@@ -55,25 +66,25 @@ const DEFAULT_REGISTERED_ACCOUNTS: RegisteredAccount[] = [
     isOfficial: true,
   },
   {
-    id: 'user-allen',
-    username: 'allenkinetic002-creator',
-    handle: '@allenkinetic002-creator',
-    name: 'Allen Dharak',
-    email: 'allendharak9@gmail.com',
-    location: 'London, UK',
-    profession: 'Creative Developer & Founder',
-    bio: 'Creative developer, founder & digital artist on Fairy. Building verified trust receipts and live social networks.',
-    isOfficial: true,
+    id: 'user-kinetic',
+    username: 'kinetic',
+    handle: '@kinetic',
+    name: 'Kinetic',
+    email: 'kinetic@fairy.app',
+    location: 'Kyoto, Japan',
+    profession: 'Photographer & Digital Artist',
+    bio: 'Photographer exploring tea houses, autumn light, and visual stillness in Kyoto.',
+    isOfficial: false,
   },
   {
-    id: 'user-elena',
-    username: 'aerifairy',
-    handle: '@aerifairy',
-    name: 'Elena Vance',
-    email: 'elena.vance@aeri.studio',
-    location: 'Seoul / Han River',
-    profession: 'Concept Visual Artist & Beatmaker',
-    bio: 'Concept visual artist, worldbuilder, and synth beatmaker exploring mythological realms on Fairy.',
+    id: 'user-karak',
+    username: 'karak',
+    handle: '@karak',
+    name: 'Karak',
+    email: 'karak@fairy.app',
+    location: 'Kyoto, Japan',
+    profession: 'Visual Storyteller',
+    bio: 'Capturing street moments, moods, and experimental aesthetic vignettes.',
     isOfficial: false,
   },
 ];
@@ -84,11 +95,16 @@ export function getStoredRegisteredAccounts(): RegisteredAccount[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Ensure defaults are present
+        // Ensure defaults are present and remove any legacy mock/fake users
         const map = new Map<string, RegisteredAccount>();
         DEFAULT_REGISTERED_ACCOUNTS.forEach((a) => map.set(a.username.toLowerCase(), a));
         parsed.forEach((a) => {
-          if (a && a.username) {
+          if (
+            a &&
+            a.username &&
+            !['aerifairy', 'user-elena', 'elena vance'].includes(a.username.toLowerCase()) &&
+            !a.name?.toLowerCase().includes('elena')
+          ) {
             map.set(a.username.toLowerCase(), a);
           }
         });
