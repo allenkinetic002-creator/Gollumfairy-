@@ -2316,39 +2316,41 @@ export default function App() {
           {activeNavIndex === 0 && (
             <>
           {/* Header */}
-          <header className="w-full px-4 pt-2.5 pb-1 flex items-center justify-between shrink-0 bg-white z-10 border-b border-slate-50">
-
-            <div className="flex items-center gap-2">
-              <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
-                <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
-              </div>
-              <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
-                Fairy
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Only show Sign In button when logged out. When logged in, it completely disappears */}
-              {(!currentUser || isLoggedOut) && (
+          <header className="w-full px-4 pt-1.5 pb-1 flex flex-col shrink-0 bg-white z-10 border-b border-slate-50">
+            {/* Sign in positioned above the header icons by the right */}
+            {(!currentUser || isLoggedOut) && (
+              <div className="w-full flex justify-end pb-1 pr-0.5">
                 <button
                   onClick={() => setShowSignInModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11.5px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer mr-1 shrink-0 animate-fadeIn"
+                  className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer animate-fadeIn"
                   title="Sign in to your account"
                 >
                   <User className="w-3.5 h-3.5 stroke-[2.2]" />
                   <span>Sign In</span>
                 </button>
-              )}
+              </div>
+            )}
 
-              {/* 1st header icon: Guacamole Bowl / Nacho Cheese icon (toggles far-right floating honeyjar icon) */}
-              <button
-                onClick={() => setShowFloatingHoneyJar((prev) => !prev)}
-                aria-label="Guacamole & Nachos"
-                title="Guacamole & Nachos"
-                className="hover:opacity-75 transition-opacity active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
-              >
-                <AeriGuacamoleBowlIcon size={30} className="w-[30px] h-[30px]" />
-              </button>
+            <div className="w-full flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
+                  <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
+                </div>
+                <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
+                  Fairy
+                </h1>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* 1st header icon: Guacamole Bowl / Nacho Cheese icon (toggles far-right floating honeyjar icon) */}
+                <button
+                  onClick={() => setShowFloatingHoneyJar((prev) => !prev)}
+                  aria-label="Guacamole & Nachos"
+                  title="Guacamole & Nachos"
+                  className="hover:opacity-75 transition-opacity active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
+                >
+                  <AeriGuacamoleBowlIcon size={30} className="w-[30px] h-[30px]" />
+                </button>
 
               {/* 2nd header icon: Concentric Circle icon linked to Create Post Modal (Photo, Video & Writing) */}
               <button
@@ -2403,6 +2405,7 @@ export default function App() {
                 <AeriMessageBubbleIcon size={23} className="w-[23px] h-[23px] text-black" />
                 <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
               </button>
+            </div>
             </div>
           </header>
 
