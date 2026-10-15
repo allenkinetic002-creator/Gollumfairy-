@@ -1,5 +1,23 @@
 [
   {
+    "id": "act-1792092424825-5976d",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-karak",
+    "details": {
+      "userId": "user-karak",
+      "switches": {
+        "support": true,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": false,
+        "updatedAt": "2026-10-15T19:27:04.825Z",
+        "activatedBy": "user-karak"
+      }
+    },
+    "savedAt": "2026-10-15T19:27:04.825Z"
+  },
+  {
     "id": "act-1792092423112-svrke",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-karak",
@@ -1312,19 +1330,5 @@
       "updatedAt": "2026-10-15T12:19:33.894Z"
     },
     "savedAt": "2026-10-15T12:19:33.895Z"
-  },
-  {
-    "id": "act-1792066773876-lfxvt",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for Elena Rostova",
-    "details": {
-      "personName": "Elena Rostova",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 101,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T12:19:33.876Z"
-    },
-    "savedAt": "2026-10-15T12:19:33.876Z"
   }
 ]
