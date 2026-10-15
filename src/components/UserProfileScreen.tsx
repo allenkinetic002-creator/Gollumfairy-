@@ -34,7 +34,6 @@ import {
   Clock,
   Compass,
   Settings,
-  LogOut,
 } from 'lucide-react';
 
 import { SettingsScreen } from './SettingsScreen';
@@ -886,16 +885,6 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               >
                 <Settings className="w-4 h-4" />
               </button>
-
-              {onLogout && !viewUser && (
-                <button
-                  onClick={onLogout}
-                  className="p-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 rounded-lg transition-colors cursor-pointer"
-                  title="Log out of account"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              )}
             </div>
           </div>
         </div>
