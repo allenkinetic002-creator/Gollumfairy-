@@ -78,7 +78,7 @@ interface TweetPostCardProps {
   onRatingReset?: () => void;
   authorPhoneLikes?: number;
   authorRank?: number;
-  onPhoneVote?: (postId: string, authorName: string, type: 'like' | 'dislike' | 'reset', newLikes: number, newDislikes: number) => void;
+  onPhoneVote?: (postId: string, authorName: string, type: 'like' | 'dislike' | 'unvote' | 'reset', newLikes: number, newDislikes: number) => void;
 }
 
 export const TweetPostCard: React.FC<TweetPostCardProps> = ({

@@ -1327,7 +1327,7 @@ export default function App() {
   const handleHandphoneTieBreakerVote = (
     categoryKey: string,
     personName: string,
-    voteType: 'like' | 'dislike' | 'reset',
+    voteType: 'like' | 'dislike' | 'unvote' | 'reset',
     newLikes: number,
     newDislikes: number
   ) => {
@@ -1404,10 +1404,10 @@ export default function App() {
         }
       });
 
-      setSelectedRank(updatedRank);
-
       if (voteType === 'reset') {
         setTieBreakerToast(`🔄 Phone hand likes reset to 0 for ${personName}`);
+      } else if (voteType === 'unvote') {
+        setTieBreakerToast(`↩ Unclicked like on ${personName} (${newLikes.toLocaleString()} likes)`);
       } else if (updatedRank === 1) {
         setTieBreakerToast(`🏆 NUMBER ONE! ${personName} moves to #1 on Leaderboard with ${newLikes.toLocaleString()} Phone Hand ${newLikes === 1 ? 'like' : 'likes'}!`);
       } else {
@@ -1416,15 +1416,15 @@ export default function App() {
 
       setTimeout(() => {
         setTieBreakerToast(null);
-      }, 3500);
+      }, 3000);
 
       return nextMap;
     });
 
-    submitVoteToBackend(personName, voteType === 'dislike' ? 'dislike' : 'like', newLikes, newDislikes);
+    submitVoteToBackend(personName, voteType === 'dislike' ? 'dislike' : voteType === 'unvote' ? 'like' : 'like', newLikes, newDislikes);
     syncActivityToRepo(
       'phone_hand_vote',
-      `Phone Hand Vote: ${personName} now has ${newLikes} likes (Ranked on leaderboard)`,
+      `Phone Hand Vote: ${personName} ${voteType === 'unvote' ? 'unclicked' : voteType} (now ${newLikes} likes)`,
       { personName, voteType, likes: newLikes, dislikes: newDislikes },
       true
     );
@@ -1433,7 +1433,7 @@ export default function App() {
   const handleFeedPostTieBreakerVote = (
     postId: string,
     authorName: string,
-    voteType: 'like' | 'dislike' | 'reset',
+    voteType: 'like' | 'dislike' | 'unvote' | 'reset',
     newLikes: number,
     newDislikes: number
   ) => {

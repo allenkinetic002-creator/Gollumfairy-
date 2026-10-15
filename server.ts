@@ -133,12 +133,12 @@ async function startServer() {
       let pullOutput = '';
       let updated = false;
 
-      if (behindCount > 0 || forcePull) {
-        const { stdout: pullOut, stderr: pullErr } = await execAsync('git pull --rebase --autostash origin main');
-        pullOutput = (pullOut || pullErr || 'Pulled latest changes from origin/main').trim();
+      if (behindCount > 0 && forcePull) {
+        const { stdout: pullOut, stderr: pullErr } = await execAsync('git pull --rebase origin main').catch(() => ({ stdout: '', stderr: '' }));
+        pullOutput = (pullOut || pullErr || '').trim();
         const { stdout: newHeadOut } = await execAsync('git rev-parse HEAD');
         const newHead = newHeadOut.trim();
-        if (newHead !== lastKnownHeadSha || behindCount > 0) {
+        if (newHead !== lastKnownHeadSha) {
           updated = true;
           lastKnownHeadSha = newHead;
         }
@@ -288,8 +288,12 @@ async function startServer() {
         if (diffOut.trim().length > 0) {
           const sanitizedMsg = commitMsg.replace(/"/g, '\\"');
           await execAsync(`git commit -m "${sanitizedMsg}"`);
-          await execAsync('git pull --rebase --autostash origin main').catch(() => {});
-          await execAsync('git push origin main');
+          try {
+            await execAsync('git push origin main');
+          } catch {
+            await execAsync('git pull --rebase origin main').catch(() => {});
+            await execAsync('git push origin main').catch(() => {});
+          }
           console.log(`[Git] Auto-pushed: ${commitMsg}`);
         }
       } catch (err: any) {

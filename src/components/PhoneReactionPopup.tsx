@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RotateCcw, Trophy, ThumbsUp, ChevronUp } from 'lucide-react';
+import { RotateCcw, Trophy, ThumbsUp, ChevronUp, Check } from 'lucide-react';
 import { AeriBattleThumbsUpIcon } from './AeriBattleThumbsUpIcon';
 import { syncActivityToRepo } from '../lib/repoSync';
 import { submitVoteToBackend, resetVoteOnBackend, subscribeToRealtime, fetchRemoteVotes } from '../lib/realtimeSync';
@@ -15,18 +15,15 @@ export interface PhoneReactionWidgetProps {
   isTied?: boolean;
   tiedWith?: string;
   currentRank?: number;
-  onVote?: (type: 'like' | 'dislike' | 'reset', newLikes: number, newDislikes: number) => void;
+  onVote?: (type: 'like' | 'dislike' | 'unvote' | 'reset', newLikes: number, newDislikes: number) => void;
 }
 
 /**
  * Reaction Widget for Phone Hand Icon:
- * - Red button at left end (+1 like per click): moves person UP in Top 10 rankings (#1 with highest likes)
- * - Users can click multiple times: 3 likes = 1st, 2 likes = 2nd, 1 like = 3rd!
- * - Blue button at right end (-1 like / downvote): moves person DOWN
- * - Centered count: Phone Likes | Dislikes
- * - Live Rank indicator badge
- * - Reset button: clears likes back to 0
- * - Double yellow line with upward yellow triangle
+ * - One vote per user: click ONCE to like (+1), click again to UN-CLICK ("unonce", -1 like)
+ * - Click once to dislike, click again to un-dislike
+ * - Highest likes on the phone hand takes #1 / Top 10 on the leaderboard (works for any number)
+ * - Protected against unclicking itself: local user vote is preserved and never overwritten by remote polls
  */
 export function PhoneReactionPopup({
   initialLikes = 0,
@@ -39,8 +36,9 @@ export function PhoneReactionPopup({
   onVote,
 }: PhoneReactionWidgetProps) {
   const normKey = (personName || 'default').toLowerCase().trim();
-  const storageKey = `fairy_phone_vote_${normKey}`;
+  const storageKey = `fairy_user_phone_vote_${normKey}`;
 
+  // User's own vote state (click once to vote, click again to un-click / unonce)
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(() => {
     try {
       const saved = localStorage.getItem(storageKey);
@@ -59,14 +57,13 @@ export function PhoneReactionPopup({
 
   const [voteFeedback, setVoteFeedback] = useState<string | null>(null);
 
-  // Sync with remote votes & realtime stream
+  // Sync aggregate likes/dislikes counts from remote votes (does NOT touch userVote so it never unclicks itself)
   useEffect(() => {
     let mounted = true;
     fetchRemoteVotes().then((remoteVotes) => {
       if (!mounted) return;
       const remote = remoteVotes[personName] || remoteVotes[normKey];
       if (remote) {
-        setUserVote(remote.vote);
         if (typeof remote.likes === 'number') setLikes(remote.likes);
         if (typeof remote.dislikes === 'number') setDislikes(remote.dislikes);
       }
@@ -76,15 +73,17 @@ export function PhoneReactionPopup({
       const eventName = (data?.personName || '').toLowerCase().trim();
       if (eventName === normKey || eventName === personName.toLowerCase().trim()) {
         if (event === 'vote_submitted') {
-          setUserVote(data.vote);
           if (typeof data.likes === 'number') setLikes(data.likes);
           if (typeof data.dislikes === 'number') setDislikes(data.dislikes);
         } else if (event === 'vote_reset') {
-          setUserVote(null);
           setLikes(0);
           setDislikes(0);
-          setVoteFeedback('Vote reset to 0 likes!');
-          setTimeout(() => setVoteFeedback(null), 3000);
+          setUserVote(null);
+          try {
+            localStorage.removeItem(storageKey);
+          } catch {}
+          setVoteFeedback('Votes reset to 0');
+          setTimeout(() => setVoteFeedback(null), 2500);
         }
       }
     });
@@ -93,48 +92,86 @@ export function PhoneReactionPopup({
       mounted = false;
       unsubscribe();
     };
-  }, [personName, normKey]);
+  }, [personName, normKey, storageKey]);
 
-  // Keep likes in sync when initialLikes prop updates
+  // Keep likes and dislikes in sync when parent props change
   useEffect(() => {
     if (typeof initialLikes === 'number') {
       setLikes(initialLikes);
     }
   }, [initialLikes]);
 
+  useEffect(() => {
+    if (typeof initialDislikes === 'number') {
+      setDislikes(initialDislikes);
+    }
+  }, [initialDislikes]);
+
+  // Toggle Like / Dislike (Click once to vote, click again to unclick / unonce)
   const handleVote = (type: 'like' | 'dislike') => {
     let nextLikes = likes;
     let nextDislikes = dislikes;
+    let actionType: 'like' | 'dislike' | 'unvote' = type;
 
     if (type === 'like') {
-      // Red button: +1 like each time clicked (e.g. 1 -> 2 -> 3 likes!)
-      nextLikes = likes + 1;
-      setUserVote('like');
-      setVoteFeedback(`+1 Like added! (${nextLikes} likes)`);
+      if (userVote === 'like') {
+        // UN-CLICK / UNONCE: user clicked like again to cancel their vote
+        nextLikes = Math.max(0, likes - 1);
+        setUserVote(null);
+        actionType = 'unvote';
+        try {
+          localStorage.removeItem(storageKey);
+        } catch {}
+        setVoteFeedback('Like unclicked (-1 like)');
+      } else {
+        // First click: vote like (+1)
+        nextLikes = likes + 1;
+        if (userVote === 'dislike') {
+          nextDislikes = Math.max(0, dislikes - 1);
+        }
+        setUserVote('like');
+        try {
+          localStorage.setItem(storageKey, 'like');
+        } catch {}
+        setVoteFeedback(`Liked! (+1 like) · Click again to unclick`);
+      }
     } else {
-      // Blue button: -1 like or +1 dislike
-      nextLikes = Math.max(0, likes - 1);
-      nextDislikes = dislikes + 1;
-      setUserVote('dislike');
-      setVoteFeedback(`-1 Like subtracted (${nextLikes} likes)`);
+      // Dislike action
+      if (userVote === 'dislike') {
+        // UN-CLICK dislike
+        nextDislikes = Math.max(0, dislikes - 1);
+        setUserVote(null);
+        actionType = 'unvote';
+        try {
+          localStorage.removeItem(storageKey);
+        } catch {}
+        setVoteFeedback('Dislike unclicked');
+      } else {
+        nextDislikes = dislikes + 1;
+        if (userVote === 'like') {
+          nextLikes = Math.max(0, likes - 1);
+        }
+        setUserVote('dislike');
+        try {
+          localStorage.setItem(storageKey, 'dislike');
+        } catch {}
+        setVoteFeedback('Disliked · Click again to unclick');
+      }
     }
 
     setLikes(nextLikes);
     setDislikes(nextDislikes);
 
-    try {
-      localStorage.setItem(storageKey, type);
-    } catch {}
-
+    // Notify parent to re-rank leaderboard
     if (onVote) {
-      onVote(type, nextLikes, nextDislikes);
+      onVote(actionType, nextLikes, nextDislikes);
     }
 
-    submitVoteToBackend(personName, type, nextLikes, nextDislikes);
+    submitVoteToBackend(personName, actionType === 'unvote' ? 'dislike' : actionType, nextLikes, nextDislikes);
     syncActivityToRepo(
       'phone_hand_vote',
-      `Phone Hand vote for ${personName}: ${type === 'like' ? `+1 Like (Total: ${nextLikes})` : `-1 Like (Total: ${nextLikes})`}`,
-      { personName, vote: type, likes: nextLikes, dislikes: nextDislikes },
+      `Phone Hand vote for ${personName}: ${actionType === 'unvote' ? `unclicked vote (${nextLikes} likes)` : `${actionType} (${nextLikes} likes)`}`,
+      { personName, vote: actionType, likes: nextLikes, dislikes: nextDislikes },
       true
     );
 
@@ -157,7 +194,7 @@ export function PhoneReactionPopup({
     }
 
     resetVoteOnBackend(personName);
-    setVoteFeedback('Vote reset to 0 likes!');
+    setVoteFeedback('Votes reset to 0');
     setTimeout(() => setVoteFeedback(null), 2500);
 
     syncActivityToRepo(
@@ -176,7 +213,7 @@ export function PhoneReactionPopup({
           <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
           <span className="uppercase tracking-wider text-[9.5px] font-black text-amber-900">Phone Hand:</span>
           <span className="font-extrabold text-slate-900 truncate">
-            {personName} · {likes} {likes === 1 ? 'like' : 'likes'}
+            {personName} · {likes.toLocaleString()} {likes === 1 ? 'like' : 'likes'}
           </span>
         </div>
 
@@ -206,27 +243,36 @@ export function PhoneReactionPopup({
             <ChevronUp className="w-3 h-3 text-emerald-600 animate-bounce" />
             {voteFeedback}
           </span>
-          <span className="text-[9.5px] font-normal text-emerald-700">Higher likes = Top 10 / #1</span>
+          <span className="text-[9.5px] font-normal text-emerald-700">Highest likes = #1</span>
         </div>
       )}
 
       {/* Main Action Row: Red Like Button (Left), Centered Counts, Blue Dislike Button (Right) */}
       <div className="w-full flex items-center justify-between gap-2 mt-0.5">
-        {/* Red Like Button (Clicking adds likes: 1st, 2nd, 3rd depending on amount of likes) */}
+        {/* Red Like Button (Click once to like, click again to unclick / unonce) */}
         <button
           type="button"
           onClick={() => handleVote('like')}
-          className="cursor-pointer w-[60px] sm:w-[68px] h-[32px] rounded-[9px] bg-[#E51E2B] hover:bg-[#D41825] active:scale-90 flex items-center justify-center transition-all shrink-0 shadow-sm ring-1 ring-red-500 hover:ring-2 hover:ring-red-400"
-          title="Click to Like: Adds +1 Phone Hand Like to move this person to #1 / Top 10"
-          aria-label="Like"
+          className={`cursor-pointer w-[62px] sm:w-[70px] h-[34px] rounded-[10px] flex items-center justify-center transition-all shrink-0 shadow-sm relative ${
+            userVote === 'like'
+              ? 'bg-[#D41825] ring-3 ring-red-400 ring-offset-2 scale-105'
+              : 'bg-[#E51E2B] hover:bg-[#D41825] active:scale-95'
+          }`}
+          title={userVote === 'like' ? 'Click to unclick your like' : 'Click to like (+1)'}
+          aria-label={userVote === 'like' ? 'Unclick like' : 'Like'}
         >
           <AeriBattleThumbsUpIcon className="w-4.5 h-4.5" contrastColor="#E51E2B" facing="right" />
+          {userVote === 'like' && (
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-white text-red-600 flex items-center justify-center shadow-xs">
+              <Check className="w-2.5 h-2.5 stroke-[3]" />
+            </span>
+          )}
         </button>
 
         {/* Centered Writing: Phone Hand Likes | Dislikes */}
         <div className="flex-1 flex items-center justify-center gap-3 shrink-0">
           <div className="text-center min-w-[55px]">
-            <div className="text-[13px] sm:text-[14px] font-black tabular-nums leading-none text-[#E51E2B]">
+            <div className={`text-[13px] sm:text-[14px] font-black tabular-nums leading-none ${userVote === 'like' ? 'text-[#E51E2B]' : 'text-slate-900'}`}>
               {likes.toLocaleString()}
             </div>
             <div className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">
@@ -237,7 +283,7 @@ export function PhoneReactionPopup({
           <div className="w-[1px] h-6 bg-slate-300 shrink-0" />
 
           <div className="text-center min-w-[55px]">
-            <div className="text-[13px] sm:text-[14px] font-black tabular-nums leading-none text-[#1D3D8F]">
+            <div className={`text-[13px] sm:text-[14px] font-black tabular-nums leading-none ${userVote === 'dislike' ? 'text-[#1D3D8F]' : 'text-slate-900'}`}>
               {dislikes.toLocaleString()}
             </div>
             <div className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">
@@ -246,15 +292,24 @@ export function PhoneReactionPopup({
           </div>
         </div>
 
-        {/* Blue Dislike Button (Subtracts like / moves down) */}
+        {/* Blue Dislike Button (Click once to dislike, click again to unclick / unonce) */}
         <button
           type="button"
           onClick={() => handleVote('dislike')}
-          className="cursor-pointer w-[60px] sm:w-[68px] h-[32px] rounded-[9px] bg-[#1D3D8F] hover:bg-[#183275] active:scale-90 flex items-center justify-center transition-all shrink-0 shadow-sm ring-1 ring-blue-500 hover:ring-2 hover:ring-blue-400"
-          title="Click to Dislike: Subtracts -1 Phone Hand Like"
-          aria-label="Dislike"
+          className={`cursor-pointer w-[62px] sm:w-[70px] h-[34px] rounded-[10px] flex items-center justify-center transition-all shrink-0 shadow-sm relative ${
+            userVote === 'dislike'
+              ? 'bg-[#183275] ring-3 ring-blue-400 ring-offset-2 scale-105'
+              : 'bg-[#1D3D8F] hover:bg-[#183275] active:scale-95'
+          }`}
+          title={userVote === 'dislike' ? 'Click to unclick your dislike' : 'Click to dislike'}
+          aria-label={userVote === 'dislike' ? 'Unclick dislike' : 'Dislike'}
         >
           <AeriBattleThumbsUpIcon className="w-4.5 h-4.5" contrastColor="#1D3D8F" facing="left" direction="down" />
+          {userVote === 'dislike' && (
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-white text-blue-700 flex items-center justify-center shadow-xs">
+              <Check className="w-2.5 h-2.5 stroke-[3]" />
+            </span>
+          )}
         </button>
       </div>
 
@@ -262,7 +317,7 @@ export function PhoneReactionPopup({
       <div className="w-full flex items-center justify-between mt-2 pt-1 border-t border-slate-200/80 px-1">
         <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
           <ThumbsUp className="w-2.5 h-2.5 text-red-500" />
-          <span>Whoever has the most likes takes #1</span>
+          <span>Click once to vote, click again to unclick</span>
         </span>
 
         {(likes > 0 || dislikes > 0) && (
