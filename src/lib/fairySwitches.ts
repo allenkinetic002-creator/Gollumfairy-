@@ -13,6 +13,51 @@ export interface FairySystemSwitches {
   activatedBy?: string;
 }
 
+export interface FairyUserProfile {
+  id: string;
+  name: string;
+  handle: string;
+  avatarInitial: string;
+  avatarBg: string;
+  bio?: string;
+  role?: string;
+}
+
+export const KNOWN_USERS: FairyUserProfile[] = [
+  {
+    id: 'user-allen',
+    name: 'Allen Dharak',
+    handle: '@allenkinetic002-creator',
+    avatarInitial: 'AD',
+    avatarBg: 'bg-indigo-600',
+    bio: 'Founder & Creative Developer',
+  },
+  {
+    id: 'user-gollumfairy',
+    name: 'Gollumfairy',
+    handle: '@Gollumfairy',
+    avatarInitial: 'GF',
+    avatarBg: 'bg-purple-600',
+    bio: 'Official Fairy Creator & Curator',
+  },
+  {
+    id: 'user-kinetic',
+    name: 'Kinetic',
+    handle: '@kinetic',
+    avatarInitial: 'K',
+    avatarBg: 'bg-emerald-600',
+    bio: 'Photographer & Digital Artist',
+  },
+  {
+    id: 'user-karak',
+    name: 'Karak',
+    handle: '@karak',
+    avatarInitial: 'KK',
+    avatarBg: 'bg-amber-600',
+    bio: 'Visual Storyteller',
+  },
+];
+
 export const FAIRY_USER_SWITCHES_STORAGE_KEY = 'fairy_user_switches_map_v2';
 export const FAIRY_LAST_USER_KEY = 'fairy_last_active_user_key';
 
@@ -34,6 +79,37 @@ export function normalizeUserKey(user?: { id?: string; handle?: string; username
   return raw.toLowerCase().replace('@', '').trim();
 }
 
+export function getAllKnownUsers(): FairyUserProfile[] {
+  const map = new Map<string, FairyUserProfile>();
+  KNOWN_USERS.forEach((u) => {
+    map.set(normalizeUserKey(u), u);
+  });
+
+  try {
+    const raw = localStorage.getItem('fairy_registered_users');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        parsed.forEach((u: any) => {
+          const key = normalizeUserKey(u);
+          if (key && !map.has(key)) {
+            map.set(key, {
+              id: u.id || `user-${key}`,
+              name: u.name || key,
+              handle: u.handle || `@${key}`,
+              avatarInitial: (u.name || key).slice(0, 2).toUpperCase(),
+              avatarBg: u.avatarBg || 'bg-purple-600',
+              bio: u.bio || '',
+            });
+          }
+        });
+      }
+    }
+  } catch (e) {}
+
+  return Array.from(map.values());
+}
+
 export function getAllUserSwitchesMap(): Record<string, FairySystemSwitches> {
   try {
     const raw = localStorage.getItem(FAIRY_USER_SWITCHES_STORAGE_KEY);
@@ -45,6 +121,41 @@ export function getAllUserSwitchesMap(): Record<string, FairySystemSwitches> {
     console.warn('[FairySwitches] Failed to parse user switches map:', e);
   }
   return {};
+}
+
+/**
+ * Returns all real users who currently have the given feature switched ON.
+ */
+export function getActiveUsersForFeature(
+  featureKey: 'support' | 'favorite' | 'trending' | 'loyalty' | 'genre'
+): FairyUserProfile[] {
+  const userSwitchesMap = getAllUserSwitchesMap();
+  const knownUsers = getAllKnownUsers();
+  const activeUserKeys = new Set<string>();
+
+  for (const [rawKey, switches] of Object.entries(userSwitchesMap)) {
+    if (switches && switches[featureKey]) {
+      activeUserKeys.add(normalizeUserKey(rawKey));
+    }
+  }
+
+  const result: FairyUserProfile[] = [];
+  for (const key of activeUserKeys) {
+    const user = knownUsers.find((u) => normalizeUserKey(u) === key);
+    if (user) {
+      result.push(user);
+    } else {
+      result.push({
+        id: `user-${key}`,
+        name: key.charAt(0).toUpperCase() + key.slice(1),
+        handle: key.startsWith('@') ? key : `@${key}`,
+        avatarInitial: key.slice(0, 2).toUpperCase(),
+        avatarBg: 'bg-purple-600',
+      });
+    }
+  }
+
+  return result;
 }
 
 export function getStoredFairySwitchesForUser(user?: { id?: string; handle?: string; username?: string; email?: string } | null | string): FairySystemSwitches {
@@ -156,6 +267,13 @@ export async function fetchServerFairySwitches(userKey?: string): Promise<FairyS
     const res = await fetch(url);
     if (res.ok) {
       const data = await res.json();
+      if (data?.userSwitches && typeof data.userSwitches === 'object') {
+        const currentMap = getAllUserSwitchesMap();
+        const merged = { ...currentMap, ...data.userSwitches };
+        try {
+          localStorage.setItem(FAIRY_USER_SWITCHES_STORAGE_KEY, JSON.stringify(merged));
+        } catch {}
+      }
       if (data?.switches) {
         return {
           support: Boolean(data.switches.support),

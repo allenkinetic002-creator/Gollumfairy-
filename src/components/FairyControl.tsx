@@ -31,6 +31,8 @@ import {
   subscribeToFairySwitches,
   fetchServerFairySwitches,
   FAIRY_LAST_USER_KEY,
+  getActiveUsersForFeature,
+  FairyUserProfile,
 } from '../lib/fairySwitches';
 
 interface FairyControlProps {
@@ -380,12 +382,24 @@ export function FairyControl({
   >('all');
   const [drawerSearch, setDrawerSearch] = useState('');
 
-  // System active counts (real states only - dynamically driven by switch and active members)
-  const supportUsersCount = (supportEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.support).length;
-  const favoriteUsersCount = (favoriteEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.favorite).length;
-  const trendingUsersCount = (trendingEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.trending).length;
-  const loyaltyUsersCount = (loyaltyEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.loyalty).length;
-  const genreUsersCount = (genreEnabled ? 1 : 0) + activators.filter((p) => p.activatedFeatures.genre).length;
+  // Active real users on each feature across the community
+  const activeSupportUsers = getActiveUsersForFeature('support');
+  const activeFavoriteUsers = getActiveUsersForFeature('favorite');
+  const activeTrendingUsers = getActiveUsersForFeature('trending');
+  const activeLoyaltyUsers = getActiveUsersForFeature('loyalty');
+  const activeGenreUsers = getActiveUsersForFeature('genre');
+
+  // Exact numbers of users that have switched it on
+  const supportUsersCount = activeSupportUsers.length + activators.filter((p) => p.activatedFeatures.support).length;
+  const favoriteUsersCount = activeFavoriteUsers.length + activators.filter((p) => p.activatedFeatures.favorite).length;
+  const trendingUsersCount = activeTrendingUsers.length + activators.filter((p) => p.activatedFeatures.trending).length;
+  const loyaltyUsersCount = activeLoyaltyUsers.length + activators.filter((p) => p.activatedFeatures.loyalty).length;
+  const genreUsersCount = activeGenreUsers.length + activators.filter((p) => p.activatedFeatures.genre).length;
+
+  const formatUsersList = (users: FairyUserProfile[]) => {
+    if (users.length === 0) return '';
+    return users.map((u) => u.name).join(', ');
+  };
 
   // Toggle person feature activation interactively
   const togglePersonFeature = (
@@ -467,8 +481,9 @@ export function FairyControl({
     metricColor: string
   ) => {
     const isExpanded = expandedCardDrawer === systemKey;
+    const activeRealUsers = getActiveUsersForFeature(systemKey);
     const activeActivatorsCount = activators.filter((p) => p.activatedFeatures[systemKey]).length;
-    const totalAvailableUsers = (isSystemActive ? 1 : 0) + activeActivatorsCount;
+    const totalAvailableUsers = activeRealUsers.length + activeActivatorsCount;
 
     const drawerPeople = activators.filter((p) => {
       if (cardDrawerFilter === 'activated' && !p.activatedFeatures[systemKey]) return false;
@@ -548,7 +563,9 @@ export function FairyControl({
                 : '0 Users on Switch'}
             </span>
             <span className="flex items-center gap-1 text-slate-500">
-              {isSystemActive ? 'Switch Applied · 1 User Available' : 'Switch Off · 0 Users'}
+              {totalAvailableUsers > 0
+                ? `${totalAvailableUsers} User${totalAvailableUsers === 1 ? '' : 's'} Active`
+                : 'Switch Off · 0 Users'}
             </span>
           </div>
         </div>
@@ -556,39 +573,48 @@ export function FairyControl({
         {/* Expanded inline people list */}
         {isExpanded && (
           <div className="pt-2 border-t border-slate-200 space-y-2 animate-fadeIn">
-            {/* Show Current User at top if switch is ON */}
-            {isSystemActive && (
-              <div className="p-2 rounded-xl border border-emerald-300 bg-emerald-50/80 shadow-2xs flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white font-black text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
-                    You
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs font-black text-slate-900 truncate">
-                        You (Current User)
-                      </span>
-                      <span className="text-[10px] text-emerald-800 font-bold bg-white px-1.5 py-0.2 rounded-full border border-emerald-200">
-                        Switch Applied
-                      </span>
+            {/* Show all real users who currently have this switch ON */}
+            {activeRealUsers.map((u) => {
+              const isCurrent = isLoggedIn && normalizeUserKey(currentUser) === normalizeUserKey(u);
+              return (
+                <div
+                  key={u.id}
+                  className="p-2 rounded-xl border border-emerald-300 bg-emerald-50/80 shadow-2xs flex items-center justify-between gap-2"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={`w-7 h-7 rounded-full ${u.avatarBg || 'bg-purple-600'} text-white font-black text-[11px] flex items-center justify-center shrink-0 shadow-2xs`}>
+                      {u.avatarInitial}
                     </div>
-                    <p className="text-[10.5px] text-slate-600">
-                      Applied on this device · 1 user available
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-black text-slate-900 truncate">
+                          {u.name} {isCurrent && '(You)'}
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-semibold truncate">
+                          {u.handle}
+                        </span>
+                        <span className="text-[10px] text-emerald-800 font-bold bg-white px-1.5 py-0.2 rounded-full border border-emerald-200">
+                          Switch Applied
+                        </span>
+                      </div>
+                      <p className="text-[10.5px] text-slate-600 truncate">
+                        {u.bio || `Active on ${systemName}`}
+                      </p>
+                    </div>
                   </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-700 text-white shrink-0">
+                    Active ON
+                  </span>
                 </div>
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-700 text-white shrink-0">
-                  Active
-                </span>
-              </div>
-            )}
+              );
+            })}
 
-            {!isSystemActive && activeActivatorsCount === 0 && (
+            {totalAvailableUsers === 0 && (
               <div className="p-3 text-center rounded-xl bg-slate-100/70 border border-dashed border-slate-200 text-slate-500 text-xs">
                 <Users className="w-5 h-5 text-slate-400 mx-auto mb-1" />
                 <p className="font-bold text-slate-700">No users available</p>
                 <p className="text-[10.5px] text-slate-500 mt-0.5">
-                  Click the switch above to apply and make 1 user available.
+                  Click the switch above to activate and show available users.
                 </p>
               </div>
             )}
@@ -1145,11 +1171,9 @@ export function FairyControl({
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  {supportEnabled
-                    ? (isLoggedIn
-                        ? 'Active · 1 user available backing creators (Stays ON across logout)'
-                        : 'Active · Preserved across logout (Sign in to turn off)')
-                    : 'Inactive · 0 users available (Switch is off)'}
+                  {supportUsersCount > 0
+                    ? `Active · ${supportUsersCount} user${supportUsersCount === 1 ? '' : 's'} on Support (${formatUsersList(activeSupportUsers) || 'Active'})`
+                    : 'Inactive · 0 users on Support (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -1495,11 +1519,9 @@ export function FairyControl({
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  {favoriteEnabled
-                    ? (isLoggedIn
-                        ? 'Active · 1 user available pinning creator feeds (Stays ON across logout)'
-                        : 'Active · Preserved across logout (Sign in to turn off)')
-                    : 'Inactive · 0 users available (Switch is off)'}
+                  {favoriteUsersCount > 0
+                    ? `Active · ${favoriteUsersCount} user${favoriteUsersCount === 1 ? '' : 's'} on Favorite (${formatUsersList(activeFavoriteUsers) || 'Active'})`
+                    : 'Inactive · 0 users on Favorite (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -1686,11 +1708,9 @@ export function FairyControl({
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  {trendingEnabled
-                    ? (isLoggedIn
-                        ? 'Active · 1 user available boosting viral trends (Stays ON across logout)'
-                        : 'Active · Preserved across logout (Sign in to turn off)')
-                    : 'Inactive · 0 users available (Switch is off)'}
+                  {trendingUsersCount > 0
+                    ? `Active · ${trendingUsersCount} user${trendingUsersCount === 1 ? '' : 's'} on Trending (${formatUsersList(activeTrendingUsers) || 'Active'})`
+                    : 'Inactive · 0 users on Trending (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -1865,11 +1885,9 @@ export function FairyControl({
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  {loyaltyEnabled
-                    ? (isLoggedIn
-                        ? 'Active · 1 user available building loyalty streaks (Stays ON across logout)'
-                        : 'Active · Preserved across logout (Sign in to turn off)')
-                    : 'Inactive · 0 users available (Switch is off)'}
+                  {loyaltyUsersCount > 0
+                    ? `Active · ${loyaltyUsersCount} user${loyaltyUsersCount === 1 ? '' : 's'} on Loyalty (${formatUsersList(activeLoyaltyUsers) || 'Active'})`
+                    : 'Inactive · 0 users on Loyalty (Switch is off)'}
                 </p>
               </div>
             </div>
@@ -2089,11 +2107,9 @@ export function FairyControl({
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  {genreEnabled
-                    ? (isLoggedIn
-                        ? 'Active · 1 user available classifying posts (Stays ON across logout)'
-                        : 'Active · Preserved across logout (Sign in to turn off)')
-                    : 'Inactive · 0 users available (Switch is off)'}
+                  {genreUsersCount > 0
+                    ? `Active · ${genreUsersCount} user${genreUsersCount === 1 ? '' : 's'} on Genre (${formatUsersList(activeGenreUsers) || 'Active'})`
+                    : 'Inactive · 0 users on Genre (Switch is off)'}
                 </p>
               </div>
             </div>
