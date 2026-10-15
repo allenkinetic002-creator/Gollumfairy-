@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792071669925-t9ow2",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T13:41:09.924Z"
+    },
+    "savedAt": "2026-10-15T13:41:09.925Z"
+  },
+  {
+    "id": "act-1792071669914-1ghe6",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T13:41:09.914Z"
+    },
+    "savedAt": "2026-10-15T13:41:09.914Z"
+  },
+  {
     "id": "act-1792070131501-64qxp",
     "action": "like_post",
     "description": "Liked post @karak",
