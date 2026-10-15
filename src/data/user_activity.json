@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792066734915-s89zq",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": false,
+      "likeCount": 1,
+      "updatedAt": "2026-10-15T12:18:54.915Z"
+    },
+    "savedAt": "2026-10-15T12:18:54.915Z"
+  },
+  {
+    "id": "act-1792066734912-hq10g",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": false,
+      "likeCount": 1,
+      "updatedAt": "2026-10-15T12:18:54.912Z"
+    },
+    "savedAt": "2026-10-15T12:18:54.912Z"
+  },
+  {
     "id": "act-1792066733312-mylcm",
     "action": "post_action",
     "description": "Post action: like on post-1792066294285",
