@@ -1,5 +1,19 @@
 [
   {
+    "id": "act-1792091179557-muhq8",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": true,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:19.556Z"
+    },
+    "savedAt": "2026-10-15T19:06:19.557Z"
+  },
+  {
     "id": "act-1792091179071-9xzg8",
     "action": "fairy_switches_updated",
     "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
@@ -1265,18 +1279,5 @@
       "updatedAt": "2026-10-15T12:18:56.253Z"
     },
     "savedAt": "2026-10-15T12:18:56.253Z"
-  },
-  {
-    "id": "act-1792066736251-puc93",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T12:18:56.250Z"
-    },
-    "savedAt": "2026-10-15T12:18:56.251Z"
   }
 ]
