@@ -25,16 +25,25 @@ import {
 } from 'lucide-react';
 import {
   FairySystemSwitches,
-  getStoredFairySwitches,
-  saveStoredFairySwitches,
+  getStoredFairySwitchesForUser,
+  saveStoredFairySwitchesForUser,
+  normalizeUserKey,
   subscribeToFairySwitches,
   fetchServerFairySwitches,
+  FAIRY_LAST_USER_KEY,
 } from '../lib/fairySwitches';
 
 interface FairyControlProps {
   onBackToFeed: () => void;
   onSwitchToDMs?: () => void;
   isLoggedIn?: boolean;
+  currentUser?: {
+    id?: string;
+    name?: string;
+    handle?: string;
+    username?: string;
+    email?: string;
+  } | null;
   onRequireAuth?: (actionName?: string) => boolean;
   onOpenSignInModal?: () => void;
 }
@@ -244,14 +253,19 @@ export function FairyControl({
   onBackToFeed,
   onSwitchToDMs,
   isLoggedIn = false,
+  currentUser = null,
   onRequireAuth,
   onOpenSignInModal,
 }: FairyControlProps) {
   // =========================================================================
-  // 5 COMPLETELY INDEPENDENT SWITCH STATES (PERSISTED ACROSS LOGOUT)
-  // Rule: Once ON, switches stay ON across logout unless turned OFF while logged in.
+  // 5 COMPLETELY INDEPENDENT SWITCH STATES (SCOPED PER USER & PERSISTED ACROSS LOGOUT)
+  // Rule 1: Once ON, switches stay ON across logout unless turned OFF while logged in.
+  // Rule 2: If a user logs in as another user who has NOT activated it, switches are OFF!
   // =========================================================================
-  const [switches, setSwitches] = useState<FairySystemSwitches>(() => getStoredFairySwitches());
+  const [switches, setSwitches] = useState<FairySystemSwitches>(() =>
+    getStoredFairySwitchesForUser(isLoggedIn ? currentUser : null)
+  );
+
   const supportEnabled = switches.support;
   const favoriteEnabled = switches.favorite;
   const trendingEnabled = switches.trending;
@@ -273,28 +287,27 @@ export function FairyControl({
     }, 4500);
   };
 
+  // Switch to the exact user's state whenever authentication or logged-in account changes
   useEffect(() => {
-    fetchServerFairySwitches().then((serverSwitches) => {
+    const userSwitches = getStoredFairySwitchesForUser(isLoggedIn ? currentUser : null);
+    setSwitches(userSwitches);
+
+    const userKey = isLoggedIn ? normalizeUserKey(currentUser) : undefined;
+    fetchServerFairySwitches(userKey).then((serverSwitches) => {
       if (serverSwitches) {
-        setSwitches((prev) => {
-          const merged: FairySystemSwitches = {
-            support: prev.support || serverSwitches.support,
-            favorite: prev.favorite || serverSwitches.favorite,
-            trending: prev.trending || serverSwitches.trending,
-            loyalty: prev.loyalty || serverSwitches.loyalty,
-            genre: prev.genre || serverSwitches.genre,
-            updatedAt: new Date().toISOString(),
-          };
-          saveStoredFairySwitches(merged);
-          return merged;
-        });
+        setSwitches(serverSwitches);
       }
     });
+  }, [isLoggedIn, currentUser?.id, currentUser?.handle, currentUser?.username]);
 
-    return subscribeToFairySwitches((updated) => {
-      setSwitches(updated);
+  useEffect(() => {
+    return subscribeToFairySwitches((updated, userKey) => {
+      const activeKey = isLoggedIn ? normalizeUserKey(currentUser) : (localStorage.getItem(FAIRY_LAST_USER_KEY) || '');
+      if (!userKey || userKey === activeKey) {
+        setSwitches(updated);
+      }
     });
-  }, []);
+  }, [isLoggedIn, currentUser]);
 
   const handleToggleSystemSwitch = (
     key: 'support' | 'favorite' | 'trending' | 'loyalty' | 'genre',
@@ -314,17 +327,27 @@ export function FairyControl({
         return;
       }
 
-      // Logged in: permitted to turn OFF
-      const updated: FairySystemSwitches = { ...switches, [key]: false, updatedAt: new Date().toISOString() };
+      // Logged in: permitted to turn OFF for this user
+      const updated: FairySystemSwitches = {
+        ...switches,
+        [key]: false,
+        updatedAt: new Date().toISOString(),
+        activatedBy: normalizeUserKey(currentUser),
+      };
       setSwitches(updated);
-      saveStoredFairySwitches(updated);
-      showToastNotice(`${displayName} switch turned OFF.`);
+      saveStoredFairySwitchesForUser(currentUser, updated);
+      showToastNotice(`${displayName} switch turned OFF for ${currentUser?.name || 'your account'}.`);
     } else {
       // Turning ON: stays ON across logouts unless turned off while logged in
-      const updated: FairySystemSwitches = { ...switches, [key]: true, updatedAt: new Date().toISOString() };
+      const updated: FairySystemSwitches = {
+        ...switches,
+        [key]: true,
+        updatedAt: new Date().toISOString(),
+        activatedBy: normalizeUserKey(currentUser) || 'guest',
+      };
       setSwitches(updated);
-      saveStoredFairySwitches(updated);
-      showToastNotice(`✨ ${displayName} switch turned ON! It remains active even if you log out.`);
+      saveStoredFairySwitchesForUser(currentUser, updated);
+      showToastNotice(`✨ ${displayName} switch turned ON for ${currentUser?.name || 'your account'}! It remains active even if you log out.`);
     }
   };
 

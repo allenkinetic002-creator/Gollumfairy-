@@ -3197,6 +3197,7 @@ export default function App() {
                 onBackToFeed={() => setActiveNavIndex(0)}
                 onSwitchToDMs={() => setControlSubTab('dm-control')}
                 isLoggedIn={isLoggedIn}
+                currentUser={currentUser}
                 onRequireAuth={requireAuth}
                 onOpenSignInModal={() => setShowSignInModal(true)}
               />

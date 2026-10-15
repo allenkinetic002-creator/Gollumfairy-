@@ -526,25 +526,46 @@ async function startServer() {
   });
 
   // --- FAIRY SYSTEM SWITCHES (SUPPORT, FAVORITE, TRENDING, LOYALTY, GENRE) ---
-  app.get('/api/fairy-switches', (_req, res) => {
-    const defaultSwitches = {
+  app.get('/api/fairy-switches', (req, res) => {
+    const raw = readJsonFile<any>('src/data/fairy_switches.json', {});
+    const userSwitchesMap = raw.userSwitches || {};
+    const userId = typeof req.query.userId === 'string' ? req.query.userId.toLowerCase().replace('@', '').trim() : '';
+
+    if (userId) {
+      const userSwitches = userSwitchesMap[userId] || {
+        support: false,
+        favorite: false,
+        trending: false,
+        loyalty: false,
+        genre: false,
+        activatedBy: userId,
+      };
+      return res.json({ success: true, switches: userSwitches, userId });
+    }
+
+    const lastUser = raw.lastActiveUser || '';
+    const fallback = (lastUser && userSwitchesMap[lastUser]) || raw.globalFallback || {
       support: false,
       favorite: false,
       trending: false,
       loyalty: false,
       genre: false,
-      updatedAt: new Date().toISOString(),
     };
-    const switches = readJsonFile('src/data/fairy_switches.json', defaultSwitches);
-    res.json({ success: true, switches });
+    res.json({ success: true, switches: fallback, lastActiveUser: lastUser, userSwitches: userSwitchesMap });
   });
 
   app.post('/api/fairy-switches', (req, res) => {
     try {
-      const { switches } = req.body;
+      const { switches, userId } = req.body;
       if (!switches) {
         return res.status(400).json({ success: false, error: 'Switches object required' });
       }
+      const raw = readJsonFile<any>('src/data/fairy_switches.json', { userSwitches: {}, lastActiveUser: '' });
+      const userSwitchesMap = raw.userSwitches || {};
+      const key = (typeof userId === 'string' && userId.trim())
+        ? userId.toLowerCase().replace('@', '').trim()
+        : (raw.lastActiveUser || 'guest');
+
       const updatedSwitches = {
         support: Boolean(switches.support),
         favorite: Boolean(switches.favorite),
@@ -552,12 +573,20 @@ async function startServer() {
         loyalty: Boolean(switches.loyalty),
         genre: Boolean(switches.genre),
         updatedAt: new Date().toISOString(),
+        activatedBy: key,
       };
-      writeJsonFile('src/data/fairy_switches.json', updatedSwitches);
-      broadcastRealtime('fairy_switches_updated', updatedSwitches);
-      logActivity('fairy_switches_updated', 'Updated system switches (Support, Favorite, Trending, Loyalty, Genre)', updatedSwitches);
-      autoCommitAndPush('feat(switches): persist support, favorite, trending, loyalty, genre state');
-      res.json({ success: true, switches: updatedSwitches });
+
+      userSwitchesMap[key] = updatedSwitches;
+      raw.userSwitches = userSwitchesMap;
+      if (key !== 'guest') {
+        raw.lastActiveUser = key;
+      }
+
+      writeJsonFile('src/data/fairy_switches.json', raw);
+      broadcastRealtime('fairy_switches_updated', { userId: key, switches: updatedSwitches });
+      logActivity('fairy_switches_updated', `Updated system switches for user ${key}`, { userId: key, switches: updatedSwitches });
+      autoCommitAndPush(`feat(switches): update switches for user ${key}`);
+      res.json({ success: true, switches: updatedSwitches, userId: key });
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
