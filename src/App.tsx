@@ -216,9 +216,36 @@ const DEFAULT_COMMENTS: CommentItem[] = [
   },
 ];
 
-// Dataset for Tab 1 (Second icon beside home screen)
-// Starting completely fresh with zero posts as requested
-const REAL_TOP_CREATORS: Creator[] = [];
+// Real creator post liked by user on Tab 1
+const REAL_TOP_CREATORS: Creator[] = [
+  {
+    rank: 1,
+    name: "Karak",
+    handle: "@karak",
+    avatarBg: "bg-amber-600",
+    avatarInitial: "KK",
+    role: "Visual Storyteller",
+    location: "Kyoto, Japan",
+    upvotes: 84,
+    rating: 9.2,
+    phoneHandLikes: 5,
+    phoneHandDislikes: 0,
+    tieBreakerScore: 5,
+    isUpvoted: true,
+    isFollowing: false,
+    category: "photographers",
+    topPost: {
+      title: "am a bad kid",
+      imageUrl: "/uploads/1792066274363-post_1792066273908_xh7e4u.jpg",
+      gradientBg: "from-amber-600 to-rose-900",
+      likes: "84",
+      comments: "15",
+      hasAudio: true,
+      audioTitle: "Original Audio",
+      tag: "Street Vignettes",
+    },
+  },
+];
 
 /**
  * Re-ranks creators strictly according to Phone Hand Likes:
@@ -540,13 +567,13 @@ export default function App() {
       };
     };
 
-    // Initial load: keep baseUsers empty so the second icon screen starts completely fresh
+    // Initial load: preserve real user post on second icon screen
     Promise.all([
       fetch("/api/users").then((r) => r.json()).catch(() => ({ success: false })),
       fetchRemoteVotes().catch(() => ({})),
     ]).then(([userData, remoteVotes]) => {
-      // Second icon screen starts fresh with zero posts
-      let baseUsers: Creator[] = [];
+      // Preserve real user posts on second icon screen
+      let baseUsers: Creator[] = [...REAL_TOP_CREATORS];
       const votesMap = (remoteVotes || {}) as Record<string, any>;
       const mergedUsers = baseUsers.map((u) => {
         const n1 = u.name;
@@ -840,7 +867,7 @@ export default function App() {
   const [selectedRank, setSelectedRank] = useState<number | 'all'>(1);
   const [creatorsData, setCreatorsData] = useState<Record<string, Creator[]>>(ALL_TOP_CREATORS);
   const [previewCreator, setPreviewCreator] = useState<Creator | null>(null);
-  const [likedCreatorPosts, setLikedCreatorPosts] = useState<Record<number, boolean>>({});
+  const [likedCreatorPosts, setLikedCreatorPosts] = useState<Record<number, boolean>>({ 1: true });
   const [honeyJarCounts, setHoneyJarCounts] = useState<Record<number, number>>({});
   // Floating Honey Jar FAB state (triggered by clicking Nacho Cheese icon, pops up at bottom left like Twitter's feather icon)
   const [showFloatingHoneyJar, setShowFloatingHoneyJar] = useState(false);
