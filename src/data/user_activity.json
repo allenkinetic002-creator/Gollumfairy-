@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792070130084-w20op",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T13:15:30.084Z"
+    },
+    "savedAt": "2026-10-15T13:15:30.084Z"
+  },
+  {
+    "id": "act-1792070130078-hy6ae",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T13:15:30.077Z"
+    },
+    "savedAt": "2026-10-15T13:15:30.078Z"
+  },
+  {
     "id": "act-1792070102654-naw4q",
     "action": "phone_hand_vote",
     "description": "Finalized UP (+1 like) vote for karak via Phone Hand",
