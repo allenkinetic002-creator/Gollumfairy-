@@ -1,5 +1,27 @@
 [
   {
+    "id": "post-1792094288961",
+    "authorName": "Karak",
+    "authorHandle": "@karak",
+    "authorAvatar": "",
+    "isVerified": true,
+    "timeAgo": "Just now",
+    "location": "Kyoto, Japan",
+    "mediaType": "image",
+    "mediaUrl": "/uploads/1792094238118-post_1792094238492_d0beqj.jpg",
+    "caption": "sunak",
+    "tags": [
+      "#fairy",
+      "#autumnlight",
+      "#artist"
+    ],
+    "genre": "Artist",
+    "audioTitle": "Original Audio",
+    "likeCount": 1,
+    "isLiked": true,
+    "isTrending": true
+  },
+  {
     "id": "post-1792066294285",
     "authorName": "karak",
     "authorHandle": "@karak",
