@@ -1,5 +1,16 @@
 [
   {
+    "id": "act-1792094290158-2clbg",
+    "action": "publish_post",
+    "description": "Post published: \"sunak\"",
+    "details": {
+      "id": "post-1792094288961",
+      "mediaType": "image"
+    },
+    "timestamp": "2026-10-15T19:58:08.964Z",
+    "savedAt": "2026-10-15T19:58:10.158Z"
+  },
+  {
     "id": "act-1792094266279-r55qo",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-karak",
@@ -1358,19 +1369,5 @@
     },
     "timestamp": "2026-10-15T13:54:44.442Z",
     "savedAt": "2026-10-15T13:54:50.211Z"
-  },
-  {
-    "id": "act-1792072488278-q8vnk",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for karak (4 phone hand likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 4,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T13:54:48.278Z"
-    },
-    "savedAt": "2026-10-15T13:54:48.278Z"
   }
 ]
