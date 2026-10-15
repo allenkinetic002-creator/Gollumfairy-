@@ -39,9 +39,15 @@ async function configureGitRemote() {
       await execAsync('git branch -M main');
       needsFetch = true;
     }
-    const token = process.env.GITHUB_TOKEN;
+    let token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      const tokenFile = path.resolve(__dirname, '.git', 'github_token');
+      if (fs.existsSync(tokenFile)) {
+        token = fs.readFileSync(tokenFile, 'utf-8').trim();
+      }
+    }
     if (token) {
-      const remoteUrl = `https://allenkinetic002-creator:${token}@github.com/${GITHUB_REPO}.git`;
+      const remoteUrl = `https://x-access-token:${token}@github.com/${GITHUB_REPO}.git`;
       try {
         await execAsync(`git remote set-url origin "${remoteUrl}"`);
       } catch {
@@ -56,7 +62,7 @@ async function configureGitRemote() {
       }
     }
     await execAsync('git config user.name "allenkinetic002-creator"');
-    await execAsync('git config user.email "casperthefriendlyghost90212@gmail.com"');
+    await execAsync('git config user.email "allenkinetic001@gmail.com"');
 
     try {
       const { stdout: headOut } = await execAsync('git rev-parse HEAD');
@@ -271,6 +277,7 @@ async function startServer() {
   function autoCommitAndPush(commitMsg: string) {
     runGitQueued(async () => {
       try {
+        await configureGitRemote();
         await execAsync('git add -A');
         const { stdout: diffOut } = await execAsync('git status --porcelain');
         if (diffOut.trim().length > 0) {
@@ -497,6 +504,7 @@ async function startServer() {
         fs.writeFileSync(activityFile, JSON.stringify(currentActivities, null, 2), 'utf-8');
 
         // Stage, commit and push to GitHub
+        await configureGitRemote();
         await execAsync('git add -A');
         const { stdout: diffOut } = await execAsync('git status --porcelain');
         let committed = false;
