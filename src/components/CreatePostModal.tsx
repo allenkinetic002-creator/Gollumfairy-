@@ -13,6 +13,7 @@ import {
   Pause,
   Smile,
   Hash,
+  User,
 } from 'lucide-react';
 import { BrokenPencilIcon } from './BrokenPencilIcon';
 
@@ -224,11 +225,25 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 space-y-3.5 scrollbar-thin">
           {/* Author Badge */}
           <div className="flex items-center gap-2.5 bg-slate-50 p-2 rounded-xl border border-slate-100">
-            <img
-              src={authorAvatar}
-              alt={authorName}
-              className="w-7 h-7 rounded-full object-cover ring-1 ring-purple-500/20"
-            />
+            {authorAvatar ? (
+              <img
+                src={authorAvatar}
+                alt={authorName}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+                className="w-7 h-7 rounded-full object-cover ring-1 ring-purple-500/20"
+              />
+            ) : null}
+            <div
+              style={{ display: authorAvatar ? 'none' : 'flex' }}
+              className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-400 items-center justify-center shrink-0"
+              title="Profile icon"
+            >
+              <User className="w-4 h-4 text-slate-400 stroke-[1.6]" />
+            </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1 leading-none">
                 <span className="text-xs font-black text-slate-900">{authorName}</span>

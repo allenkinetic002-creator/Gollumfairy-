@@ -1657,7 +1657,7 @@ export default function App() {
         id: p.id,
         authorName: p.authorName || p.author_name || 'Anonymous User',
         authorHandle: p.authorHandle || p.author_handle || '@user',
-        authorAvatar: p.authorAvatar || p.author_avatar || elenaAvatar,
+        authorAvatar: p.authorAvatar || p.author_avatar || (p.authorHandle === '@elena_aeri' ? elenaAvatar : ''),
         isVerified: !!(p.isVerified || p.is_verified),
         timeAgo: p.timeAgo || p.time_ago || 'Recent',
         location: p.location || undefined,
@@ -1728,7 +1728,7 @@ export default function App() {
       id: 'tweet-' + Date.now(),
       authorName: currentUser?.name || 'Anonymous User',
       authorHandle: currentUser?.handle || '@user',
-      authorAvatar: currentUser?.avatarUrl || elenaAvatar,
+      authorAvatar: currentUser?.avatarUrl || '',
       isVerified: true,
       timeAgo: 'Just now',
       isTweet: true,
@@ -1791,7 +1791,7 @@ export default function App() {
       id: 'post-' + Date.now(),
       authorName: currentUser?.name || 'Anonymous User',
       authorHandle: currentUser?.handle || '@user',
-      authorAvatar: currentUser?.avatarUrl || elenaAvatar,
+      authorAvatar: currentUser?.avatarUrl || '',
       isVerified: true,
       timeAgo: 'Just now',
       location: payload.location,
@@ -2051,9 +2051,9 @@ export default function App() {
     const newPostId = 'post-challenge-' + Date.now();
     const newPost: FeedPost = {
       id: newPostId,
-      authorName: payload.challengerName,
-      authorHandle: '@elena_aeri',
-      authorAvatar: payload.challengerAvatar,
+      authorName: payload.challengerName || currentUser?.name || 'Anonymous User',
+      authorHandle: currentUser?.handle || '@user',
+      authorAvatar: payload.challengerAvatar || currentUser?.avatarUrl || '',
       isVerified: true,
       timeAgo: 'Just now',
       location: 'Battle Arena',
@@ -2731,18 +2731,29 @@ export default function App() {
                 <div className="flex items-center justify-between py-1 px-0.5 shrink-0 bg-white">
                   <div className="flex items-center gap-2.5">
                     <div className="relative">
-                      <img
-                        src={post.authorAvatar}
-                        alt={post.authorName}
+                      {post.authorAvatar ? (
+                        <img
+                          src={post.authorAvatar}
+                          alt={post.authorName}
+                          onClick={() => handleTogglePhoneReaction(post.id)}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                          className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
+                        />
+                      ) : null}
+                      <div
                         onClick={() => handleTogglePhoneReaction(post.id)}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = elenaAvatar;
-                        }}
-                        className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
-                      />
+                        style={{ display: post.authorAvatar ? 'none' : 'flex' }}
+                        className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 text-slate-400 items-center justify-center p-0.5 shadow-xs cursor-pointer hover:border-slate-300 transition-all ring-2 ring-purple-600/20"
+                        title="Profile icon"
+                      >
+                        <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
+                      </div>
                       {/* Flame Badge directly on top of the profile pic */}
-                      <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-tr from-[#FF5722] to-amber-400 flex items-center justify-center ring-1.5 ring-white shadow-2xs" title="Trending Creator">
+                      <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-tr from-[#FF5722] to-amber-400 flex items-center justify-center ring-1.5 ring-white shadow-2xs pointer-events-none" title="Trending Creator">
                         <AeriFlameIcon filled className="w-2.5 h-2.5 text-white" />
                       </div>
                     </div>
@@ -2946,11 +2957,24 @@ export default function App() {
                 {/* 5. Post Writing & Caption */}
                 <div className="pt-0.5 pb-1 px-0.5 shrink-0">
                   <div className="flex items-start gap-2">
-                    <img
-                      src={post.authorAvatar}
-                      alt={post.authorName}
-                      className="w-5 h-5 rounded-full object-cover shrink-0 mt-0.5 ring-1 ring-purple-500/20"
-                    />
+                    {post.authorAvatar ? (
+                      <img
+                        src={post.authorAvatar}
+                        alt={post.authorName}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                        className="w-5 h-5 rounded-full object-cover shrink-0 mt-0.5 ring-1 ring-purple-500/20"
+                      />
+                    ) : null}
+                    <div
+                      style={{ display: post.authorAvatar ? 'none' : 'flex' }}
+                      className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 items-center justify-center shrink-0 mt-0.5"
+                    >
+                      <User className="w-3 h-3 text-slate-400 stroke-[1.8]" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] leading-snug text-slate-800">
                         <span className="font-extrabold text-slate-900 mr-1.5">
@@ -4256,9 +4280,9 @@ export default function App() {
         isOpen={showCreateTweetModal}
         onClose={() => setShowCreateTweetModal(false)}
         onPublishTweet={handlePublishTweet}
-        authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : elenaAvatar}
-        authorName={currentUser && !isLoggedOut ? currentUser.name : "Elena Vance"}
-        authorHandle={currentUser && !isLoggedOut ? currentUser.handle : "@elena_aeri"}
+        authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : ''}
+        authorName={currentUser && !isLoggedOut ? currentUser.name : (isLoggedIn ? "You" : "Anonymous User")}
+        authorHandle={currentUser && !isLoggedOut ? currentUser.handle : (isLoggedIn ? "@user" : "@user")}
       />
 
       {/* Create Post Modal (Allows posting video, pic, and writing) */}
@@ -4266,9 +4290,9 @@ export default function App() {
         isOpen={showCreatePostModal}
         onClose={() => setShowCreatePostModal(false)}
         onPublish={handlePublishPost}
-        authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : elenaAvatar}
-        authorName={currentUser && !isLoggedOut ? currentUser.name : "Elena Vance"}
-        authorHandle={currentUser && !isLoggedOut ? currentUser.handle : "@elena_aeri"}
+        authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : ''}
+        authorName={currentUser && !isLoggedOut ? currentUser.name : (isLoggedIn ? "You" : "Anonymous User")}
+        authorHandle={currentUser && !isLoggedOut ? currentUser.handle : (isLoggedIn ? "@user" : "@user")}
       />
 
       {/* Raygun Action Modals (Verb: Past Challenges / Adverb: Challenge Person to Online Fight) */}
@@ -4288,9 +4312,9 @@ export default function App() {
             opponentHandle={raygunTarget.handle}
             opponentAvatar={raygunTarget.avatar}
             currentUser={{
-              name: 'Elena Vance',
-              handle: '@elena_aeri',
-              avatar: elenaAvatar,
+              name: currentUser && !isLoggedOut ? currentUser.name : 'You',
+              handle: currentUser && !isLoggedOut ? currentUser.handle : '@user',
+              avatar: currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : '',
             }}
             onPublishChallenge={handlePublishChallenge}
           />

@@ -184,20 +184,21 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
                 alt={post.authorName}
                 onClick={() => onTogglePhoneReaction(post.id)}
                 onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
                 }}
                 className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
               />
-            ) : (
-              <div
-                onClick={() => onTogglePhoneReaction(post.id)}
-                className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center p-0.5 shadow-xs cursor-pointer hover:border-slate-400 transition-all"
-                title="Profile icon"
-              >
-                <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
-              </div>
-            )}
+            ) : null}
+            <div
+              onClick={() => onTogglePhoneReaction(post.id)}
+              style={{ display: post.authorAvatar ? 'none' : 'flex' }}
+              className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 items-center justify-center p-0.5 shadow-xs cursor-pointer hover:border-slate-400 transition-all"
+              title="Profile icon"
+            >
+              <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
+            </div>
           </div>
 
           <div className="flex flex-col min-w-0 leading-tight">

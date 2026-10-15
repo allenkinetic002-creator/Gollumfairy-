@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Image as ImageIcon, Upload, Video, Users, Plus, Trophy } from 'lucide-react';
+import { X, Image as ImageIcon, Upload, Video, Users, Plus, Trophy, User } from 'lucide-react';
 import { AeriBattleThumbsUpIcon } from './AeriBattleThumbsUpIcon';
 import { BattleParticipant } from './FaceoffBattleModal';
 
@@ -331,11 +331,25 @@ export const ChallengePostModal: React.FC<ChallengePostModalProps> = ({
         {/* Faces & Percentages Row */}
         <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shadow-2xs ring-1 ring-slate-200"
-            />
+            {currentUser.avatar ? (
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shadow-2xs ring-1 ring-slate-200"
+              />
+            ) : null}
+            <div
+              style={{ display: currentUser.avatar ? 'none' : 'flex' }}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 items-center justify-center shrink-0"
+              title="Profile icon"
+            >
+              <User className="w-5 h-5 text-slate-400 stroke-[1.6]" />
+            </div>
             <span className="text-[13.5px] sm:text-[14.5px] font-black text-slate-900 tabular-nums">
               {redPct.toFixed(1)}%
             </span>
