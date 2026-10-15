@@ -1,42 +1,66 @@
 {
-  "Allen Dharak": {
-    "personName": "Allen Dharak",
+  "Karak": {
+    "personName": "Karak",
     "vote": "like",
     "isFinal": true,
-    "likes": 142,
+    "likes": 3,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T13:15:00.000Z"
+  },
+  "karak": {
+    "personName": "Karak",
+    "vote": "like",
+    "isFinal": true,
+    "likes": 3,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T13:15:00.000Z"
+  },
+  "Kinetic": {
+    "personName": "Kinetic",
+    "vote": null,
+    "isFinal": false,
+    "likes": 0,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "kinetic": {
+    "personName": "Kinetic",
+    "vote": null,
+    "isFinal": false,
+    "likes": 0,
     "dislikes": 0,
     "updatedAt": "2026-10-15T12:00:00.000Z"
   },
   "Gollumfairy": {
     "personName": "Gollumfairy",
-    "vote": "like",
-    "isFinal": true,
-    "likes": 128,
+    "vote": null,
+    "isFinal": false,
+    "likes": 0,
     "dislikes": 0,
     "updatedAt": "2026-10-15T12:00:00.000Z"
   },
-  "Kinetic": {
-    "personName": "Kinetic",
-    "vote": "like",
-    "isFinal": true,
-    "likes": 96,
+  "gollumfairy": {
+    "personName": "Gollumfairy",
+    "vote": null,
+    "isFinal": false,
+    "likes": 0,
     "dislikes": 0,
     "updatedAt": "2026-10-15T12:00:00.000Z"
   },
-  "Karak": {
-    "personName": "Karak",
-    "vote": "like",
-    "isFinal": true,
-    "likes": 84,
+  "Allen Dharak": {
+    "personName": "Allen Dharak",
+    "vote": null,
+    "isFinal": false,
+    "likes": 0,
     "dislikes": 0,
     "updatedAt": "2026-10-15T12:00:00.000Z"
   },
-  "karak": {
-    "personName": "karak",
-    "vote": "like",
-    "isFinal": true,
-    "likes": 3,
+  "allenkinetic002-creator": {
+    "personName": "Allen Dharak",
+    "vote": null,
+    "isFinal": false,
+    "likes": 0,
     "dislikes": 0,
-    "updatedAt": "2026-10-15T13:15:00.986Z"
+    "updatedAt": "2026-10-15T12:00:00.000Z"
   }
 }

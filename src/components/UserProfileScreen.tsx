@@ -1453,12 +1453,14 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               <div className="w-full flex justify-center pt-0 pb-1 -mt-0.5">
                 <PhoneReactionPopup
                   personName={wikiData.name}
-                  initialLikes={100}
-                  onVote={(type, newVote) => {
-                    if (type === 'like' && newVote === 'like') {
-                      setToastMessage(`▲ ${wikiData.name} gained +1 flame like (Tie-Breaker UP in rankings)`);
-                    } else if (type === 'dislike' && newVote === 'dislike') {
-                      setToastMessage(`▼ ${wikiData.name} lost -1 flame like (Tie-Breaker DOWN in rankings)`);
+                  initialLikes={0}
+                  onVote={(type, newLikes) => {
+                    if (type === 'like') {
+                      setToastMessage(`▲ ${wikiData.name} now has ${newLikes} Phone Hand likes (Top 10 / #1)`);
+                    } else if (type === 'dislike') {
+                      setToastMessage(`▼ ${wikiData.name} lost -1 like (${newLikes} likes remaining)`);
+                    } else {
+                      setToastMessage(`🔄 Phone hand likes reset to 0 for ${wikiData.name}`);
                     }
                     setTimeout(() => setToastMessage(null), 3000);
                   }}

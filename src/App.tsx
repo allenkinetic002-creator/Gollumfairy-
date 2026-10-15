@@ -88,7 +88,7 @@ import { SignInModal } from './components/SignInModal';
 import { SignInRequiredModal } from './components/SignInRequiredModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
-import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend, submitVoteToBackend } from './lib/realtimeSync';
+import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend, submitVoteToBackend, fetchRemoteVotes } from './lib/realtimeSync';
 import { getSafeMediaUrl, DEFAULT_FALLBACK_IMAGE, TEA_AND_TEA_IMAGE } from './lib/imageUpload';
 
 export interface FeedPost {
@@ -153,6 +153,8 @@ interface Creator {
   location?: string;
   upvotes: number;
   rating?: number;
+  phoneHandLikes?: number;
+  phoneHandDislikes?: number;
   tieBreakerScore?: number;
   tieBreakerLikes?: number;
   tieBreakerDislikes?: number;
@@ -228,6 +230,8 @@ const REAL_TOP_CREATORS: Creator[] = [
     location: "London, UK",
     upvotes: 142,
     rating: 9.8,
+    phoneHandLikes: 0,
+    phoneHandDislikes: 0,
     tieBreakerScore: 0,
     isUpvoted: false,
     isFollowing: true,
@@ -253,6 +257,8 @@ const REAL_TOP_CREATORS: Creator[] = [
     location: "Fairy Realm",
     upvotes: 128,
     rating: 9.6,
+    phoneHandLikes: 0,
+    phoneHandDislikes: 0,
     tieBreakerScore: 0,
     isUpvoted: false,
     isFollowing: true,
@@ -278,6 +284,8 @@ const REAL_TOP_CREATORS: Creator[] = [
     location: "Kyoto, Japan",
     upvotes: 96,
     rating: 9.4,
+    phoneHandLikes: 0,
+    phoneHandDislikes: 0,
     tieBreakerScore: 0,
     isUpvoted: false,
     isFollowing: false,
@@ -301,7 +309,9 @@ const REAL_TOP_CREATORS: Creator[] = [
     location: "Kyoto, Japan",
     upvotes: 84,
     rating: 9.2,
-    tieBreakerScore: 0,
+    phoneHandLikes: 3,
+    phoneHandDislikes: 0,
+    tieBreakerScore: 3,
     isUpvoted: false,
     isFollowing: false,
     category: "photographers",
@@ -316,15 +326,39 @@ const REAL_TOP_CREATORS: Creator[] = [
   },
 ];
 
+/**
+ * Re-ranks creators strictly according to Phone Hand Likes:
+ * - Highest likes on that phone hand moves to top 10 / number 1!
+ * - e.g. 3 likes is 1st, 2 likes is 2nd, 1 like is 3rd!
+ * - Ties broken by rating, then general upvotes
+ */
+export function sortCreatorsByPhoneLikes(creators: Creator[]): Creator[] {
+  const copy = [...creators];
+  copy.sort((a, b) => {
+    const phoneDiff = (b.phoneHandLikes || 0) - (a.phoneHandLikes || 0);
+    if (phoneDiff !== 0) return phoneDiff;
+
+    const ratingDiff = (b.rating ?? 9.0) - (a.rating ?? 9.0);
+    if (ratingDiff !== 0) return ratingDiff;
+
+    return (b.upvotes || 0) - (a.upvotes || 0);
+  });
+  return copy.map((item, idx) => ({
+    ...item,
+    rank: idx + 1,
+  }));
+}
+
 export function buildCreatorsRecord(creators: Creator[]): Record<string, Creator[]> {
+  const sorted = sortCreatorsByPhoneLikes(creators);
   const map: Record<string, Creator[]> = {
-    all: creators,
-    new_artists: creators.filter((c) => c.category === "new_artists" || c.rank <= 2),
-    photographers: creators.filter((c) => c.category === "photographers" || c.role.toLowerCase().includes("photo")),
-    innovators: creators.filter((c) => c.category === "innovators" || c.role.toLowerCase().includes("dev") || c.role.toLowerCase().includes("founder")),
-    us_top: creators,
-    comedians: creators,
-    character_designers: creators,
+    all: sorted,
+    new_artists: sortCreatorsByPhoneLikes(creators.filter((c) => c.category === "new_artists" || c.rank <= 2)),
+    photographers: sortCreatorsByPhoneLikes(creators.filter((c) => c.category === "photographers" || c.role.toLowerCase().includes("photo"))),
+    innovators: sortCreatorsByPhoneLikes(creators.filter((c) => c.category === "innovators" || c.role.toLowerCase().includes("dev") || c.role.toLowerCase().includes("founder"))),
+    us_top: sorted,
+    comedians: sorted,
+    character_designers: sorted,
   };
   return map;
 }
@@ -612,38 +646,93 @@ export default function App() {
       };
     };
 
-    // Fetch real registered users for Top Creators leaderboard
-    fetch("/api/users")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.users) && data.users.length > 0) {
-          const registeredUsers: Creator[] = data.users.map((u: any, idx: number) => ({
-            rank: u.rank || idx + 1,
-            name: u.name || u.username,
-            handle: u.handle || "@" + u.username,
-            avatarBg: u.avatarBg || "bg-indigo-600",
-            avatarInitial: u.avatarInitial || (u.name ? u.name[0].toUpperCase() : "U"),
-            role: u.role || u.profession || "Verified Creator",
-            location: u.location || "Fairy Hub",
-            upvotes: u.upvotes || 50,
-            rating: u.rating || 9.0,
-            tieBreakerScore: 0,
-            isUpvoted: false,
-            isFollowing: false,
-            category: u.category || "new_artists",
-            topPost: {
-              title: (u.name || u.username) + " on Fairy Network",
-              imageUrl: topPostPhoto,
-              gradientBg: "from-indigo-600 to-purple-900",
-              likes: String(u.upvotes || 50),
-              comments: "12",
-              tag: "Verified",
-            },
-          }));
-          setCreatorsData(buildCreatorsRecord(registeredUsers));
-        }
-      })
-      .catch(() => {});
+    // Fetch real registered users and remote phone hand votes together
+    Promise.all([
+      fetch("/api/users").then((r) => r.json()).catch(() => ({ success: false })),
+      fetchRemoteVotes().catch(() => ({})),
+    ]).then(([userData, remoteVotes]) => {
+      let baseUsers: Creator[] = REAL_TOP_CREATORS;
+      if (userData?.success && Array.isArray(userData.users) && userData.users.length > 0) {
+        baseUsers = userData.users.map((u: any, idx: number) => ({
+          rank: u.rank || idx + 1,
+          name: u.name || u.username,
+          handle: u.handle || "@" + u.username,
+          avatarBg: u.avatarBg || "bg-indigo-600",
+          avatarInitial: u.avatarInitial || (u.name ? u.name[0].toUpperCase() : "U"),
+          role: u.role || u.profession || "Verified Creator",
+          location: u.location || "Fairy Hub",
+          upvotes: u.upvotes || 50,
+          rating: u.rating || 9.0,
+          phoneHandLikes: 0,
+          phoneHandDislikes: 0,
+          tieBreakerScore: 0,
+          isUpvoted: false,
+          isFollowing: false,
+          category: u.category || "new_artists",
+          topPost: {
+            title: (u.name || u.username) + " on Fairy Network",
+            imageUrl: topPostPhoto,
+            gradientBg: "from-indigo-600 to-purple-900",
+            likes: String(u.upvotes || 50),
+            comments: "12",
+            tag: "Verified",
+          },
+        }));
+      }
+
+      // Merge remote phone hand votes (e.g. Karak: 3 likes moves to #1!)
+      const votesMap = (remoteVotes || {}) as Record<string, any>;
+      const mergedUsers = baseUsers.map((u) => {
+        const n1 = u.name;
+        const n2 = u.name.toLowerCase().trim();
+        const n3 = u.handle.replace('@', '').toLowerCase().trim();
+        const rec = votesMap[n1] || votesMap[n2] || votesMap[n3];
+        const pLikes = typeof rec?.likes === 'number' ? rec.likes : (u.phoneHandLikes || 0);
+        const pDislikes = typeof rec?.dislikes === 'number' ? rec.dislikes : (u.phoneHandDislikes || 0);
+        return {
+          ...u,
+          phoneHandLikes: pLikes,
+          phoneHandDislikes: pDislikes,
+          tieBreakerLikes: pLikes,
+          tieBreakerDislikes: pDislikes,
+          tieBreakerScore: pLikes - pDislikes,
+        };
+      });
+
+      setCreatorsData(buildCreatorsRecord(mergedUsers));
+    }).catch(() => {});
+
+    // Realtime vote listener: when votes update remotely, re-sort creators live
+    const unsubscribeVotes = subscribeToRealtime((event, data) => {
+      if (event === 'vote_submitted' || event === 'vote_reset') {
+        fetchRemoteVotes().then((votes) => {
+          if (!votes) return;
+          setCreatorsData((prev) => {
+            const nextMap: Record<string, Creator[]> = {};
+            Object.keys(prev).forEach((cat) => {
+              const list = (prev[cat] || []).map((c) => {
+                const n1 = c.name;
+                const n2 = c.name.toLowerCase().trim();
+                const n3 = c.handle.replace('@', '').toLowerCase().trim();
+                const rec = votes[n1] || votes[n2] || votes[n3];
+                const pLikes = typeof rec?.likes === 'number' ? rec.likes : (c.phoneHandLikes || 0);
+                const pDislikes = typeof rec?.dislikes === 'number' ? rec.dislikes : (c.phoneHandDislikes || 0);
+                return {
+                  ...c,
+                  phoneHandLikes: pLikes,
+                  phoneHandDislikes: pDislikes,
+                  tieBreakerLikes: pLikes,
+                  tieBreakerDislikes: pDislikes,
+                  tieBreakerScore: pLikes - pDislikes,
+                };
+              });
+              nextMap[cat] = sortCreatorsByPhoneLikes(list);
+            });
+            return nextMap;
+          });
+        });
+      }
+    });
 
     // Load from local server storage, Supabase, and localStorage
     Promise.all([
@@ -1205,140 +1294,163 @@ export default function App() {
     });
   };
 
-  // Handphone Tie-Breaker: Red button moves UP (+1), Blue button moves DOWN (-1)
+  // Helper to find a creator's phone hand likes
+  const getCreatorPhoneLikes = (nameOrHandle: string): number => {
+    const target = (nameOrHandle || '').toLowerCase().trim();
+    for (const cat of Object.keys(creatorsData)) {
+      const found = creatorsData[cat]?.find(
+        (c) =>
+          c.name.toLowerCase().trim() === target ||
+          c.handle.replace('@', '').toLowerCase().trim() === target
+      );
+      if (found && typeof found.phoneHandLikes === 'number') {
+        return found.phoneHandLikes;
+      }
+    }
+    return 0;
+  };
+
+  // Helper to find a creator's current rank
+  const getCreatorRank = (nameOrHandle: string): number | undefined => {
+    const target = (nameOrHandle || '').toLowerCase().trim();
+    const allList = creatorsData.all || creatorsData.new_artists || [];
+    const found = allList.find(
+      (c) =>
+        c.name.toLowerCase().trim() === target ||
+        c.handle.replace('@', '').toLowerCase().trim() === target
+    );
+    return found?.rank;
+  };
+
+  // Handphone Tie-Breaker: Red button adds likes, highest likes moves to #1 / Top 10
+  // e.g. 3 likes is 1st, 2 likes is 2nd, 1 like is 3rd!
   const handleHandphoneTieBreakerVote = (
     categoryKey: string,
     personName: string,
-    voteType: 'like' | 'dislike',
-    newVote: 'like' | 'dislike' | null
+    voteType: 'like' | 'dislike' | 'reset',
+    newLikes: number,
+    newDislikes: number
   ) => {
-    if (!requireAuth('vote on tie-breakers')) return;
+    if (!requireAuth('vote on creators')) return;
+    const targetKey = (personName || 'default').toLowerCase().trim();
+
     setCreatorsData((prev) => {
-      const list = (prev[categoryKey] || []).map((c) => ({ ...c }));
-      const targetIndex = list.findIndex((c) => c.name === personName);
-      if (targetIndex === -1) return prev;
+      const nextMap: Record<string, Creator[]> = {};
+      let updatedRank = 1;
 
-      const target = list[targetIndex];
-      const prevScore = target.tieBreakerScore || 0;
-      let newScore = prevScore;
+      Object.keys(prev).forEach((cat) => {
+        let list = (prev[cat] || []).map((c) => {
+          const match =
+            c.name.toLowerCase().trim() === targetKey ||
+            c.handle.replace('@', '').toLowerCase().trim() === targetKey;
+          if (match) {
+            return {
+              ...c,
+              phoneHandLikes: newLikes,
+              phoneHandDislikes: newDislikes,
+              tieBreakerLikes: newLikes,
+              tieBreakerDislikes: newDislikes,
+              tieBreakerScore: newLikes - newDislikes,
+            };
+          }
+          return { ...c };
+        });
 
-      if (voteType === 'like') {
-        if (newVote === 'like') {
-          // Upvote (+1 like)
-          target.upvotes = (target.upvotes || 0) + 1;
-          newScore += 1;
-          target.tieBreakerLikes = (target.tieBreakerLikes || 0) + 1;
-        } else {
-          // Unvoted like (-1 like)
-          target.upvotes = Math.max(0, (target.upvotes || 0) - 1);
-          newScore -= 1;
-          target.tieBreakerLikes = Math.max(0, (target.tieBreakerLikes || 0) - 1);
+        // If person not found in this category but exists elsewhere, add them if viewing all or top
+        const alreadyInList = list.some(
+          (c) =>
+            c.name.toLowerCase().trim() === targetKey ||
+            c.handle.replace('@', '').toLowerCase().trim() === targetKey
+        );
+        if (!alreadyInList && (cat === 'all' || cat === 'us_top')) {
+          list.push({
+            rank: list.length + 1,
+            name: personName,
+            handle: '@' + targetKey.replace(/\s+/g, ''),
+            avatarBg: 'bg-purple-600',
+            avatarInitial: personName[0]?.toUpperCase() || 'U',
+            role: 'Verified Creator',
+            location: 'Fairy Network',
+            upvotes: 60,
+            rating: 9.3,
+            phoneHandLikes: newLikes,
+            phoneHandDislikes: newDislikes,
+            tieBreakerScore: newLikes - newDislikes,
+            isUpvoted: false,
+            isFollowing: false,
+            category: 'new_artists',
+            topPost: {
+              title: `${personName} on Fairy`,
+              imageUrl: topPostPhoto,
+              gradientBg: 'from-purple-600 to-indigo-900',
+              likes: String(newLikes),
+              comments: '8',
+              tag: 'Creator',
+            },
+          });
         }
-      } else if (voteType === 'dislike') {
-        if (newVote === 'dislike') {
-          // Downvote: subtract a like (-1 like)
-          target.upvotes = Math.max(0, (target.upvotes || 0) - 1);
-          newScore -= 1;
-          target.tieBreakerDislikes = (target.tieBreakerDislikes || 0) + 1;
-        } else {
-          // Unvoted dislike (+1 like)
-          target.upvotes = (target.upvotes || 0) + 1;
-          newScore += 1;
-          target.tieBreakerDislikes = Math.max(0, (target.tieBreakerDislikes || 0) - 1);
+
+        // Re-sort: highest likes on that phone hand moves to top 10 or number 1!
+        const sorted = sortCreatorsByPhoneLikes(list);
+        nextMap[cat] = sorted;
+
+        const found = sorted.find(
+          (c) =>
+            c.name.toLowerCase().trim() === targetKey ||
+            c.handle.replace('@', '').toLowerCase().trim() === targetKey
+        );
+        if (found) {
+          updatedRank = found.rank;
         }
-      }
-
-      target.tieBreakerScore = newScore;
-      list[targetIndex] = target;
-
-      const oldRank = target.rank;
-
-      // Re-sort creators by:
-      // 1. upvotes DESC (so red button +1 moves UP, blue button -1 moves DOWN)
-      // 2. rating DESC (e.g. 9.5 vs 9.0)
-      // 3. tieBreakerScore DESC
-      list.sort((a, b) => {
-        const upDiff = (b.upvotes || 0) - (a.upvotes || 0);
-        if (upDiff !== 0) return upDiff;
-
-        const ratingDiff = (b.rating ?? 9.0) - (a.rating ?? 9.0);
-        if (ratingDiff !== 0) return ratingDiff;
-
-        return (b.tieBreakerScore || 0) - (a.tieBreakerScore || 0);
       });
 
-      // Re-assign ranks 1..N
-      const rankedList = list.map((item, idx) => ({
-        ...item,
-        rank: idx + 1,
-      }));
+      setSelectedRank(updatedRank);
 
-      const newRank = rankedList.find((c) => c.name === personName)?.rank || oldRank;
-
-      // Submit vote to backend & auto-sync to GitHub
-      submitVoteToBackend(personName, voteType, target.tieBreakerLikes, target.tieBreakerDislikes);
-      syncActivityToRepo('tie_breaker_vote', `Tie-breaker vote on ${personName}: ${voteType === 'like' ? '+1 Like' : '-1 Like'} (Rank #${newRank})`, { person: personName, voteType, rank: newRank }, true);
-
-      if (newRank < oldRank) {
-        setTieBreakerToast(`▲ Tie-Breaker: ${personName} moved UP to Rank #${newRank}! (+1 flame like)`);
-      } else if (newRank > oldRank) {
-        setTieBreakerToast(`▼ Tie-Breaker: ${personName} moved DOWN to Rank #${newRank}! (-1 flame like subtracted)`);
+      if (voteType === 'reset') {
+        setTieBreakerToast(`🔄 Phone hand likes reset to 0 for ${personName}`);
+      } else if (updatedRank === 1) {
+        setTieBreakerToast(`🏆 NUMBER ONE! ${personName} moves to #1 on Leaderboard with ${newLikes} Phone Hand ${newLikes === 1 ? 'like' : 'likes'}!`);
       } else {
-        if (voteType === 'like') {
-          setTieBreakerToast(`▲ Handphone upvote recorded for ${personName} (+1 like)`);
-        } else {
-          setTieBreakerToast(`▼ Handphone downvote recorded for ${personName} (-1 like subtracted)`);
-        }
+        setTieBreakerToast(`▲ ${personName} moves to Rank #${updatedRank} with ${newLikes} Phone Hand ${newLikes === 1 ? 'like' : 'likes'}!`);
       }
+
       setTimeout(() => {
         setTieBreakerToast(null);
       }, 3500);
 
-      return {
-        ...prev,
-        [categoryKey]: rankedList,
-      };
+      return nextMap;
     });
+
+    submitVoteToBackend(personName, voteType === 'dislike' ? 'dislike' : 'like', newLikes, newDislikes);
+    syncActivityToRepo(
+      'phone_hand_vote',
+      `Phone Hand Vote: ${personName} now has ${newLikes} likes (Ranked on leaderboard)`,
+      { personName, voteType, likes: newLikes, dislikes: newDislikes },
+      true
+    );
   };
 
   const handleFeedPostTieBreakerVote = (
     postId: string,
     authorName: string,
-    voteType: 'like' | 'dislike',
-    newVote: 'like' | 'dislike' | null
+    voteType: 'like' | 'dislike' | 'reset',
+    newLikes: number,
+    newDislikes: number
   ) => {
-    if (!requireAuth('vote on social reach')) return;
+    if (!requireAuth('vote on creators')) return;
     setFeedPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
-          const currentLikes = p.likeCount || 100;
-          let delta = 0;
-          if (voteType === 'like') {
-            delta = newVote === 'like' ? 1 : -1;
-          } else {
-            delta = newVote === 'dislike' ? -1 : 1;
-          }
-          const nextLikes = Math.max(0, currentLikes + delta);
           return {
             ...p,
-            likeCount: nextLikes,
+            likeCount: Math.max(1, (p.likeCount || 10) + (voteType === 'like' ? 1 : -1)),
           };
         }
         return p;
       })
     );
 
-    submitVoteToBackend(authorName, voteType);
-    syncActivityToRepo('feed_post_tiebreaker', `${voteType === 'like' ? 'Upvoted (+1)' : 'Downvoted (-1)'} feed post by ${authorName}`, { postId, voteType }, true);
-
-    if (voteType === 'like' && newVote === 'like') {
-      setTieBreakerToast(`▲ ${authorName} flame like +1 (Tie-Breaker UP)`);
-    } else if (voteType === 'dislike' && newVote === 'dislike') {
-      setTieBreakerToast(`▼ ${authorName} flame like -1 (Tie-Breaker DOWN)`);
-    }
-    setTimeout(() => {
-      setTieBreakerToast(null);
-    }, 3000);
+    handleHandphoneTieBreakerVote(selectedCategory, authorName, voteType, newLikes, newDislikes);
   };
 
   return (
@@ -1645,6 +1757,11 @@ export default function App() {
                   onRatingReset={() => {
                     handleRatingReset(post.authorName);
                   }}
+                  authorPhoneLikes={getCreatorPhoneLikes(post.authorName)}
+                  authorRank={getCreatorRank(post.authorName)}
+                  onPhoneVote={(postId, authorName, type, newLikes, newDislikes) => {
+                    handleFeedPostTieBreakerVote(postId, authorName, type, newLikes, newDislikes);
+                  }}
                 />
               ) : (
               <div key={post.id} className="space-y-1.5 shrink-0">
@@ -1654,9 +1771,10 @@ export default function App() {
                     <PhoneReactionPopup
                       personName={post.authorName}
                       postAuthor={post.authorName}
-                      initialLikes={post.likeCount || 342}
-                      onVote={(type, newVote) => {
-                        handleFeedPostTieBreakerVote(post.id, post.authorName, type, newVote);
+                      currentRank={getCreatorRank(post.authorName)}
+                      initialLikes={getCreatorPhoneLikes(post.authorName)}
+                      onVote={(type, newLikes, newDislikes) => {
+                        handleFeedPostTieBreakerVote(post.id, post.authorName, type, newLikes, newDislikes);
                       }}
                     />
                   </div>
@@ -2401,9 +2519,10 @@ export default function App() {
                           isTied={Boolean(tiedOpponent)}
                           tiedWith={tiedOpponent ? `${tiedOpponent.name} (${tiedOpponent.upvotes.toLocaleString()} likes · ${tiedOpponent.rating ?? 9.0}/10)` : undefined}
                           currentRank={person.rank}
-                          initialLikes={person.upvotes}
-                          onVote={(type, newVote) => {
-                            handleHandphoneTieBreakerVote(selectedCategory, person.name, type, newVote);
+                          initialLikes={person.phoneHandLikes || 0}
+                          initialDislikes={person.phoneHandDislikes || 0}
+                          onVote={(type, newLikes, newDislikes) => {
+                            handleHandphoneTieBreakerVote(selectedCategory, person.name, type, newLikes, newDislikes);
                           }}
                         />
                       </div>
@@ -2427,16 +2546,24 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Tie-Breaker Status if votes applied */}
-                    {person.tieBreakerScore !== undefined && person.tieBreakerScore !== 0 && (
-                      <div className="mx-3.5 my-2 px-3 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
-                        <span className={`font-bold flex items-center gap-1 text-[11px] ${person.tieBreakerScore > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                          {person.tieBreakerScore > 0 ? '▲ Moved UP in Top 10' : '▼ Moved DOWN in Top 10'}
-                          <span className="font-normal text-slate-500">
-                            (Handphone Net: {person.tieBreakerScore > 0 ? `+${person.tieBreakerScore}` : person.tieBreakerScore})
-                          </span>
+                    {/* Phone Hand Likes / Leaderboard Rank Badge */}
+                    {person.phoneHandLikes !== undefined && person.phoneHandLikes > 0 && (
+                      <div className="mx-3.5 my-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-red-50 via-amber-50 to-red-50 border border-red-200 text-xs flex items-center justify-between shadow-2xs">
+                        <span className="font-extrabold flex items-center gap-1.5 text-[11px] text-red-700">
+                          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                          <span>Phone Hand Likes: {person.phoneHandLikes} {person.phoneHandLikes === 1 ? 'like' : 'likes'}</span>
                         </span>
-                        <span className="text-[10px] font-mono text-slate-400">
+                        <span
+                          className={`font-black text-xs px-2.5 py-0.5 rounded-md shadow-2xs ${
+                            person.rank === 1
+                              ? 'bg-amber-400 text-amber-950 font-black border border-amber-500'
+                              : person.rank === 2
+                              ? 'bg-slate-300 text-slate-900 border border-slate-400'
+                              : person.rank === 3
+                              ? 'bg-amber-700 text-white'
+                              : 'bg-red-600 text-white'
+                          }`}
+                        >
                           Rank #{person.rank}
                         </span>
                       </div>

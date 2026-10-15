@@ -386,45 +386,51 @@ async function startServer() {
 
   app.post('/api/votes/submit', (req, res) => {
     const { personName, vote, likes, dislikes } = req.body;
-    const key = personName || 'default';
+    const key = (personName || 'default').trim();
     const votes = readJsonFile<Record<string, any>>('src/data/votes.json', {});
 
-    votes[key] = {
+    const record = {
       personName: key,
       vote,
       isFinal: true,
-      likes: typeof likes === 'number' ? likes : 101,
+      likes: typeof likes === 'number' ? likes : 1,
       dislikes: typeof dislikes === 'number' ? dislikes : 0,
       updatedAt: new Date().toISOString(),
     };
+    votes[key] = record;
+    // Also save lowercase key so lookups by username or name match seamlessly
+    const lowerKey = key.toLowerCase();
+    votes[lowerKey] = record;
+
     writeJsonFile('src/data/votes.json', votes);
 
-    const eventPayload = { ...votes[key] };
+    const eventPayload = { ...record };
     broadcastRealtime('vote_submitted', eventPayload);
-    logActivity('vote_submitted', `Finalized ${vote === 'like' ? 'UP' : 'DOWN'} vote for ${key}`, eventPayload);
-    autoCommitAndPush(`feat(votes): recorded ${vote} vote for ${key}`);
+    logActivity('vote_submitted', `Finalized ${vote === 'like' ? 'UP' : 'DOWN'} vote for ${key} (${record.likes} phone hand likes)`, eventPayload);
+    autoCommitAndPush(`feat(votes): recorded ${vote} vote for ${key} (${record.likes} likes)`);
 
     res.json({ success: true, ...eventPayload });
   });
 
   app.post('/api/votes/reset', (req, res) => {
     const { personName } = req.body;
-    const key = personName || 'default';
+    const key = (personName || 'default').trim();
     const votes = readJsonFile<Record<string, any>>('src/data/votes.json', {});
 
-    if (votes[key]) {
-      votes[key].vote = null;
-      votes[key].isFinal = false;
-      votes[key].updatedAt = new Date().toISOString();
-      writeJsonFile('src/data/votes.json', votes);
-    }
-
-    const eventPayload = {
+    const record = {
       personName: key,
       isFinal: false,
       vote: null,
+      likes: 0,
+      dislikes: 0,
       updatedAt: new Date().toISOString(),
     };
+    votes[key] = record;
+    const lowerKey = key.toLowerCase();
+    votes[lowerKey] = record;
+    writeJsonFile('src/data/votes.json', votes);
+
+    const eventPayload = { ...record };
 
     broadcastRealtime('vote_reset', eventPayload);
     logActivity('vote_reset', `Reset vote for ${key}`, eventPayload);

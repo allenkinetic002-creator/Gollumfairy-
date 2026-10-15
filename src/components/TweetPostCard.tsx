@@ -76,6 +76,9 @@ interface TweetPostCardProps {
   onOpenStarStamps?: () => void;
   onRatingSubmit?: (rating: number) => void;
   onRatingReset?: () => void;
+  authorPhoneLikes?: number;
+  authorRank?: number;
+  onPhoneVote?: (postId: string, authorName: string, type: 'like' | 'dislike' | 'reset', newLikes: number, newDislikes: number) => void;
 }
 
 export const TweetPostCard: React.FC<TweetPostCardProps> = ({
@@ -102,6 +105,9 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
   onOpenStarStamps,
   onRatingSubmit,
   onRatingReset,
+  authorPhoneLikes = 0,
+  authorRank,
+  onPhoneVote,
 }) => {
   const [isRetweeted, setIsRetweeted] = useState(Boolean(post.isRetweeted));
   const [retweetCount, setRetweetCount] = useState(post.retweetCount ?? 14);
@@ -169,7 +175,11 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
         <div className="w-full flex justify-center pb-1">
           <PhoneReactionPopup
             personName={post.authorName}
-            initialLikes={post.likeCount || 100}
+            currentRank={authorRank}
+            initialLikes={authorPhoneLikes}
+            onVote={(type, newLikes, newDislikes) => {
+              onPhoneVote?.(post.id, post.authorName, type, newLikes, newDislikes);
+            }}
           />
         </div>
       )}
