@@ -157,13 +157,17 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
                     {tweetText || <span className="italic text-slate-400">Your post text will appear here...</span>}
                   </p>
 
-                  {/* Attached media */}
+                  {/* Attached media (Full picture display) */}
                   {selectedImage && (
-                    <div className="mt-2.5 rounded-xl overflow-hidden border border-slate-200 bg-black max-h-56">
+                    <div className="relative mt-2.5 rounded-xl overflow-hidden border border-slate-200 bg-slate-950 max-h-[380px] flex items-center justify-center">
+                      <div
+                        className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
+                        style={{ backgroundImage: `url(${selectedImage})` }}
+                      />
                       <img
                         src={selectedImage}
                         alt="Attached media"
-                        className="w-full h-full object-cover object-center max-h-56"
+                        className="relative z-10 w-full h-auto max-h-[380px] object-contain mx-auto"
                       />
                     </div>
                   )}

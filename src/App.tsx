@@ -34,6 +34,7 @@ import {
   UploadCloud,
   GitBranch,
   RefreshCw,
+  Maximize2,
 } from 'lucide-react';
 import postImage from './assets/images/fairy_post_image_1791012530319.jpg';
 import elenaAvatar from './assets/images/creator_portrait_elena_1791014499312.jpg';
@@ -1560,6 +1561,7 @@ export default function App() {
 
   const [showCreateTweetModal, setShowCreateTweetModal] = useState(false);
   const [tweetSuccessToast, setTweetSuccessToast] = useState<string | null>(null);
+  const [fullscreenMediaUrl, setFullscreenMediaUrl] = useState<string | null>(null);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([
     {
       id: 'tweet-initial-elena',
@@ -2654,8 +2656,16 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 3. Post Card: Image or Video */}
-                <div className="relative w-full h-[36vh] min-h-[190px] max-h-[290px] rounded-[18px] overflow-hidden bg-black shadow-xs shrink-0 group">
+                {/* 3. Post Card: Image or Video (Full picture display without cropping) */}
+                <div className="relative w-full min-h-[220px] max-h-[620px] rounded-[18px] overflow-hidden bg-slate-950 flex items-center justify-center shadow-xs shrink-0 group">
+                  {/* Subtle blur backdrop to fill aspect ratio letterbox cleanly */}
+                  {post.mediaType !== 'video' && post.mediaUrl && (
+                    <div
+                      className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
+                      style={{ backgroundImage: `url(${post.mediaUrl})` }}
+                    />
+                  )}
+
                   {post.mediaType === 'video' ? (
                     <video
                       src={post.mediaUrl}
@@ -2664,18 +2674,32 @@ export default function App() {
                       loop
                       muted
                       playsInline
-                      className="w-full h-full object-cover object-center"
+                      className="relative z-10 w-full max-h-[620px] object-contain mx-auto"
                     />
                   ) : (
                     <img
                       src={post.mediaUrl}
                       alt={post.caption}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover object-center"
+                      className="relative z-10 w-full max-h-[620px] object-contain mx-auto cursor-pointer"
+                      onClick={() => setFullscreenMediaUrl(post.mediaUrl || null)}
                     />
                   )}
 
-                  <div className="absolute right-3 bottom-3 bg-white/75 backdrop-blur-md px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/40 pointer-events-none">
+                  {/* Expand to full screen icon */}
+                  {post.mediaUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setFullscreenMediaUrl(post.mediaUrl || null)}
+                      className="absolute top-2.5 right-2.5 z-20 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity cursor-pointer shadow-xs"
+                      title="View full picture"
+                      aria-label="View full picture"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
+                  <div className="absolute right-3 bottom-3 z-20 bg-white/75 backdrop-blur-md px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/40 pointer-events-none">
                     <Music className="w-3 h-3 text-slate-800" />
                     <span className="text-[9.5px] font-semibold text-slate-900 tracking-tight">
                       {post.audioTitle || 'Original Audio'}
@@ -4184,6 +4208,32 @@ export default function App() {
             }}
             currentUser={currentUser || undefined}
           />
+        </div>
+      )}
+
+      {/* Full Picture Lightbox Modal */}
+      {fullscreenMediaUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-3 animate-fadeIn"
+          onClick={() => setFullscreenMediaUrl(null)}
+        >
+          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+            <button
+              onClick={() => setFullscreenMediaUrl(null)}
+              className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
+              title="Close full picture"
+              aria-label="Close"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <div className="relative max-w-full max-h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={fullscreenMediaUrl}
+              alt="Full picture view"
+              className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            />
+          </div>
         </div>
       )}
 

@@ -319,13 +319,17 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
         </div>
       )}
 
-      {/* Attached Sitch Photo / Media if exists */}
+      {/* Attached Sitch Photo / Media if exists (Full picture display) */}
       {post.mediaUrl && (
-        <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-950 max-h-72 shadow-2xs">
+        <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-950 max-h-[550px] flex items-center justify-center shadow-2xs group">
+          <div
+            className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
+            style={{ backgroundImage: `url(${post.mediaUrl})` }}
+          />
           <img
             src={post.mediaUrl}
             alt="Sitch attachment"
-            className="w-full h-full max-h-72 object-cover object-center"
+            className="relative z-10 w-full h-auto max-h-[550px] object-contain mx-auto"
           />
         </div>
       )}

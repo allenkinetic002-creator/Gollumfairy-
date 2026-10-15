@@ -1605,8 +1605,14 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               </div>
             </div>
 
-            {/* 3. Post Card: Image or Video */}
-            <div className="relative w-full h-[36vh] min-h-[200px] max-h-[300px] rounded-[18px] overflow-hidden bg-black shadow-xs shrink-0 group">
+            {/* 3. Post Card: Image or Video (Full picture display without cropping) */}
+            <div className="relative w-full min-h-[220px] max-h-[620px] rounded-[18px] overflow-hidden bg-slate-950 flex items-center justify-center shadow-xs shrink-0 group">
+              {selectedPost.mediaType !== 'video' && selectedPost.mediaUrl && (
+                <div
+                  className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
+                  style={{ backgroundImage: `url(${selectedPost.mediaUrl})` }}
+                />
+              )}
               {selectedPost.mediaType === 'video' ? (
                 <video
                   src={selectedPost.mediaUrl}
@@ -1615,17 +1621,17 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                   loop
                   muted
                   playsInline
-                  className="w-full h-full object-cover object-center"
+                  className="relative z-10 w-full max-h-[620px] object-contain mx-auto"
                 />
               ) : (
                 <img
                   src={selectedPost.mediaUrl}
                   alt={selectedPost.caption}
-                  className="w-full h-full object-cover object-center"
+                  className="relative z-10 w-full max-h-[620px] object-contain mx-auto"
                 />
               )}
 
-              <div className="absolute right-3 bottom-3 bg-white/75 backdrop-blur-md px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/40 pointer-events-none">
+              <div className="absolute right-3 bottom-3 z-20 bg-white/75 backdrop-blur-md px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/40 pointer-events-none">
                 <Music className="w-3 h-3 text-slate-800" />
                 <span className="text-[9.5px] font-semibold text-slate-900 tracking-tight">
                   {selectedPost.audioTitle || 'Original Audio'}

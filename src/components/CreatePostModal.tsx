@@ -234,7 +234,13 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
             </label>
 
             {mediaUrl ? (
-              <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-black/90 group shadow-xs border border-slate-200">
+              <div className="relative w-full min-h-[190px] max-h-[380px] rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center group shadow-xs border border-slate-200">
+                {mediaType !== 'video' && (
+                  <div
+                    className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
+                    style={{ backgroundImage: `url(${mediaUrl})` }}
+                  />
+                )}
                 {mediaType === 'video' ? (
                   <>
                     <video
@@ -244,24 +250,24 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       loop
                       autoPlay
                       muted
-                      className="w-full h-full object-cover"
+                      className="relative z-10 w-full max-h-[380px] object-contain mx-auto"
                     />
                     <button
                       type="button"
                       onClick={toggleVideoPlayback}
-                      className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                      className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity cursor-pointer z-20"
                     >
                       {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                     </button>
-                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full text-white text-[9.5px] font-bold flex items-center gap-1">
+                    <span className="absolute top-2 left-2 z-20 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full text-white text-[9.5px] font-bold flex items-center gap-1">
                       <Video className="w-3 h-3 text-indigo-400" /> Video
                     </span>
                   </>
                 ) : (
                   <>
-                    <img src={mediaUrl} alt="Upload preview" className="w-full h-full object-cover" />
-                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full text-white text-[9.5px] font-bold flex items-center gap-1">
-                      <ImageIcon className="w-3 h-3 text-amber-400" /> Photo
+                    <img src={mediaUrl} alt="Upload preview" className="relative z-10 w-full max-h-[380px] object-contain mx-auto" />
+                    <span className="absolute top-2 left-2 z-20 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full text-white text-[9.5px] font-bold flex items-center gap-1">
+                      <ImageIcon className="w-3 h-3 text-amber-400" /> Full Picture
                     </span>
                   </>
                 )}
@@ -270,7 +276,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setMediaUrl('')}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                  className="absolute top-2 right-2 z-20 w-7 h-7 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                   title="Remove media"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
