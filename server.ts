@@ -525,6 +525,44 @@ async function startServer() {
     res.json({ success: true, ...payload });
   });
 
+  // --- FAIRY SYSTEM SWITCHES (SUPPORT, FAVORITE, TRENDING, LOYALTY, GENRE) ---
+  app.get('/api/fairy-switches', (_req, res) => {
+    const defaultSwitches = {
+      support: false,
+      favorite: false,
+      trending: false,
+      loyalty: false,
+      genre: false,
+      updatedAt: new Date().toISOString(),
+    };
+    const switches = readJsonFile('src/data/fairy_switches.json', defaultSwitches);
+    res.json({ success: true, switches });
+  });
+
+  app.post('/api/fairy-switches', (req, res) => {
+    try {
+      const { switches } = req.body;
+      if (!switches) {
+        return res.status(400).json({ success: false, error: 'Switches object required' });
+      }
+      const updatedSwitches = {
+        support: Boolean(switches.support),
+        favorite: Boolean(switches.favorite),
+        trending: Boolean(switches.trending),
+        loyalty: Boolean(switches.loyalty),
+        genre: Boolean(switches.genre),
+        updatedAt: new Date().toISOString(),
+      };
+      writeJsonFile('src/data/fairy_switches.json', updatedSwitches);
+      broadcastRealtime('fairy_switches_updated', updatedSwitches);
+      logActivity('fairy_switches_updated', 'Updated system switches (Support, Favorite, Trending, Loyalty, Genre)', updatedSwitches);
+      autoCommitAndPush('feat(switches): persist support, favorite, trending, loyalty, genre state');
+      res.json({ success: true, switches: updatedSwitches });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // Automated Activity Sync endpoint: called when user creates posts, votes, interacts
   app.post('/api/sync/repo-update', async (req, res) => {
     runGitQueued(async () => {

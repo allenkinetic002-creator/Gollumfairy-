@@ -3196,6 +3196,9 @@ export default function App() {
               <FairyControl
                 onBackToFeed={() => setActiveNavIndex(0)}
                 onSwitchToDMs={() => setControlSubTab('dm-control')}
+                isLoggedIn={isLoggedIn}
+                onRequireAuth={requireAuth}
+                onOpenSignInModal={() => setShowSignInModal(true)}
               />
             ) : controlSubTab === 'dm-control' ? (
               <DMControl
@@ -3333,8 +3336,8 @@ export default function App() {
               localStorage.removeItem('fairy_current_user');
             } catch (e) {}
             setActiveNavIndex(0);
-            setTweetSuccessToast('Logged out. Sign in is available above the header.');
-            setTimeout(() => setTweetSuccessToast(null), 3000);
+            setTweetSuccessToast('Logged out. Support, Favorite, Trending, Loyalty, & Genre switches remain preserved.');
+            setTimeout(() => setTweetSuccessToast(null), 3500);
           }}
         />
 

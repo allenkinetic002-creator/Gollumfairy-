@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Check,
@@ -20,11 +20,23 @@ import {
   Bell,
   Eye,
   Activity,
+  Lock,
+  LogIn,
 } from 'lucide-react';
+import {
+  FairySystemSwitches,
+  getStoredFairySwitches,
+  saveStoredFairySwitches,
+  subscribeToFairySwitches,
+  fetchServerFairySwitches,
+} from '../lib/fairySwitches';
 
 interface FairyControlProps {
   onBackToFeed: () => void;
   onSwitchToDMs?: () => void;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (actionName?: string) => boolean;
+  onOpenSignInModal?: () => void;
 }
 
 // Shared Category & Genre List for both SUPPORT and GENRE systems
@@ -228,15 +240,93 @@ const SEARCHABLE_CREATORS = [
   { id: 's-5', name: 'Finnick O’Reilly', handle: '@finnick_lore', bio: 'Speculative sci-fi worldbuilder' },
 ];
 
-export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps) {
+export function FairyControl({
+  onBackToFeed,
+  onSwitchToDMs,
+  isLoggedIn = false,
+  onRequireAuth,
+  onOpenSignInModal,
+}: FairyControlProps) {
   // =========================================================================
-  // 5 COMPLETELY INDEPENDENT SWITCH STATES
+  // 5 COMPLETELY INDEPENDENT SWITCH STATES (PERSISTED ACROSS LOGOUT)
+  // Rule: Once ON, switches stay ON across logout unless turned OFF while logged in.
   // =========================================================================
-  const [supportEnabled, setSupportEnabled] = useState(false);
-  const [favoriteEnabled, setFavoriteEnabled] = useState(false);
-  const [trendingEnabled, setTrendingEnabled] = useState(false);
-  const [loyaltyEnabled, setLoyaltyEnabled] = useState(false);
-  const [genreEnabled, setGenreEnabled] = useState(false);
+  const [switches, setSwitches] = useState<FairySystemSwitches>(() => getStoredFairySwitches());
+  const supportEnabled = switches.support;
+  const favoriteEnabled = switches.favorite;
+  const trendingEnabled = switches.trending;
+  const loyaltyEnabled = switches.loyalty;
+  const genreEnabled = switches.genre;
+
+  const [authNoticeModal, setAuthNoticeModal] = useState<{
+    isOpen: boolean;
+    featureName: string;
+    systemKey: 'support' | 'favorite' | 'trending' | 'loyalty' | 'genre';
+  } | null>(null);
+
+  const [toastNotice, setToastNotice] = useState<string | null>(null);
+
+  const showToastNotice = (msg: string) => {
+    setToastNotice(msg);
+    setTimeout(() => {
+      setToastNotice((prev) => (prev === msg ? null : prev));
+    }, 4500);
+  };
+
+  useEffect(() => {
+    fetchServerFairySwitches().then((serverSwitches) => {
+      if (serverSwitches) {
+        setSwitches((prev) => {
+          const merged: FairySystemSwitches = {
+            support: prev.support || serverSwitches.support,
+            favorite: prev.favorite || serverSwitches.favorite,
+            trending: prev.trending || serverSwitches.trending,
+            loyalty: prev.loyalty || serverSwitches.loyalty,
+            genre: prev.genre || serverSwitches.genre,
+            updatedAt: new Date().toISOString(),
+          };
+          saveStoredFairySwitches(merged);
+          return merged;
+        });
+      }
+    });
+
+    return subscribeToFairySwitches((updated) => {
+      setSwitches(updated);
+    });
+  }, []);
+
+  const handleToggleSystemSwitch = (
+    key: 'support' | 'favorite' | 'trending' | 'loyalty' | 'genre',
+    displayName: string
+  ) => {
+    const isCurrentlyOn = switches[key];
+
+    if (isCurrentlyOn) {
+      // User is attempting to turn OFF the switch
+      // Core rule: "unless he off it when he is logged in"
+      if (!isLoggedIn) {
+        setAuthNoticeModal({
+          isOpen: true,
+          featureName: displayName,
+          systemKey: key,
+        });
+        return;
+      }
+
+      // Logged in: permitted to turn OFF
+      const updated: FairySystemSwitches = { ...switches, [key]: false, updatedAt: new Date().toISOString() };
+      setSwitches(updated);
+      saveStoredFairySwitches(updated);
+      showToastNotice(`${displayName} switch turned OFF.`);
+    } else {
+      // Turning ON: stays ON across logouts unless turned off while logged in
+      const updated: FairySystemSwitches = { ...switches, [key]: true, updatedAt: new Date().toISOString() };
+      setSwitches(updated);
+      saveStoredFairySwitches(updated);
+      showToastNotice(`✨ ${displayName} switch turned ON! It remains active even if you log out.`);
+    }
+  };
 
   // Active count for top status chip
   const activeSystemsCount = [
@@ -1033,7 +1123,9 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {supportEnabled
-                    ? 'Active · 1 user available backing new & growing creators'
+                    ? (isLoggedIn
+                        ? 'Active · 1 user available backing creators (Stays ON across logout)'
+                        : 'Active · Preserved across logout (Sign in to turn off)')
                     : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
@@ -1041,9 +1133,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
 
             {/* Independent Switch matching DM Control style (RED) */}
             <div
-              onClick={() => setSupportEnabled((prev) => !prev)}
+              onClick={() => handleToggleSystemSwitch('support', 'Support')}
               className="flex items-center gap-2 cursor-pointer bg-slate-100 p-1.5 rounded-full hover:bg-slate-200/80 transition-colors"
-              title="Toggle Support System On / Off"
+              title={
+                supportEnabled
+                  ? (isLoggedIn ? 'Support is ON (Click to turn OFF)' : 'Support is ON (Preserved across logout · Sign in to turn OFF)')
+                  : 'Support is OFF (Click to turn ON · Stays ON across logouts)'
+              }
             >
               <span
                 className={`text-[10px] font-black tracking-wider uppercase pl-1 transition-colors ${
@@ -1377,7 +1473,9 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {favoriteEnabled
-                    ? 'Active · 1 user available pinning favorite creator feeds'
+                    ? (isLoggedIn
+                        ? 'Active · 1 user available pinning creator feeds (Stays ON across logout)'
+                        : 'Active · Preserved across logout (Sign in to turn off)')
                     : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
@@ -1385,9 +1483,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
 
             {/* Independent Switch matching DM Control style (PINK) */}
             <div
-              onClick={() => setFavoriteEnabled((prev) => !prev)}
+              onClick={() => handleToggleSystemSwitch('favorite', 'Favorite')}
               className="flex items-center gap-2 cursor-pointer bg-slate-100 p-1.5 rounded-full hover:bg-slate-200/80 transition-colors"
-              title="Toggle Favorite System On / Off"
+              title={
+                favoriteEnabled
+                  ? (isLoggedIn ? 'Favorite is ON (Click to turn OFF)' : 'Favorite is ON (Preserved across logout · Sign in to turn OFF)')
+                  : 'Favorite is OFF (Click to turn ON · Stays ON across logouts)'
+              }
             >
               <span
                 className={`text-[10px] font-black tracking-wider uppercase pl-1 transition-colors ${
@@ -1562,7 +1664,9 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {trendingEnabled
-                    ? 'Active · 1 user available boosting viral trends'
+                    ? (isLoggedIn
+                        ? 'Active · 1 user available boosting viral trends (Stays ON across logout)'
+                        : 'Active · Preserved across logout (Sign in to turn off)')
                     : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
@@ -1570,9 +1674,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
 
             {/* Independent Switch matching DM Control style (BLUE) */}
             <div
-              onClick={() => setTrendingEnabled((prev) => !prev)}
+              onClick={() => handleToggleSystemSwitch('trending', 'Trending')}
               className="flex items-center gap-2 cursor-pointer bg-slate-100 p-1.5 rounded-full hover:bg-slate-200/80 transition-colors"
-              title="Toggle Trending System On / Off"
+              title={
+                trendingEnabled
+                  ? (isLoggedIn ? 'Trending is ON (Click to turn OFF)' : 'Trending is ON (Preserved across logout · Sign in to turn OFF)')
+                  : 'Trending is OFF (Click to turn ON · Stays ON across logouts)'
+              }
             >
               <span
                 className={`text-[10px] font-black tracking-wider uppercase pl-1 transition-colors ${
@@ -1735,7 +1843,9 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {loyaltyEnabled
-                    ? 'Active · 1 user available building loyalty streaks'
+                    ? (isLoggedIn
+                        ? 'Active · 1 user available building loyalty streaks (Stays ON across logout)'
+                        : 'Active · Preserved across logout (Sign in to turn off)')
                     : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
@@ -1743,9 +1853,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
 
             {/* Independent Switch matching DM Control style (GOLD) */}
             <div
-              onClick={() => setLoyaltyEnabled((prev) => !prev)}
+              onClick={() => handleToggleSystemSwitch('loyalty', 'Loyalty')}
               className="flex items-center gap-2 cursor-pointer bg-slate-100 p-1.5 rounded-full hover:bg-slate-200/80 transition-colors"
-              title="Toggle Loyalty System On / Off"
+              title={
+                loyaltyEnabled
+                  ? (isLoggedIn ? 'Loyalty is ON (Click to turn OFF)' : 'Loyalty is ON (Preserved across logout · Sign in to turn OFF)')
+                  : 'Loyalty is OFF (Click to turn ON · Stays ON across logouts)'
+              }
             >
               <span
                 className={`text-[10px] font-black tracking-wider uppercase pl-1 transition-colors ${
@@ -1953,7 +2067,9 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {genreEnabled
-                    ? 'Active · 1 user available classifying posts by craft'
+                    ? (isLoggedIn
+                        ? 'Active · 1 user available classifying posts (Stays ON across logout)'
+                        : 'Active · Preserved across logout (Sign in to turn off)')
                     : 'Inactive · 0 users available (Switch is off)'}
                 </p>
               </div>
@@ -1961,9 +2077,13 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
 
             {/* Independent Switch matching DM Control style (PURPLE) */}
             <div
-              onClick={() => setGenreEnabled((prev) => !prev)}
+              onClick={() => handleToggleSystemSwitch('genre', 'Genre')}
               className="flex items-center gap-2 cursor-pointer bg-slate-100 p-1.5 rounded-full hover:bg-slate-200/80 transition-colors"
-              title="Toggle Genre System On / Off"
+              title={
+                genreEnabled
+                  ? (isLoggedIn ? 'Genre is ON (Click to turn OFF)' : 'Genre is ON (Preserved across logout · Sign in to turn OFF)')
+                  : 'Genre is OFF (Click to turn ON · Stays ON across logouts)'
+              }
             >
               <span
                 className={`text-[10px] font-black tracking-wider uppercase pl-1 transition-colors ${
@@ -2544,6 +2664,78 @@ export function FairyControl({ onBackToFeed, onSwitchToDMs }: FairyControlProps)
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Switch Protection Modal: "Unless he off it when he is logged in" */}
+      {authNoticeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 text-slate-800 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                  <Lock className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-slate-900">Sign In Required</h4>
+                  <p className="text-[11px] text-slate-500">Switch protection rule</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAuthNoticeModal(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3 text-xs text-amber-900 leading-relaxed space-y-1.5">
+              <p className="font-semibold">
+                The <span className="font-bold underline">{authNoticeModal.featureName}</span> switch was turned ON and remains active across logout.
+              </p>
+              <p className="text-[11px] text-amber-800">
+                It stays that way and can <span className="font-bold">only be turned off while logged in</span>. Please sign in to turn off {authNoticeModal.featureName}.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={() => {
+                  const feat = authNoticeModal.featureName;
+                  setAuthNoticeModal(null);
+                  if (onOpenSignInModal) {
+                    onOpenSignInModal();
+                  } else if (onRequireAuth) {
+                    onRequireAuth(`turn off ${feat}`);
+                  }
+                }}
+                className="flex-1 py-2.5 px-3 bg-purple-600 hover:bg-purple-700 active:scale-98 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                Sign In to Turn Off
+              </button>
+              <button
+                onClick={() => setAuthNoticeModal(null)}
+                className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Keep Active
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notice */}
+      {toastNotice && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[90%] bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2.5 border border-slate-700/60 backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="flex-1 leading-snug">{toastNotice}</span>
+          <button
+            onClick={() => setToastNotice(null)}
+            className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
     </div>
