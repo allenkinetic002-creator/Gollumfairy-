@@ -1,5 +1,16 @@
 [
   {
+    "id": "act-1792066296014-naxrx",
+    "action": "publish_post",
+    "description": "Post published: \"am a bad kid\"",
+    "details": {
+      "id": "post-1792066294285",
+      "mediaType": "image"
+    },
+    "timestamp": "2026-10-15T12:11:34.288Z",
+    "savedAt": "2026-10-15T12:11:36.014Z"
+  },
+  {
     "id": "act-1792060584034-wxd1u",
     "action": "publish_post",
     "description": "Post published: \"nice\"",
