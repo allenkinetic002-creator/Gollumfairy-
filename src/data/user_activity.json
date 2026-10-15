@@ -1,5 +1,23 @@
 [
   {
+    "id": "act-1792094324514-fbk06",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-karak",
+    "details": {
+      "userId": "user-karak",
+      "switches": {
+        "support": false,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": false,
+        "updatedAt": "2026-10-15T19:58:44.513Z",
+        "activatedBy": "user-karak"
+      }
+    },
+    "savedAt": "2026-10-15T19:58:44.514Z"
+  },
+  {
     "id": "act-1792094290158-2clbg",
     "action": "publish_post",
     "description": "Post published: \"sunak\"",
@@ -1351,19 +1369,6 @@
     "details": {
       "personName": "karak",
       "vote": "unvote",
-      "likes": 2,
-      "dislikes": 0
-    },
-    "timestamp": "2026-10-15T13:54:44.442Z",
-    "savedAt": "2026-10-15T13:54:50.211Z"
-  },
-  {
-    "id": "act-1792072490211-7cglv",
-    "action": "phone_hand_vote",
-    "description": "Phone Hand Vote: karak unclicked (now 2 likes)",
-    "details": {
-      "personName": "karak",
-      "voteType": "unvote",
       "likes": 2,
       "dislikes": 0
     },
