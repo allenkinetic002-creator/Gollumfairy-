@@ -42,7 +42,7 @@ export interface RegisteredAccount {
   isOfficial?: boolean;
 }
 
-const DEFAULT_REGISTERED_ACCOUNTS: RegisteredAccount[] = [
+export const DEFAULT_REGISTERED_ACCOUNTS: RegisteredAccount[] = [
   {
     id: 'user-allen',
     username: 'allenkinetic002-creator',
@@ -125,6 +125,15 @@ export function saveRegisteredAccount(account: RegisteredAccount) {
     map.set(account.username.toLowerCase(), account);
     const updated = Array.from(map.values());
     localStorage.setItem('fairy_registered_users', JSON.stringify(updated));
+
+    // Also persist to backend storage and trigger realtime sync
+    fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(account),
+    }).catch(() => {});
+
+    window.dispatchEvent(new CustomEvent('fairy_user_registered', { detail: account }));
   } catch (e) {
     console.warn('Failed saving fairy_registered_users:', e);
   }

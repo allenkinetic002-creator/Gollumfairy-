@@ -84,7 +84,7 @@ import { ChallengePostModal, ChallengePostPayload } from './components/Challenge
 import { UserSearchModal, UserSearchItem } from './components/UserSearchModal';
 import { UserProfileScreen } from './components/UserProfileScreen';
 import { SettingsScreen } from './components/SettingsScreen';
-import { SignInModal } from './components/SignInModal';
+import { SignInModal, DEFAULT_REGISTERED_ACCOUNTS, getStoredRegisteredAccounts, RegisteredAccount } from './components/SignInModal';
 import { SignInRequiredModal } from './components/SignInRequiredModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
@@ -160,7 +160,7 @@ interface Creator {
   tieBreakerDislikes?: number;
   isUpvoted: boolean;
   isFollowing: boolean;
-  category: 'new_artists' | 'comedians' | 'photographers' | 'character_designers' | 'us_top' | 'innovators';
+  category: 'new_artists' | 'comedians' | 'photographers' | 'character_designers' | 'us_top' | 'innovators' | 'artists' | 'creators' | string;
   topPost: {
     title: string;
     imageUrl?: string;
@@ -216,8 +216,8 @@ const DEFAULT_COMMENTS: CommentItem[] = [
   },
 ];
 
-// Real creator post liked by user on Tab 1
-const REAL_TOP_CREATORS: Creator[] = [
+// Real registered creators on Fairy network
+export const REAL_REGISTERED_CREATORS: Creator[] = [
   {
     rank: 1,
     name: "Karak",
@@ -245,12 +245,93 @@ const REAL_TOP_CREATORS: Creator[] = [
       tag: "Street Vignettes",
     },
   },
+  {
+    rank: 2,
+    name: "Allen Dharak",
+    handle: "@allenkinetic002-creator",
+    avatarBg: "bg-indigo-600",
+    avatarInitial: "AD",
+    role: "Founder & Creative Developer",
+    location: "London, UK",
+    upvotes: 142,
+    rating: 9.8,
+    phoneHandLikes: 0,
+    phoneHandDislikes: 0,
+    tieBreakerScore: 0,
+    isUpvoted: false,
+    isFollowing: false,
+    category: "innovators",
+    topPost: {
+      title: "Building Fairy Social Feed & Live Sync",
+      imageUrl: topPostPhoto,
+      gradientBg: "from-indigo-600 to-purple-900",
+      likes: "142",
+      comments: "24",
+      hasAudio: true,
+      audioTitle: "Fairy Radio",
+      tag: "Founder Showcase",
+    },
+  },
+  {
+    rank: 3,
+    name: "Gollumfairy",
+    handle: "@Gollumfairy",
+    avatarBg: "bg-purple-600",
+    avatarInitial: "GF",
+    role: "Official Fairy Creator & Curator",
+    location: "Fairy Realm",
+    upvotes: 128,
+    rating: 9.6,
+    phoneHandLikes: 0,
+    phoneHandDislikes: 0,
+    tieBreakerScore: 0,
+    isUpvoted: false,
+    isFollowing: false,
+    category: "new_artists",
+    topPost: {
+      title: "Gollumfairy Verified Trust Network",
+      imageUrl: charDesignPhoto,
+      gradientBg: "from-purple-600 to-pink-900",
+      likes: "128",
+      comments: "18",
+      hasAudio: true,
+      audioTitle: "Curator Ambient",
+      tag: "Curator Spotlight",
+    },
+  },
+  {
+    rank: 4,
+    name: "Kinetic",
+    handle: "@kinetic",
+    avatarBg: "bg-emerald-600",
+    avatarInitial: "K",
+    role: "Photographer & Digital Artist",
+    location: "Kyoto, Japan",
+    upvotes: 96,
+    rating: 9.4,
+    phoneHandLikes: 0,
+    phoneHandDislikes: 0,
+    tieBreakerScore: 0,
+    isUpvoted: false,
+    isFollowing: false,
+    category: "photographers",
+    topPost: {
+      title: "tea and tea",
+      imageUrl: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=1000&auto=format&fit=crop&q=80",
+      gradientBg: "from-emerald-600 to-teal-900",
+      likes: "96",
+      comments: "12",
+      hasAudio: true,
+      audioTitle: "Original Audio",
+      tag: "Autumn Stillness",
+    },
+  },
 ];
 
 /**
  * Re-ranks creators strictly according to Phone Hand Likes:
  * - Highest likes on that phone hand moves to top 10 / number 1!
- * - e.g. 3 likes is 1st, 2 likes is 2nd, 1 like is 3rd!
+ * - e.g. 5 likes is 1st, 2 likes is 2nd, 1 like is 3rd!
  * - Ties broken by rating, then general upvotes
  */
 export function sortCreatorsByPhoneLikes(creators: Creator[]): Creator[] {
@@ -274,9 +355,35 @@ export function buildCreatorsRecord(creators: Creator[]): Record<string, Creator
   const sorted = sortCreatorsByPhoneLikes(creators);
   const map: Record<string, Creator[]> = {
     all: sorted,
-    new_artists: sortCreatorsByPhoneLikes(creators.filter((c) => c.category === "new_artists" || c.rank <= 2)),
-    photographers: sortCreatorsByPhoneLikes(creators.filter((c) => c.category === "photographers" || c.role.toLowerCase().includes("photo"))),
-    innovators: sortCreatorsByPhoneLikes(creators.filter((c) => c.category === "innovators" || c.role.toLowerCase().includes("dev") || c.role.toLowerCase().includes("founder"))),
+    new_artists: sortCreatorsByPhoneLikes(
+      creators.filter(
+        (c) =>
+          c.category === 'new_artists' ||
+          c.category === 'artists' ||
+          c.role.toLowerCase().includes('art') ||
+          c.role.toLowerCase().includes('curator') ||
+          c.rank <= 2
+      )
+    ),
+    photographers: sortCreatorsByPhoneLikes(
+      creators.filter(
+        (c) =>
+          c.category === 'photographers' ||
+          c.role.toLowerCase().includes('photo') ||
+          c.role.toLowerCase().includes('storyteller') ||
+          c.role.toLowerCase().includes('visual')
+      )
+    ),
+    innovators: sortCreatorsByPhoneLikes(
+      creators.filter(
+        (c) =>
+          c.category === 'innovators' ||
+          c.category === 'creators' ||
+          c.role.toLowerCase().includes('dev') ||
+          c.role.toLowerCase().includes('founder') ||
+          c.role.toLowerCase().includes('creator')
+      )
+    ),
     us_top: sorted,
     comedians: sorted,
     character_designers: sorted,
@@ -284,95 +391,149 @@ export function buildCreatorsRecord(creators: Creator[]): Record<string, Creator
   return map;
 }
 
-const ALL_TOP_CREATORS: Record<string, Creator[]> = buildCreatorsRecord(REAL_TOP_CREATORS);
+export function convertRegisteredUsersToCreators(
+  rawUsers: any[],
+  posts: any[],
+  votesMap: Record<string, any> = {},
+  ratingsMap: Record<string, any> = {}
+): Creator[] {
+  const baseMap = new Map<string, Creator>();
+
+  // Seed default registered creators
+  REAL_REGISTERED_CREATORS.forEach((c) => {
+    baseMap.set(c.name.toLowerCase().trim(), { ...c });
+    baseMap.set(c.handle.replace('@', '').toLowerCase().trim(), { ...c });
+  });
+
+  // Merge any registered users from server or localStorage
+  if (Array.isArray(rawUsers)) {
+    rawUsers.forEach((u) => {
+      if (!u || (!u.name && !u.username)) return;
+      const keyName = (u.name || u.username).toLowerCase().trim();
+      const keyHandle = (u.handle || u.username || '').replace('@', '').toLowerCase().trim();
+
+      const existing = baseMap.get(keyName) || baseMap.get(keyHandle);
+      const cat =
+        u.category === 'creators' ||
+        u.role?.toLowerCase().includes('dev') ||
+        u.role?.toLowerCase().includes('founder')
+          ? 'innovators'
+          : u.category === 'artists' ||
+            u.role?.toLowerCase().includes('photo') ||
+            u.role?.toLowerCase().includes('storyteller')
+          ? 'photographers'
+          : existing?.category || 'new_artists';
+
+      // Match actual post published by user if available
+      const userPost = (posts || []).find((p) => {
+        const pAuthor = (p.authorName || '').toLowerCase().trim();
+        const pHandle = (p.authorHandle || '').replace('@', '').toLowerCase().trim();
+        return (
+          pAuthor === keyName ||
+          pHandle === keyHandle ||
+          pAuthor === keyHandle ||
+          pHandle === keyName
+        );
+      });
+
+      const topPost = userPost
+        ? {
+            title: userPost.caption || userPost.tweetContent || 'Latest Post',
+            imageUrl: userPost.mediaUrl || existing?.topPost?.imageUrl || topPostPhoto,
+            gradientBg: existing?.topPost?.gradientBg || 'from-purple-600 to-indigo-900',
+            likes: String(userPost.likeCount || existing?.upvotes || 1),
+            comments: String(userPost.replyCount || 0),
+            hasAudio: true,
+            audioTitle: userPost.audioTitle || 'Original Audio',
+            tag: userPost.tags?.[0] || 'Real Post',
+          }
+        : existing?.topPost || {
+            title: `${u.name || u.username} on Fairy`,
+            imageUrl: u.avatarUrl || topPostPhoto,
+            gradientBg: 'from-purple-600 to-indigo-900',
+            likes: String(u.upvotes || 10),
+            comments: '0',
+            hasAudio: false,
+            audioTitle: 'Original Audio',
+            tag: 'Verified Profile',
+          };
+
+      const creatorItem: Creator = {
+        rank: existing?.rank || baseMap.size + 1,
+        name: u.name || u.username,
+        handle: u.handle || `@${u.username}`,
+        avatarBg: u.avatarBg || existing?.avatarBg || 'bg-purple-600',
+        avatarInitial: u.avatarInitial || (u.name ? u.name.slice(0, 2).toUpperCase() : 'U'),
+        avatarUrl: u.avatarUrl || existing?.avatarUrl,
+        role: u.role || u.profession || existing?.role || 'Verified Fairy Creator',
+        location: u.location || existing?.location || 'Fairy Network',
+        upvotes: u.upvotes || existing?.upvotes || 10,
+        rating:
+          ratingsMap[u.name]?.rating ||
+          ratingsMap[u.username]?.rating ||
+          u.rating ||
+          existing?.rating ||
+          9.2,
+        phoneHandLikes: 0,
+        phoneHandDislikes: 0,
+        tieBreakerScore: 0,
+        isUpvoted: existing?.isUpvoted || false,
+        isFollowing: existing?.isFollowing || false,
+        category: cat,
+        topPost,
+      };
+
+      baseMap.set(keyName, creatorItem);
+      baseMap.set(keyHandle, creatorItem);
+    });
+  }
+
+  // Deduplicate creators by unique name/handle
+  const uniqueCreators: Creator[] = [];
+  const seen = new Set<string>();
+  baseMap.forEach((c) => {
+    const id = c.name.toLowerCase().trim();
+    if (!seen.has(id)) {
+      seen.add(id);
+      // Apply votes
+      const n1 = c.name;
+      const n2 = c.name.toLowerCase().trim();
+      const n3 = c.handle.replace('@', '').toLowerCase().trim();
+      const rec = votesMap[n1] || votesMap[n2] || votesMap[n3];
+      const pLikes = typeof rec?.likes === 'number' ? rec.likes : (c.phoneHandLikes || 0);
+      const pDislikes = typeof rec?.dislikes === 'number' ? rec.dislikes : (c.phoneHandDislikes || 0);
+
+      // Apply ratings
+      const ratRec = ratingsMap[n1] || ratingsMap[n2] || ratingsMap[n3];
+      const finalRating = typeof ratRec?.rating === 'number' ? ratRec.rating : (c.rating ?? 9.2);
+
+      uniqueCreators.push({
+        ...c,
+        rating: finalRating,
+        phoneHandLikes: pLikes,
+        phoneHandDislikes: pDislikes,
+        tieBreakerLikes: pLikes,
+        tieBreakerDislikes: pDislikes,
+        tieBreakerScore: pLikes - pDislikes,
+      });
+    }
+  });
+
+  return sortCreatorsByPhoneLikes(uniqueCreators);
+}
+
+const ALL_TOP_CREATORS: Record<string, Creator[]> = buildCreatorsRecord(REAL_REGISTERED_CREATORS);
 
 const CATEGORY_TABS = [
   { id: "all", label: "All Real Creators", icon: Trophy, emoji: "🏆" },
-  { id: "new_artists", label: "Artists", icon: Mic, emoji: "🎨" },
+  { id: "new_artists", label: "Artists & Curators", icon: Mic, emoji: "🎨" },
   { id: "photographers", label: "Photographers", icon: Camera, emoji: "📸" },
   { id: "innovators", label: "Developers & Founders", icon: Lightbulb, emoji: "⚡" },
   { id: "us_top", label: "Top Leaderboard", icon: MapPin, emoji: "✨" },
 ];
 
-const CATEGORY_POST_IMAGES: Record<string, string[]> = {
-  new_artists: [
-    topPostPhoto,
-    'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1572945758420-798858348ee1?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=80',
-  ],
-  comedians: [
-    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1526478806334-5fd488fcaabc?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80',
-  ],
-  photographers: [
-    postImage,
-    topPostPhoto,
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1000&q=80',
-  ],
-  character_designers: [
-    charDesignPhoto,
-    'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1618172193763-c511deb635ca?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1569705460033-cfaa4bf9f822?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?auto=format&fit=crop&w=1000&q=80',
-  ],
-  us_top: [
-    topPostPhoto,
-    postImage,
-    'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1000&q=80',
-  ],
-  innovators: [
-    topPostPhoto,
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80',
-    'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1000&q=80',
-  ],
-};
-
 function getCreatorPostImage(creator: Creator): string {
-  if (creator.topPost.imageUrl) return creator.topPost.imageUrl;
-  const list = CATEGORY_POST_IMAGES[creator.category];
-  if (list && list[creator.rank - 1]) return list[creator.rank - 1];
+  if (creator.topPost?.imageUrl) return creator.topPost.imageUrl;
   return topPostPhoto;
 }
 
@@ -567,65 +728,51 @@ export default function App() {
       };
     };
 
-    // Initial load: preserve real user post on second icon screen
-    Promise.all([
-      fetch("/api/users").then((r) => r.json()).catch(() => ({ success: false })),
-      fetchRemoteVotes().catch(() => ({})),
-    ]).then(([userData, remoteVotes]) => {
-      // Preserve real user posts on second icon screen
-      let baseUsers: Creator[] = [...REAL_TOP_CREATORS];
-      const votesMap = (remoteVotes || {}) as Record<string, any>;
-      const mergedUsers = baseUsers.map((u) => {
-        const n1 = u.name;
-        const n2 = u.name.toLowerCase().trim();
-        const n3 = u.handle.replace('@', '').toLowerCase().trim();
-        const rec = votesMap[n1] || votesMap[n2] || votesMap[n3];
-        const pLikes = typeof rec?.likes === 'number' ? rec.likes : (u.phoneHandLikes || 0);
-        const pDislikes = typeof rec?.dislikes === 'number' ? rec.dislikes : (u.phoneHandDislikes || 0);
-        return {
-          ...u,
-          phoneHandLikes: pLikes,
-          phoneHandDislikes: pDislikes,
-          tieBreakerLikes: pLikes,
-          tieBreakerDislikes: pDislikes,
-          tieBreakerScore: pLikes - pDislikes,
-        };
-      });
+    // Refresh real registered creators from /api/users, local storage, votes, and posts
+    const refreshRealCreators = async () => {
+      try {
+        const [userData, remoteVotes, ratingsData, postsRes] = await Promise.all([
+          fetch("/api/users").then((r) => r.json()).catch(() => ({ success: false })),
+          fetchRemoteVotes().catch(() => ({})),
+          fetch("/api/ratings").then((r) => r.json()).catch(() => ({ success: false })),
+          fetch("/api/posts").then((r) => r.json()).catch(() => ({ posts: [] })),
+        ]);
 
-      setCreatorsData(buildCreatorsRecord(mergedUsers));
-    }).catch(() => {});
+        const votesMap = (remoteVotes || {}) as Record<string, any>;
+        const ratingsMap = (ratingsData?.ratings || {}) as Record<string, any>;
+        const rawUsers =
+          userData && userData.success && Array.isArray(userData.users) && userData.users.length > 0
+            ? userData.users
+            : getStoredRegisteredAccounts();
+        const postsList = Array.isArray(postsRes?.posts) ? postsRes.posts : [];
 
-    // Realtime vote listener: when votes update remotely, re-sort creators live
-    const unsubscribeVotes = subscribeToRealtime((event, data) => {
-      if (event === 'vote_submitted' || event === 'vote_reset') {
-        fetchRemoteVotes().then((votes) => {
-          if (!votes) return;
-          setCreatorsData((prev) => {
-            const nextMap: Record<string, Creator[]> = {};
-            Object.keys(prev).forEach((cat) => {
-              const list = (prev[cat] || []).map((c) => {
-                const n1 = c.name;
-                const n2 = c.name.toLowerCase().trim();
-                const n3 = c.handle.replace('@', '').toLowerCase().trim();
-                const rec = votes[n1] || votes[n2] || votes[n3];
-                const pLikes = typeof rec?.likes === 'number' ? rec.likes : (c.phoneHandLikes || 0);
-                const pDislikes = typeof rec?.dislikes === 'number' ? rec.dislikes : (c.phoneHandDislikes || 0);
-                return {
-                  ...c,
-                  phoneHandLikes: pLikes,
-                  phoneHandDislikes: pDislikes,
-                  tieBreakerLikes: pLikes,
-                  tieBreakerDislikes: pDislikes,
-                  tieBreakerScore: pLikes - pDislikes,
-                };
-              });
-              nextMap[cat] = sortCreatorsByPhoneLikes(list);
-            });
-            return nextMap;
-          });
-        });
+        const creators = convertRegisteredUsersToCreators(rawUsers, postsList, votesMap, ratingsMap);
+        setCreatorsData(buildCreatorsRecord(creators));
+      } catch (e) {
+        console.warn('Failed refreshing real creators:', e);
+      }
+    };
+
+    refreshRealCreators();
+
+    // Realtime listener for votes, ratings, new posts, and registered users
+    const unsubscribeRealtimeEvents = subscribeToRealtime((event, _data) => {
+      if (
+        event === 'vote_submitted' ||
+        event === 'vote_reset' ||
+        event === 'user_registered' ||
+        event === 'rating_submitted' ||
+        event === 'rating_reset' ||
+        event === 'new_post'
+      ) {
+        refreshRealCreators();
       }
     });
+
+    const handleLocalUserRegistered = () => {
+      refreshRealCreators();
+    };
+    window.addEventListener('fairy_user_registered', handleLocalUserRegistered);
 
     // Load from local server storage, Supabase, and localStorage
     Promise.all([
@@ -863,7 +1010,7 @@ export default function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Top 10 Creators Categories
-  const [selectedCategory, setSelectedCategory] = useState<string>('new_artists');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRank, setSelectedRank] = useState<number | 'all'>(1);
   const [creatorsData, setCreatorsData] = useState<Record<string, Creator[]>>(ALL_TOP_CREATORS);
   const [previewCreator, setPreviewCreator] = useState<Creator | null>(null);
@@ -1139,7 +1286,7 @@ export default function App() {
     setShowMatchesScreen(false);
   };
 
-  const currentCreators = creatorsData[selectedCategory] || creatorsData.new_artists;
+  const currentCreators = creatorsData[selectedCategory] || creatorsData.all || creatorsData.new_artists || [];
 
   const handleToggleCommentLike = (id: string) => {
     if (!requireAuth('like comments')) return;
