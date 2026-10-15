@@ -17,6 +17,15 @@
       "genre": false,
       "updatedAt": "2026-10-15T19:18:36.673Z",
       "activatedBy": "user-kinetic"
+    },
+    "guest": {
+      "support": true,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:43:23.985Z",
+      "activatedBy": "guest"
     }
   },
   "lastActiveUser": "user-karak",
