@@ -30,5 +30,13 @@
     "likes": 84,
     "dislikes": 0,
     "updatedAt": "2026-10-15T12:00:00.000Z"
+  },
+  "karak": {
+    "personName": "karak",
+    "vote": "like",
+    "isFinal": true,
+    "likes": 3,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T13:15:00.986Z"
   }
 }
