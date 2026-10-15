@@ -1544,24 +1544,8 @@ export default function App() {
         const parsed = JSON.parse(saved);
         if (parsed && (parsed.name || parsed.handle || parsed.username)) return parsed;
       }
-      const rawRegistered = localStorage.getItem('fairy_registered_users');
-      if (rawRegistered) {
-        const regList = JSON.parse(rawRegistered);
-        if (Array.isArray(regList) && regList.length > 0 && regList[0].username) {
-          return regList[0];
-        }
-      }
     } catch (e) {}
-    return {
-      id: 'user-gollumfairy',
-      username: 'Gollumfairy',
-      name: 'Gollumfairy',
-      handle: '@Gollumfairy',
-      email: 'gollumfairy@fairy.app',
-      location: 'Fairy Realm',
-      profession: 'Verified Fairy Creator',
-      bio: 'Official creator of Gollumfairy on Fairy network. Verified trust receipts & live community feeds.',
-    };
+    return null;
   });
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
   const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
@@ -2316,41 +2300,26 @@ export default function App() {
           {activeNavIndex === 0 && (
             <>
           {/* Header */}
-          <header className="w-full px-4 pt-1.5 pb-1 flex flex-col shrink-0 bg-white z-10 border-b border-slate-50">
-            {/* Sign in positioned above the header icons by the right */}
-            {(!currentUser || isLoggedOut) && (
-              <div className="w-full flex justify-end pb-1 pr-0.5">
-                <button
-                  onClick={() => setShowSignInModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer animate-fadeIn"
-                  title="Sign in to your account"
-                >
-                  <User className="w-3.5 h-3.5 stroke-[2.2]" />
-                  <span>Sign In</span>
-                </button>
+          <header className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-white z-10 border-b border-slate-50">
+            <div className="flex items-center gap-2">
+              <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
+                <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
               </div>
-            )}
+              <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
+                Fairy
+              </h1>
+            </div>
 
-            <div className="w-full flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
-                  <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
-                </div>
-                <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
-                  Fairy
-                </h1>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {/* 1st header icon: Guacamole Bowl / Nacho Cheese icon (toggles far-right floating honeyjar icon) */}
-                <button
-                  onClick={() => setShowFloatingHoneyJar((prev) => !prev)}
-                  aria-label="Guacamole & Nachos"
-                  title="Guacamole & Nachos"
-                  className="hover:opacity-75 transition-opacity active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
-                >
-                  <AeriGuacamoleBowlIcon size={30} className="w-[30px] h-[30px]" />
-                </button>
+            <div className="flex items-center gap-3">
+              {/* 1st header icon: Guacamole Bowl / Nacho Cheese icon (toggles far-right floating honeyjar icon) */}
+              <button
+                onClick={() => setShowFloatingHoneyJar((prev) => !prev)}
+                aria-label="Guacamole & Nachos"
+                title="Guacamole & Nachos"
+                className="hover:opacity-75 transition-opacity active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
+              >
+                <AeriGuacamoleBowlIcon size={30} className="w-[30px] h-[30px]" />
+              </button>
 
               {/* 2nd header icon: Concentric Circle icon linked to Create Post Modal (Photo, Video & Writing) */}
               <button
@@ -2381,31 +2350,46 @@ export default function App() {
                 <AeriOneEyeHatGuyIcon className="w-[33px] h-[33px] text-black" />
               </button>
 
-              <button
-                onClick={() => {
-                  setShowUserSearchModal(true);
-                }}
-                aria-label="Search Creators & Users"
-                title="Search Creators & Users"
-                className="hover:opacity-75 transition-opacity cursor-pointer p-1 translate-y-1"
-              >
-                <AeriSearchIcon className="w-[23px] h-[23px] text-black" />
-              </button>
+              {/* Column with Sign In button placed directly above the Search icon and Messaging icon */}
+              <div className="flex flex-col items-center sm:items-end gap-1">
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                  title="Sign In to Fairy"
+                  aria-label="Sign In"
+                >
+                  <User className="w-3.5 h-3.5 stroke-[2.4]" />
+                  <span>Sign In</span>
+                </button>
 
-              {/* Message icon (where user messages normal users) */}
-              <button
-                onClick={() => {
-                  setTargetMessagePerson(null);
-                  setShowNormalMessagesScreen(true);
-                }}
-                aria-label="Messages"
-                title="Messages · Direct messages with normal users"
-                className="hover:opacity-75 transition-all active:scale-90 cursor-pointer p-1 relative text-black flex items-center justify-center -translate-x-1.5 mr-1 translate-y-1"
-              >
-                <AeriMessageBubbleIcon size={23} className="w-[23px] h-[23px] text-black" />
-                <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-              </button>
-            </div>
+                <div className="flex items-center gap-3">
+                  {/* Search icon */}
+                  <button
+                    onClick={() => {
+                      setShowUserSearchModal(true);
+                    }}
+                    aria-label="Search Creators & Users"
+                    title="Search Creators & Users"
+                    className="hover:opacity-75 transition-opacity cursor-pointer p-0.5 flex items-center justify-center"
+                  >
+                    <AeriSearchIcon className="w-[22px] h-[22px] text-black" />
+                  </button>
+
+                  {/* Messaging icon */}
+                  <button
+                    onClick={() => {
+                      setTargetMessagePerson(null);
+                      setShowNormalMessagesScreen(true);
+                    }}
+                    aria-label="Messages"
+                    title="Messages · Direct messages with normal users"
+                    className="hover:opacity-75 transition-all active:scale-90 cursor-pointer p-0.5 relative text-black flex items-center justify-center"
+                  >
+                    <AeriMessageBubbleIcon size={22} className="w-[22px] h-[22px] text-black" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                  </button>
+                </div>
+              </div>
             </div>
           </header>
 
