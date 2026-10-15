@@ -1,5 +1,40 @@
 [
   {
+    "id": "act-1792066776041-k20v9",
+    "action": "tie_breaker_vote",
+    "description": "Tie-breaker vote on Elena Rostova: +1 Like (Rank #9)",
+    "details": {
+      "person": "Elena Rostova",
+      "voteType": "like",
+      "rank": 9
+    },
+    "timestamp": "2026-10-15T12:19:34.241Z",
+    "savedAt": "2026-10-15T12:19:36.041Z"
+  },
+  {
+    "id": "act-1792066776041-81oyk",
+    "action": "tie_breaker_vote",
+    "description": "Tie-breaker vote on Elena Rostova: +1 Like (Rank #9)",
+    "details": {
+      "person": "Elena Rostova",
+      "voteType": "like",
+      "rank": 9
+    },
+    "timestamp": "2026-10-15T12:19:34.241Z",
+    "savedAt": "2026-10-15T12:19:36.041Z"
+  },
+  {
+    "id": "act-1792066776041-wlg8g",
+    "action": "phone_hand_vote",
+    "description": "Finalized UP (+1 like) vote for Elena Rostova via Phone Hand",
+    "details": {
+      "personName": "Elena Rostova",
+      "vote": "like"
+    },
+    "timestamp": "2026-10-15T12:19:34.240Z",
+    "savedAt": "2026-10-15T12:19:36.041Z"
+  },
+  {
     "id": "act-1792066773895-hhr5y",
     "action": "vote_submitted",
     "description": "Finalized UP vote for Elena Rostova",
