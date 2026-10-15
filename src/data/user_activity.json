@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792071682869-lseve",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand vote for karak: +1 Like (Total: 4)",
+    "details": {
+      "personName": "karak",
+      "vote": "like",
+      "likes": 4,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T13:41:21.101Z",
+    "savedAt": "2026-10-15T13:41:22.869Z"
+  },
+  {
+    "id": "act-1792071682869-pz41g",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand Vote: karak now has 4 likes (Ranked on leaderboard)",
+    "details": {
+      "personName": "karak",
+      "voteType": "like",
+      "likes": 4,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T13:41:21.101Z",
+    "savedAt": "2026-10-15T13:41:22.869Z"
+  },
+  {
     "id": "act-1792071681032-5yo29",
     "action": "vote_submitted",
     "description": "Finalized UP vote for karak (4 phone hand likes)",
