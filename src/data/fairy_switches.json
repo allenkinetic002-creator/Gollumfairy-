@@ -5,9 +5,9 @@
       "favorite": false,
       "trending": false,
       "loyalty": false,
-      "genre": false,
+      "genre": true,
       "supportedGenre": "Artist",
-      "updatedAt": "2026-10-15T20:29:29.280Z",
+      "updatedAt": "2026-10-15T20:29:32.531Z",
       "activatedBy": "user-karak"
     },
     "user-kinetic": {
