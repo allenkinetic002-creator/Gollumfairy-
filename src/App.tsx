@@ -216,115 +216,9 @@ const DEFAULT_COMMENTS: CommentItem[] = [
   },
 ];
 
-// REAL USERS DATASET for Tab 1 (Top Creators Leaderboard)
-// Zero mock/fake users - exclusively verified real accounts:
-// Allen Dharak (@allenkinetic002-creator), Gollumfairy (@Gollumfairy), Kinetic (@kinetic), Karak (@karak)
-const REAL_TOP_CREATORS: Creator[] = [
-  {
-    rank: 1,
-    name: "Allen Dharak",
-    handle: "@allenkinetic002-creator",
-    avatarBg: "bg-indigo-600",
-    avatarInitial: "AD",
-    role: "Founder & Creative Developer",
-    location: "London, UK",
-    upvotes: 142,
-    rating: 9.8,
-    phoneHandLikes: 0,
-    phoneHandDislikes: 0,
-    tieBreakerScore: 0,
-    isUpvoted: false,
-    isFollowing: true,
-    category: "innovators",
-    topPost: {
-      title: "Fairy Social Feed & GitHub Sync Architecture",
-      imageUrl: topPostPhoto,
-      gradientBg: "from-indigo-600 to-purple-900",
-      likes: "142",
-      comments: "36",
-      hasAudio: true,
-      audioTitle: "Synthesizer Echoes",
-      tag: "Founder & Dev",
-    },
-  },
-  {
-    rank: 2,
-    name: "Gollumfairy",
-    handle: "@Gollumfairy",
-    avatarBg: "bg-purple-600",
-    avatarInitial: "GF",
-    role: "Official Fairy Creator & Curator",
-    location: "Fairy Realm",
-    upvotes: 128,
-    rating: 9.6,
-    phoneHandLikes: 0,
-    phoneHandDislikes: 0,
-    tieBreakerScore: 0,
-    isUpvoted: false,
-    isFollowing: true,
-    category: "new_artists",
-    topPost: {
-      title: "Fairy Realm Verified Trust Receipts & Pledges",
-      imageUrl: postImage,
-      gradientBg: "from-purple-600 to-indigo-900",
-      likes: "128",
-      comments: "28",
-      hasAudio: true,
-      audioTitle: "Fairy Meadow Harmonics",
-      tag: "Curator",
-    },
-  },
-  {
-    rank: 3,
-    name: "Kinetic",
-    handle: "@kinetic",
-    avatarBg: "bg-emerald-600",
-    avatarInitial: "K",
-    role: "Photographer & Digital Artist",
-    location: "Kyoto, Japan",
-    upvotes: 96,
-    rating: 9.4,
-    phoneHandLikes: 0,
-    phoneHandDislikes: 0,
-    tieBreakerScore: 0,
-    isUpvoted: false,
-    isFollowing: false,
-    category: "photographers",
-    topPost: {
-      title: "Tea & Autumn Light in Kyoto",
-      imageUrl: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=1000&auto=format&fit=crop&q=80",
-      gradientBg: "from-emerald-600 to-teal-900",
-      likes: "96",
-      comments: "19",
-      tag: "Kyoto Light",
-    },
-  },
-  {
-    rank: 4,
-    name: "Karak",
-    handle: "@karak",
-    avatarBg: "bg-amber-600",
-    avatarInitial: "KK",
-    role: "Visual Storyteller",
-    location: "Kyoto, Japan",
-    upvotes: 84,
-    rating: 9.2,
-    phoneHandLikes: 3,
-    phoneHandDislikes: 0,
-    tieBreakerScore: 3,
-    isUpvoted: false,
-    isFollowing: false,
-    category: "photographers",
-    topPost: {
-      title: "Street moments & autumn light vignettes",
-      imageUrl: "/uploads/1792066274363-post_1792066273908_xh7e4u.jpg",
-      gradientBg: "from-amber-600 to-rose-900",
-      likes: "84",
-      comments: "15",
-      tag: "Street Vignettes",
-    },
-  },
-];
+// Dataset for Tab 1 (Second icon beside home screen)
+// Starting completely fresh with zero posts as requested
+const REAL_TOP_CREATORS: Creator[] = [];
 
 /**
  * Re-ranks creators strictly according to Phone Hand Likes:
@@ -646,41 +540,13 @@ export default function App() {
       };
     };
 
-    // Fetch real registered users and remote phone hand votes together
+    // Initial load: keep baseUsers empty so the second icon screen starts completely fresh
     Promise.all([
       fetch("/api/users").then((r) => r.json()).catch(() => ({ success: false })),
       fetchRemoteVotes().catch(() => ({})),
     ]).then(([userData, remoteVotes]) => {
-      let baseUsers: Creator[] = REAL_TOP_CREATORS;
-      if (userData?.success && Array.isArray(userData.users) && userData.users.length > 0) {
-        baseUsers = userData.users.map((u: any, idx: number) => ({
-          rank: u.rank || idx + 1,
-          name: u.name || u.username,
-          handle: u.handle || "@" + u.username,
-          avatarBg: u.avatarBg || "bg-indigo-600",
-          avatarInitial: u.avatarInitial || (u.name ? u.name[0].toUpperCase() : "U"),
-          role: u.role || u.profession || "Verified Creator",
-          location: u.location || "Fairy Hub",
-          upvotes: u.upvotes || 50,
-          rating: u.rating || 9.0,
-          phoneHandLikes: 0,
-          phoneHandDislikes: 0,
-          tieBreakerScore: 0,
-          isUpvoted: false,
-          isFollowing: false,
-          category: u.category || "new_artists",
-          topPost: {
-            title: (u.name || u.username) + " on Fairy Network",
-            imageUrl: topPostPhoto,
-            gradientBg: "from-indigo-600 to-purple-900",
-            likes: String(u.upvotes || 50),
-            comments: "12",
-            tag: "Verified",
-          },
-        }));
-      }
-
-      // Merge remote phone hand votes (e.g. Karak: 3 likes moves to #1!)
+      // Second icon screen starts fresh with zero posts
+      let baseUsers: Creator[] = [];
       const votesMap = (remoteVotes || {}) as Record<string, any>;
       const mergedUsers = baseUsers.map((u) => {
         const n1 = u.name;
@@ -902,6 +768,43 @@ export default function App() {
         [newPost.id]: true,
       }));
     }
+
+    // When starting fresh, newly published posts appear on the creator screen
+    const newCreatorPost: Creator = {
+      rank: 1,
+      name: newPost.authorName,
+      handle: newPost.authorHandle,
+      avatarBg: "bg-indigo-600",
+      avatarInitial: newPost.authorName ? newPost.authorName[0].toUpperCase() : "U",
+      avatarUrl: newPost.authorAvatar,
+      role: "Creator",
+      location: newPost.location || "Fairy Realm",
+      upvotes: 1,
+      rating: 9.5,
+      phoneHandLikes: 0,
+      phoneHandDislikes: 0,
+      tieBreakerScore: 0,
+      isUpvoted: false,
+      isFollowing: false,
+      category: "new_artists",
+      topPost: {
+        title: newPost.caption || "Fresh Creation",
+        imageUrl: newPost.mediaUrl || topPostPhoto,
+        gradientBg: "from-indigo-600 to-purple-900",
+        likes: "1",
+        comments: "0",
+        hasAudio: Boolean(newPost.audioTitle),
+        audioTitle: newPost.audioTitle || "Original Audio",
+        tag: newPost.tags?.[0] || "Fresh Post",
+      },
+    };
+    setCreatorsData((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((cat) => {
+        updated[cat] = [newCreatorPost, ...(updated[cat] || [])];
+      });
+      return updated;
+    });
   };
 
 
@@ -2374,12 +2277,13 @@ export default function App() {
               Top 10 {CATEGORY_TABS.find((t) => t.id === selectedCategory)?.label}
             </span>
             <span className="text-[10px] font-semibold text-purple-600">
-              Updated Live &middot; 10 Featured
+              {currentCreators.length === 0 ? 'Starting Fresh · 0 Posts' : `Updated Live · ${currentCreators.length} Featured`}
             </span>
           </div>
 
-          {/* RANK SWITCHER BAR (1, 2, 3... 10 and All 10 Feed toggle) */}
-          <div className="px-3 py-2 bg-white border-b border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0 shadow-2xs sticky top-0 z-10">
+          {/* RANK SWITCHER BAR (1, 2, 3... 10 and All 10 Feed toggle) - Shown when posts exist */}
+          {currentCreators.length > 0 && (
+            <div className="px-3 py-2 bg-white border-b border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0 shadow-2xs sticky top-0 z-10">
             {/* All 10 Feed button */}
             <button
               onClick={() => {
@@ -2464,10 +2368,42 @@ export default function App() {
               );
             })}
           </div>
+          )}
 
           {/* CONTINUOUS SCROLLABLE CREATORS FEED (Posts Fully Displayed) */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 space-y-4 scrollbar-thin">
-            {currentCreators.map((person) => {
+            {currentCreators.length === 0 ? (
+              <div className="h-full min-h-[360px] flex flex-col items-center justify-center p-8 text-center bg-white rounded-3xl border border-slate-200/90 shadow-2xs my-auto">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-purple-100 to-indigo-100 text-purple-600 flex items-center justify-center mb-4 shadow-2xs ring-8 ring-purple-50/70">
+                  <Sparkles className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-[17px] font-black text-slate-900 mb-1 tracking-tight">
+                  Start Fresh
+                </h3>
+                <p className="text-xs text-slate-500 max-w-xs mb-6 leading-relaxed">
+                  All previous posts have been removed from this screen. You are ready to start fresh! Share your first creation to kick off the new feed.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                  <button
+                    onClick={() => {
+                      if (!requireAuth('create a post')) return;
+                      setShowCreatePostModal(true);
+                    }}
+                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-black rounded-full shadow-md active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Create First Post</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveNavIndex(0)}
+                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors cursor-pointer"
+                  >
+                    Back to Feed
+                  </button>
+                </div>
+              </div>
+            ) : (
+              currentCreators.map((person) => {
               const isSelected = selectedRank === person.rank;
               const postImg = getCreatorPostImage(person);
               const isLiked = !!likedCreatorPosts[person.rank];
@@ -2913,7 +2849,7 @@ export default function App() {
                 </div>
               </div>
             );
-          })}
+          }))}
           </div>
 
           {/* Modal to Preview Creator's Post when tapped */}
