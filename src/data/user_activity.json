@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792070087418-xemeb",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T13:14:47.417Z"
+    },
+    "savedAt": "2026-10-15T13:14:47.418Z"
+  },
+  {
+    "id": "act-1792070087409-ugvf1",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T13:14:47.408Z"
+    },
+    "savedAt": "2026-10-15T13:14:47.409Z"
+  },
+  {
     "id": "act-1792066776041-k20v9",
     "action": "tie_breaker_vote",
     "description": "Tie-breaker vote on Elena Rostova: +1 Like (Rank #9)",
