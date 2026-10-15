@@ -1,5 +1,47 @@
 [
   {
+    "id": "act-1792066773895-hhr5y",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for Elena Rostova",
+    "details": {
+      "personName": "Elena Rostova",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 1,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T12:19:33.894Z"
+    },
+    "savedAt": "2026-10-15T12:19:33.895Z"
+  },
+  {
+    "id": "act-1792066773876-lfxvt",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for Elena Rostova",
+    "details": {
+      "personName": "Elena Rostova",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 101,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T12:19:33.876Z"
+    },
+    "savedAt": "2026-10-15T12:19:33.876Z"
+  },
+  {
+    "id": "act-1792066773864-sry12",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for Elena Rostova",
+    "details": {
+      "personName": "Elena Rostova",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 1,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T12:19:33.864Z"
+    },
+    "savedAt": "2026-10-15T12:19:33.864Z"
+  },
+  {
     "id": "act-1792066742447-334jd",
     "action": "like_post",
     "description": "Liked post @karak",

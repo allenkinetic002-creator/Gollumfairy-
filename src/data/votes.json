@@ -6,5 +6,13 @@
     "likes": 101,
     "dislikes": 0,
     "updatedAt": "2026-10-14T18:27:06.495Z"
+  },
+  "Elena Rostova": {
+    "personName": "Elena Rostova",
+    "vote": "like",
+    "isFinal": true,
+    "likes": 1,
+    "dislikes": 0,
+    "updatedAt": "2026-10-15T12:19:33.894Z"
   }
 }
