@@ -1,5 +1,57 @@
 [
   {
+    "id": "act-1792066733312-mylcm",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T12:18:53.311Z"
+    },
+    "savedAt": "2026-10-15T12:18:53.312Z"
+  },
+  {
+    "id": "act-1792066733309-z7o2p",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T12:18:53.309Z"
+    },
+    "savedAt": "2026-10-15T12:18:53.309Z"
+  },
+  {
+    "id": "act-1792066732335-ic3wn",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": false,
+      "likeCount": 1,
+      "updatedAt": "2026-10-15T12:18:52.334Z"
+    },
+    "savedAt": "2026-10-15T12:18:52.335Z"
+  },
+  {
+    "id": "act-1792066732333-yizh8",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": false,
+      "likeCount": 1,
+      "updatedAt": "2026-10-15T12:18:52.332Z"
+    },
+    "savedAt": "2026-10-15T12:18:52.333Z"
+  },
+  {
     "id": "act-1792066731976-n8sg8",
     "action": "post_action",
     "description": "Post action: like on post-1792066294285",
