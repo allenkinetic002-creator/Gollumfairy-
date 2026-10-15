@@ -2406,8 +2406,19 @@ export default function App() {
             </div>
           </header>
 
-          {/* Comment Mode Switcher */}
-          <div className="w-full px-4 py-1.5 flex items-center justify-end shrink-0 bg-white z-10 border-b border-slate-100">
+          {/* Comment Mode Switcher & Live Repo Sync */}
+          <div className="w-full px-4 py-1.5 flex items-center justify-between shrink-0 bg-white z-10 border-b border-slate-100">
+            <button
+              onClick={() => setShowGitHubSyncModal(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
+              title="Open GitHub Live Repo Sync (allenkinetic002-creator/Gollumfairy-)"
+            >
+              <GitBranch className="w-3 h-3 text-indigo-600" />
+              <span>Repo Sync</span>
+              {repoSyncStatus?.status === 'syncing' && (
+                <RefreshCw className="w-2.5 h-2.5 text-indigo-600 animate-spin" />
+              )}
+            </button>
             <div className="inline-flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
               <button
                 onClick={() => setCommentType('off')}

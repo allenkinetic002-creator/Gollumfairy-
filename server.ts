@@ -215,6 +215,7 @@ async function startServer() {
           await execAsync(`git commit -m "${sanitizedMsg}"`);
           committed = true;
         }
+        await execAsync('git pull --rebase --autostash origin main').catch(() => {});
         const { stdout: pushOut, stderr: pushErr } = await execAsync('git push origin main');
         const { stdout: lastCommit } = await execAsync('git log -1 --pretty=format:"%h - %s"');
         const { stdout: headOut } = await execAsync('git rev-parse HEAD');
@@ -275,6 +276,7 @@ async function startServer() {
         if (diffOut.trim().length > 0) {
           const sanitizedMsg = commitMsg.replace(/"/g, '\\"');
           await execAsync(`git commit -m "${sanitizedMsg}"`);
+          await execAsync('git pull --rebase --autostash origin main').catch(() => {});
           await execAsync('git push origin main');
           console.log(`[Git] Auto-pushed: ${commitMsg}`);
         }
@@ -504,6 +506,7 @@ async function startServer() {
           committed = true;
         }
 
+        await execAsync('git pull --rebase --autostash origin main').catch(() => {});
         const { stdout: pushOut, stderr: pushErr } = await execAsync('git push origin main');
         const { stdout: lastCommit } = await execAsync('git log -1 --pretty=format:"%h - %s"');
 
