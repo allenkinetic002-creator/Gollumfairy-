@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792073075098-y5o5p",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand vote for karak: like (5 likes)",
+    "details": {
+      "personName": "karak",
+      "vote": "like",
+      "likes": 5,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T14:04:33.984Z",
+    "savedAt": "2026-10-15T14:04:35.098Z"
+  },
+  {
+    "id": "act-1792073075098-e5bv8",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand Vote: karak like (now 5 likes)",
+    "details": {
+      "personName": "karak",
+      "voteType": "like",
+      "likes": 5,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T14:04:33.984Z",
+    "savedAt": "2026-10-15T14:04:35.098Z"
+  },
+  {
     "id": "act-1792073073482-uhw03",
     "action": "vote_submitted",
     "description": "Finalized UP vote for karak (5 phone hand likes)",
@@ -1221,16 +1247,5 @@
     "action": "app_check",
     "description": "Verified auto-sync and Supabase live integration",
     "savedAt": "2026-10-14T17:18:11.943Z"
-  },
-  {
-    "id": "act-init",
-    "action": "app_opened",
-    "timestamp": "2026-10-14T17:11:00.000Z",
-    "description": "App launched and linked to allenkinetic002-creator/Gollumfairy- and Supabase khixsxyyulxpwlkxtaag",
-    "details": {
-      "repo": "allenkinetic002-creator/Gollumfairy-",
-      "branch": "main",
-      "supabaseProject": "khixsxyyulxpwlkxtaag"
-    }
   }
 ]
