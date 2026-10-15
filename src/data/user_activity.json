@@ -1,5 +1,33 @@
 [
   {
+    "id": "act-1792072483952-lf1x3",
+    "action": "vote_submitted",
+    "description": "Finalized DOWN vote for karak (2 phone hand likes)",
+    "details": {
+      "personName": "karak",
+      "vote": "dislike",
+      "isFinal": true,
+      "likes": 2,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T13:54:43.951Z"
+    },
+    "savedAt": "2026-10-15T13:54:43.952Z"
+  },
+  {
+    "id": "act-1792072483933-shtdn",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for karak (2 phone hand likes)",
+    "details": {
+      "personName": "karak",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 2,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T13:54:43.933Z"
+    },
+    "savedAt": "2026-10-15T13:54:43.933Z"
+  },
+  {
     "id": "act-1792072483297-hym91",
     "action": "phone_hand_vote",
     "description": "Phone Hand vote for karak: unclicked vote (2 likes)",

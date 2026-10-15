@@ -9,11 +9,11 @@
   },
   "karak": {
     "personName": "karak",
-    "vote": "like",
+    "vote": "dislike",
     "isFinal": true,
-    "likes": 4,
+    "likes": 2,
     "dislikes": 0,
-    "updatedAt": "2026-10-15T13:54:40.653Z"
+    "updatedAt": "2026-10-15T13:54:43.951Z"
   },
   "Kinetic": {
     "personName": "Kinetic",
