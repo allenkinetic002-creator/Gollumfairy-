@@ -1,12 +1,12 @@
 {
   "userSwitches": {
     "user-karak": {
-      "support": true,
+      "support": false,
       "favorite": false,
       "trending": false,
       "loyalty": false,
       "genre": false,
-      "updatedAt": "2026-10-15T19:43:37.380Z",
+      "updatedAt": "2026-10-15T19:43:38.203Z",
       "activatedBy": "user-karak"
     },
     "user-kinetic": {
