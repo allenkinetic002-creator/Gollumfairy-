@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792072490211-67c2s",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand vote for karak: unclicked vote (2 likes)",
+    "details": {
+      "personName": "karak",
+      "vote": "unvote",
+      "likes": 2,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T13:54:44.442Z",
+    "savedAt": "2026-10-15T13:54:50.211Z"
+  },
+  {
+    "id": "act-1792072490211-7cglv",
+    "action": "phone_hand_vote",
+    "description": "Phone Hand Vote: karak unclicked (now 2 likes)",
+    "details": {
+      "personName": "karak",
+      "voteType": "unvote",
+      "likes": 2,
+      "dislikes": 0
+    },
+    "timestamp": "2026-10-15T13:54:44.442Z",
+    "savedAt": "2026-10-15T13:54:50.211Z"
+  },
+  {
     "id": "act-1792072488278-q8vnk",
     "action": "vote_submitted",
     "description": "Finalized UP vote for karak (4 phone hand likes)",
