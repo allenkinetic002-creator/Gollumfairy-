@@ -8,12 +8,12 @@
     "updatedAt": "2026-10-15T13:15:00.000Z"
   },
   "karak": {
-    "personName": "Karak",
+    "personName": "karak",
     "vote": "like",
     "isFinal": true,
-    "likes": 3,
+    "likes": 4,
     "dislikes": 0,
-    "updatedAt": "2026-10-15T13:15:00.000Z"
+    "updatedAt": "2026-10-15T13:41:15.096Z"
   },
   "Kinetic": {
     "personName": "Kinetic",
