@@ -62,7 +62,7 @@ async function configureGitRemote() {
       }
     }
     await execAsync('git config user.name "allenkinetic002-creator"');
-    await execAsync('git config user.email "allenkinetic001@gmail.com"');
+    await execAsync('git config user.email "allenkinetic002@gmail.com"');
 
     try {
       const { stdout: headOut } = await execAsync('git rev-parse HEAD');
