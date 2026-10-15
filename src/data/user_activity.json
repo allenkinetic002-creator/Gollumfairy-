@@ -1,5 +1,33 @@
 [
   {
+    "id": "act-1792091217201-pmqdw",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": true,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:57.200Z"
+    },
+    "savedAt": "2026-10-15T19:06:57.201Z"
+  },
+  {
+    "id": "act-1792091217180-m1byx",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": true,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:57.179Z"
+    },
+    "savedAt": "2026-10-15T19:06:57.180Z"
+  },
+  {
     "id": "act-1792091179557-muhq8",
     "action": "fairy_switches_updated",
     "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
@@ -1255,29 +1283,5 @@
     },
     "timestamp": "2026-10-15T12:18:52.147Z",
     "savedAt": "2026-10-15T12:19:00.025Z"
-  },
-  {
-    "id": "act-1792066740025-ps3ea",
-    "action": "like_post",
-    "description": "Liked post @karak",
-    "details": {
-      "postId": "post-1792066294285",
-      "isLiked": true
-    },
-    "timestamp": "2026-10-15T12:18:52.146Z",
-    "savedAt": "2026-10-15T12:19:00.025Z"
-  },
-  {
-    "id": "act-1792066736253-evcaq",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T12:18:56.253Z"
-    },
-    "savedAt": "2026-10-15T12:18:56.253Z"
   }
 ]
