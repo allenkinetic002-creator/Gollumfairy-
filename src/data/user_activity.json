@@ -1,5 +1,24 @@
 [
   {
+    "id": "act-1792096183066-0iu1o",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-karak",
+    "details": {
+      "userId": "user-karak",
+      "switches": {
+        "support": false,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": true,
+        "supportedGenre": "Artist",
+        "updatedAt": "2026-10-15T20:29:43.065Z",
+        "activatedBy": "user-karak"
+      }
+    },
+    "savedAt": "2026-10-15T20:29:43.066Z"
+  },
+  {
     "id": "act-1792096172531-ypygp",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-karak",
@@ -1403,19 +1422,5 @@
       "updatedAt": "2026-10-15T14:04:33.481Z"
     },
     "savedAt": "2026-10-15T14:04:33.483Z"
-  },
-  {
-    "id": "act-1792073073473-42m9r",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for karak (5 phone hand likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 5,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T14:04:33.473Z"
-    },
-    "savedAt": "2026-10-15T14:04:33.473Z"
   }
 ]
