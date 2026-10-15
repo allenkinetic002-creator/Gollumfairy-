@@ -33,6 +33,7 @@ export interface SettingsScreenProps {
   onOpenDMControl?: () => void;
   onLogout?: () => void;
   onOpenGitHubSync?: () => void;
+  onUpdateUser?: (updated: { name: string; handle: string; email: string }) => void;
   currentUser?: {
     name: string;
     handle: string;
@@ -45,6 +46,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onOpenDMControl,
   onLogout,
   onOpenGitHubSync,
+  onUpdateUser,
   currentUser,
 }) => {
   // Navigation / active modal states
@@ -494,7 +496,60 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               </button>
               <button
                 onClick={() => {
-                  showToast('Account details updated successfully');
+                  const cleanName = displayName.trim() || 'Fairy User';
+                  const cleanUser = username.trim().replace(/^@+/, '') || 'user';
+                  const cleanHandle = `@${cleanUser}`;
+                  const cleanEmail = email.trim();
+
+                  // Save updated user to fairy_current_user
+                  try {
+                    const saved = localStorage.getItem('fairy_current_user');
+                    const parsed = saved ? JSON.parse(saved) : {};
+                    const updated = {
+                      ...parsed,
+                      name: cleanName,
+                      handle: cleanHandle,
+                      email: cleanEmail,
+                    };
+                    localStorage.setItem('fairy_current_user', JSON.stringify(updated));
+                  } catch (e) {}
+
+                  // Update fairy_registered_users if present
+                  try {
+                    const raw = localStorage.getItem('fairy_registered_users');
+                    if (raw) {
+                      const list = JSON.parse(raw);
+                      if (Array.isArray(list)) {
+                        const idx = list.findIndex(
+                          (u) =>
+                            u.username?.toLowerCase() === cleanUser.toLowerCase() ||
+                            u.handle?.toLowerCase() === cleanHandle.toLowerCase()
+                        );
+                        if (idx >= 0) {
+                          list[idx] = { ...list[idx], name: cleanName, handle: cleanHandle, email: cleanEmail };
+                        } else {
+                          list.push({
+                            id: `user-${cleanUser.toLowerCase()}`,
+                            username: cleanUser,
+                            handle: cleanHandle,
+                            name: cleanName,
+                            email: cleanEmail,
+                          });
+                        }
+                        localStorage.setItem('fairy_registered_users', JSON.stringify(list));
+                      }
+                    }
+                  } catch (e) {}
+
+                  if (onUpdateUser) {
+                    onUpdateUser({
+                      name: cleanName,
+                      handle: cleanHandle,
+                      email: cleanEmail,
+                    });
+                  }
+
+                  showToast(`Updated username to ${cleanHandle}`);
                   setActiveModal(null);
                 }}
                 className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer shadow-sm"

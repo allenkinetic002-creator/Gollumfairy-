@@ -1542,17 +1542,25 @@ export default function App() {
       const saved = localStorage.getItem('fairy_current_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.name) return parsed;
+        if (parsed && (parsed.name || parsed.handle || parsed.username)) return parsed;
+      }
+      const rawRegistered = localStorage.getItem('fairy_registered_users');
+      if (rawRegistered) {
+        const regList = JSON.parse(rawRegistered);
+        if (Array.isArray(regList) && regList.length > 0 && regList[0].username) {
+          return regList[0];
+        }
       }
     } catch (e) {}
     return {
-      id: 'user-allen',
-      name: 'Allen Dharak',
-      handle: '@allenkinetic002-creator',
-      email: 'allendharak9@gmail.com',
-      location: 'London, UK',
-      profession: 'Creative Developer & Founder',
-      bio: 'Creative developer, founder & digital artist on Fairy. Building verified trust receipts and live social networks.',
+      id: 'user-gollumfairy',
+      username: 'Gollumfairy',
+      name: 'Gollumfairy',
+      handle: '@Gollumfairy',
+      email: 'gollumfairy@fairy.app',
+      location: 'Fairy Realm',
+      profession: 'Verified Fairy Creator',
+      bio: 'Official creator of Gollumfairy on Fairy network. Verified trust receipts & live community feeds.',
     };
   });
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
@@ -2353,7 +2361,7 @@ export default function App() {
                       setActiveNavIndex(4);
                     }}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11.5px] font-semibold rounded-full shadow-2xs active:scale-95 transition-all cursor-pointer"
-                    title="View your profile (@allenkinetic002-creator)"
+                    title={`View your profile (${currentUser.handle || currentUser.name})`}
                   >
                     {/* Empty state profile icon for new user */}
                     <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center shrink-0">
@@ -4114,7 +4122,9 @@ export default function App() {
         isOpen={showCreatePostModal}
         onClose={() => setShowCreatePostModal(false)}
         onPublish={handlePublishPost}
-        authorAvatar={elenaAvatar}
+        authorAvatar={currentUser && !isLoggedOut ? (currentUser.avatarUrl || '') : elenaAvatar}
+        authorName={currentUser && !isLoggedOut ? currentUser.name : "Elena Vance"}
+        authorHandle={currentUser && !isLoggedOut ? currentUser.handle : "@elena_aeri"}
       />
 
       {/* Raygun Action Modals (Verb: Past Challenges / Adverb: Challenge Person to Online Fight) */}
@@ -4174,7 +4184,7 @@ export default function App() {
           } catch (e) {}
           setIsLoggedOut(false);
           setSelectedProfileUser(null);
-          setTweetSuccessToast(`Welcome back, ${user.name}!`);
+          setTweetSuccessToast(`Logged in as registered user: ${user.handle}`);
           setTimeout(() => {
             setTweetSuccessToast(null);
           }, 3000);
@@ -4209,6 +4219,12 @@ export default function App() {
             }}
             onOpenGitHubSync={() => {
               setShowGitHubSyncModal(true);
+            }}
+            onUpdateUser={(updated) => {
+              setCurrentUser((prev) =>
+                prev ? { ...prev, ...updated } : { ...updated, location: 'Global' }
+              );
+              setSelectedProfileUser(null);
             }}
             currentUser={currentUser || undefined}
           />

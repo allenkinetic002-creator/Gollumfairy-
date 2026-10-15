@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   Image as ImageIcon,
@@ -99,6 +99,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     `Who looks Hotter between me ${authorName} or this loser Slimy sticky`
   );
   const [opponentName, setOpponentName] = useState<string>('Slimy sticky');
+
+  useEffect(() => {
+    if (authorName) {
+      setFaceoffQuestion(`Who looks Hotter between me ${authorName} or this loser Slimy sticky`);
+    }
+  }, [authorName]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
