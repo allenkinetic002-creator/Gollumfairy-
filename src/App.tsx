@@ -2315,81 +2315,27 @@ export default function App() {
           {/* ========================================================================= */}
           {activeNavIndex === 0 && (
             <>
-              {/* Top Utility Bar with Sign In Button positioned above the 5 upper header icons */}
-          <div className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-slate-50/90 border-b border-slate-100 z-10">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold tracking-tight text-slate-500 uppercase">
-                Fairy Live
-              </span>
-              {currentUser && !isLoggedOut && (
-                <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
-                  · {currentUser.name}
-                </span>
-              )}
-              <button
-                onClick={() => setShowGitHubSyncModal(true)}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-md text-[10.5px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0"
-                title="GitHub Live Sync (allenkinetic002-creator/Gollumfairy-)"
-              >
-                <GitBranch className={`w-3 h-3 ${repoSyncStatus?.status === 'syncing' ? 'animate-spin' : ''}`} />
-                <span>
-                  {repoSyncStatus?.status === 'syncing'
-                    ? 'Syncing Repo...'
-                    : repoSyncStatus?.status === 'synced'
-                    ? 'Repo Synced'
-                    : 'GitHub Sync'}
-                </span>
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* Once logged in, Sign In button disappears! Only displays when logged out */}
-              {(!currentUser || isLoggedOut) ? (
-                <button
-                  onClick={() => setShowSignInModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer animate-fadeIn"
-                  title="Sign in to your account"
-                >
-                  <User className="w-3.5 h-3.5 stroke-[2.2]" />
-                  <span>Sign In</span>
-                </button>
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => {
-                      setSelectedProfileUser(null);
-                      setActiveNavIndex(4);
-                    }}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11.5px] font-semibold rounded-full shadow-2xs active:scale-95 transition-all cursor-pointer"
-                    title={`View your profile (${currentUser.handle || currentUser.name})`}
-                  >
-                    {/* Empty state profile icon for new user */}
-                    <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center shrink-0">
-                      <User className="w-3.5 h-3.5 stroke-[1.8] text-slate-400" />
-                    </div>
-                    <span className="max-w-[110px] truncate text-slate-800 font-bold">
-                      {currentUser.handle || currentUser.name}
+              {/* Top Utility Bar with Sign In Button: Only displayed when logged out. When logged in, it completely disappears */}
+              {(!currentUser || isLoggedOut) && (
+                <div className="w-full px-4 pt-2 pb-1.5 flex items-center justify-between shrink-0 bg-slate-50/95 border-b border-slate-100 z-10 animate-fadeIn">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold tracking-tight text-slate-500 uppercase">
+                      Fairy Live
                     </span>
-                  </button>
+                  </div>
 
-                  {/* Quick Log out button */}
-                  <button
-                    onClick={() => {
-                      setCurrentUser(null);
-                      setIsLoggedOut(true);
-                      try {
-                        localStorage.removeItem('fairy_current_user');
-                      } catch (e) {}
-                    }}
-                    className="px-2 py-0.5 text-[11px] font-semibold text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors cursor-pointer"
-                    title="Log out"
-                  >
-                    Log out
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowSignInModal(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[12px] font-bold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer animate-fadeIn"
+                      title="Sign in to your account"
+                    >
+                      <User className="w-3.5 h-3.5 stroke-[2.2]" />
+                      <span>Sign In</span>
+                    </button>
+                  </div>
                 </div>
               )}
-            </div>
-          </div>
 
           {/* Header */}
           <header className="w-full px-4 pt-2.5 pb-1 flex items-center justify-between shrink-0 bg-white z-10 border-b border-slate-50">
@@ -3962,6 +3908,16 @@ export default function App() {
           currentUser={currentUser || undefined}
           onClearViewUser={() => setSelectedProfileUser(null)}
           onOpenSettings={() => setShowSettingsScreen(true)}
+          onLogout={() => {
+            setCurrentUser(null);
+            setIsLoggedOut(true);
+            try {
+              localStorage.removeItem('fairy_current_user');
+            } catch (e) {}
+            setActiveNavIndex(0);
+            setTweetSuccessToast('Logged out. Sign in is available above the header.');
+            setTimeout(() => setTweetSuccessToast(null), 3000);
+          }}
         />
 
       )}
