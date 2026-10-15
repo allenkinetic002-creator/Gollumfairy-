@@ -1,5 +1,49 @@
 [
   {
+    "id": "act-1792074182215-keitm",
+    "action": "like_post",
+    "description": "Unliked post @user",
+    "details": {
+      "postId": "post-1792060584588",
+      "isLiked": false
+    },
+    "timestamp": "2026-10-15T14:22:52.497Z",
+    "savedAt": "2026-10-15T14:23:02.215Z"
+  },
+  {
+    "id": "act-1792074182215-5cvg4",
+    "action": "like_post",
+    "description": "Unliked post @user",
+    "details": {
+      "postId": "post-1792060584588",
+      "isLiked": false
+    },
+    "timestamp": "2026-10-15T14:22:52.497Z",
+    "savedAt": "2026-10-15T14:23:02.215Z"
+  },
+  {
+    "id": "act-1792074182215-1xxwg",
+    "action": "like_post",
+    "description": "Liked post @user",
+    "details": {
+      "postId": "post-1792060584588",
+      "isLiked": true
+    },
+    "timestamp": "2026-10-15T14:22:51.848Z",
+    "savedAt": "2026-10-15T14:23:02.215Z"
+  },
+  {
+    "id": "act-1792074182215-v6han",
+    "action": "like_post",
+    "description": "Liked post @user",
+    "details": {
+      "postId": "post-1792060584588",
+      "isLiked": true
+    },
+    "timestamp": "2026-10-15T14:22:51.848Z",
+    "savedAt": "2026-10-15T14:23:02.215Z"
+  },
+  {
     "id": "act-1792074171972-zub0z",
     "action": "post_action",
     "description": "Post action: like on post-1792060584588",
@@ -1228,53 +1272,5 @@
       "updatedAt": "2026-10-15T12:18:52.332Z"
     },
     "savedAt": "2026-10-15T12:18:52.333Z"
-  },
-  {
-    "id": "act-1792066731976-n8sg8",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T12:18:51.975Z"
-    },
-    "savedAt": "2026-10-15T12:18:51.976Z"
-  },
-  {
-    "id": "act-1792066731964-rvkm5",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T12:18:51.964Z"
-    },
-    "savedAt": "2026-10-15T12:18:51.964Z"
-  },
-  {
-    "id": "act-1792066296014-naxrx",
-    "action": "publish_post",
-    "description": "Post published: \"am a bad kid\"",
-    "details": {
-      "id": "post-1792066294285",
-      "mediaType": "image"
-    },
-    "timestamp": "2026-10-15T12:11:34.288Z",
-    "savedAt": "2026-10-15T12:11:36.014Z"
-  },
-  {
-    "id": "act-1792060584034-wxd1u",
-    "action": "publish_post",
-    "description": "Post published: \"nice\"",
-    "details": {
-      "id": "post-1792060584588",
-      "mediaType": "image"
-    },
-    "timestamp": "2026-10-15T10:36:24.589Z",
-    "savedAt": "2026-10-15T10:36:24.034Z"
   }
 ]
