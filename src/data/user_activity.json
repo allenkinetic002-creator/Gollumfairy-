@@ -1,5 +1,31 @@
 [
   {
+    "id": "act-1792066731976-n8sg8",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T12:18:51.975Z"
+    },
+    "savedAt": "2026-10-15T12:18:51.976Z"
+  },
+  {
+    "id": "act-1792066731964-rvkm5",
+    "action": "post_action",
+    "description": "Post action: like on post-1792066294285",
+    "details": {
+      "postId": "post-1792066294285",
+      "action": "like",
+      "isLiked": true,
+      "likeCount": 2,
+      "updatedAt": "2026-10-15T12:18:51.964Z"
+    },
+    "savedAt": "2026-10-15T12:18:51.964Z"
+  },
+  {
     "id": "act-1792066296014-naxrx",
     "action": "publish_post",
     "description": "Post published: \"am a bad kid\"",
