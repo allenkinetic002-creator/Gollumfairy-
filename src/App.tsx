@@ -1548,6 +1548,7 @@ export default function App() {
     } catch (e) {}
     return null;
   });
+  const isLoggedIn = Boolean(currentUser) && !isLoggedOut;
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
   const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
   const [repoSyncStatus, setRepoSyncStatus] = useState<SyncStatus | null>(null);
@@ -2368,18 +2369,20 @@ export default function App() {
             <>
           {/* Header */}
           <header className="w-full px-4 pt-1.5 pb-1 flex flex-col shrink-0 bg-white z-10 border-b border-slate-50 relative">
-            {/* Top row: Sign in button positioned directly above the Search icon and Messaging icon on the right */}
-            <div className="w-full flex items-center justify-end pr-0.5 pb-1">
-              <button
-                onClick={() => setShowSignInModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                title="Sign In to Fairy"
-                aria-label="Sign In"
-              >
-                <User className="w-3.5 h-3.5 stroke-[2.4]" />
-                <span>Sign In</span>
-              </button>
-            </div>
+            {/* Top row: Sign in button (disappears when signed in, nothing else added) */}
+            {!isLoggedIn && (
+              <div className="w-full flex items-center justify-end pr-0.5 pb-1">
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                  title="Sign In to Fairy"
+                  aria-label="Sign In"
+                >
+                  <User className="w-3.5 h-3.5 stroke-[2.4]" />
+                  <span>Sign In</span>
+                </button>
+              </div>
+            )}
 
             {/* Main Header Row: Logo on left, all 5 icons in a single row on right */}
             <div className="w-full flex items-center justify-between">
@@ -3136,14 +3139,16 @@ export default function App() {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowSignInModal(true)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
-                  title="Sign In to Fairy"
-                >
-                  <User className="w-3 h-3 stroke-[2.4]" />
-                  <span>Sign In</span>
-                </button>
+                {!isLoggedIn && (
+                  <button
+                    onClick={() => setShowSignInModal(true)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-extrabold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
+                    title="Sign In to Fairy"
+                  >
+                    <User className="w-3 h-3 stroke-[2.4]" />
+                    <span>Sign In</span>
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveNavIndex(0)}
                   className="text-[11px] font-bold text-slate-600 hover:text-black px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
