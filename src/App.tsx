@@ -88,7 +88,7 @@ import { SignInModal } from './components/SignInModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
 import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend, submitVoteToBackend } from './lib/realtimeSync';
-
+import { getSafeMediaUrl, DEFAULT_FALLBACK_IMAGE, TEA_AND_TEA_IMAGE } from './lib/imageUpload';
 
 export interface FeedPost {
   id: string;
@@ -1607,37 +1607,74 @@ export default function App() {
     initializeTrustReceiptsSync();
     initializeStarStampsSync();
 
-    // Fetch any community posts from Supabase
-    fetchRemotePosts().then((remotePosts) => {
-      if (remotePosts && remotePosts.length > 0) {
+    // Helper to normalize and ensure persistent, valid media URLs
+    const normalizePost = (p: any): FeedPost => {
+      const caption = p.caption || p.tweetContent || p.tweet_content || '';
+      let defaultFallback = DEFAULT_FALLBACK_IMAGE;
+      if (caption.toLowerCase().includes('tea')) {
+        defaultFallback = TEA_AND_TEA_IMAGE;
+      }
+      const rawMedia = p.mediaUrl || p.media_url;
+      const safeMedia = rawMedia ? getSafeMediaUrl(rawMedia, defaultFallback) : (p.isTweet ? undefined : defaultFallback);
+
+      return {
+        id: p.id,
+        authorName: p.authorName || p.author_name || 'Anonymous User',
+        authorHandle: p.authorHandle || p.author_handle || '@user',
+        authorAvatar: p.authorAvatar || p.author_avatar || elenaAvatar,
+        isVerified: !!(p.isVerified || p.is_verified),
+        timeAgo: p.timeAgo || p.time_ago || 'Recent',
+        location: p.location || undefined,
+        mediaType: (p.mediaType || p.media_type) as any || (p.isTweet || p.is_tweet ? 'tweet' : 'image'),
+        isTweet: !!(p.isTweet || p.is_tweet),
+        tweetContent: p.tweetContent || p.tweet_content || undefined,
+        mediaUrl: safeMedia,
+        caption: p.caption || p.tweet_content || '',
+        tags: p.tags || [],
+        audioTitle: p.audioTitle || p.audio_title || 'Original Audio',
+        likeCount: p.likeCount ?? p.like_count ?? 1,
+        isLiked: false,
+        isTrending: true,
+        retweetCount: p.retweetCount ?? p.retweet_count ?? 0,
+        replyCount: p.replyCount ?? p.reply_count ?? 0,
+        viewCount: p.viewCount || p.view_count || '1',
+        faceoffConfig: p.faceoffConfig || p.faceoff_config,
+      };
+    };
+
+    // Load from local server storage, Supabase, and localStorage
+    Promise.all([
+      fetch('/api/posts')
+        .then((r) => (r.ok ? r.json() : { posts: [] }))
+        .catch(() => ({ posts: [] })),
+      fetchRemotePosts().catch(() => []),
+    ]).then(([localRes, remotePosts]) => {
+      const combined: any[] = [];
+      if (Array.isArray(localRes?.posts)) {
+        combined.push(...localRes.posts);
+      }
+      if (Array.isArray(remotePosts)) {
+        combined.push(...remotePosts);
+      }
+
+      // Also read cached localStorage posts
+      try {
+        const stored = localStorage.getItem('fairy_user_posts');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) combined.push(...parsed);
+        }
+      } catch {}
+
+      if (combined.length > 0) {
         setFeedPosts((prev) => {
           const map = new Map<string, FeedPost>();
-          // Put remote first
-          remotePosts.forEach((r) => {
-            map.set(r.id, {
-              id: r.id,
-              authorName: r.author_name,
-              authorHandle: r.author_handle,
-              authorAvatar: r.author_avatar || elenaAvatar,
-              isVerified: !!r.is_verified,
-              timeAgo: r.time_ago || 'Recent',
-              location: r.location || undefined,
-              mediaType: (r.media_type as any) || (r.is_tweet ? 'tweet' : 'image'),
-              isTweet: r.is_tweet,
-              tweetContent: r.tweet_content || undefined,
-              mediaUrl: r.media_url || undefined,
-              caption: r.caption || r.tweet_content || '',
-              tags: r.tags || [],
-              audioTitle: r.audio_title || 'Original Audio',
-              likeCount: r.like_count ?? 0,
-              isLiked: false,
-              isTrending: true,
-              retweetCount: r.retweet_count ?? 0,
-              replyCount: r.reply_count ?? 0,
-              viewCount: r.view_count || '1',
-            });
+          combined.forEach((p) => {
+            if (p && p.id && !map.has(p.id)) {
+              map.set(p.id, normalizePost(p));
+            }
           });
-          // Add default local posts if not already present
+          // Retain default seed posts if not in combined
           prev.forEach((p) => {
             if (!map.has(p.id)) {
               map.set(p.id, p);
@@ -1678,6 +1715,20 @@ export default function App() {
     setShowNormalMessagesScreen(false);
     setTargetMessagePerson(null);
 
+    // Sync to local server storage
+    fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTweet),
+    }).catch(() => {});
+
+    // Cache in browser localStorage
+    try {
+      const stored = localStorage.getItem('fairy_user_posts');
+      const list = stored ? JSON.parse(stored) : [];
+      localStorage.setItem('fairy_user_posts', JSON.stringify([newTweet, ...list].slice(0, 50)));
+    } catch {}
+
     // Sync to Supabase in the background
     syncPostToSupabase(newTweet).catch((err) =>
       console.warn('[Supabase] Failed to sync new tweet:', err)
@@ -1717,6 +1768,20 @@ export default function App() {
       faceoffConfig: payload.faceoffConfig,
     };
     setFeedPosts((prev) => [newPost, ...prev]);
+
+    // Sync to local server storage
+    fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newPost),
+    }).catch(() => {});
+
+    // Cache in browser localStorage
+    try {
+      const stored = localStorage.getItem('fairy_user_posts');
+      const list = stored ? JSON.parse(stored) : [];
+      localStorage.setItem('fairy_user_posts', JSON.stringify([newPost, ...list].slice(0, 50)));
+    } catch {}
 
     // Sync to Supabase in the background
     syncPostToSupabase(newPost).catch((err) =>
@@ -2603,6 +2668,10 @@ export default function App() {
                         src={post.authorAvatar}
                         alt={post.authorName}
                         onClick={() => handleTogglePhoneReaction(post.id)}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = elenaAvatar;
+                        }}
                         className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
                       />
                       {/* Flame Badge directly on top of the profile pic */}
@@ -2662,7 +2731,7 @@ export default function App() {
                   {post.mediaType !== 'video' && post.mediaUrl && (
                     <div
                       className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
-                      style={{ backgroundImage: `url(${post.mediaUrl})` }}
+                      style={{ backgroundImage: `url(${getSafeMediaUrl(post.mediaUrl)})` }}
                     />
                   )}
 
@@ -2678,11 +2747,15 @@ export default function App() {
                     />
                   ) : (
                     <img
-                      src={post.mediaUrl}
+                      src={getSafeMediaUrl(post.mediaUrl)}
                       alt={post.caption}
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+                      }}
                       className="relative z-10 w-full max-h-[620px] object-contain mx-auto cursor-pointer"
-                      onClick={() => setFullscreenMediaUrl(post.mediaUrl || null)}
+                      onClick={() => setFullscreenMediaUrl(getSafeMediaUrl(post.mediaUrl))}
                     />
                   )}
 
@@ -4229,8 +4302,12 @@ export default function App() {
           </div>
           <div className="relative max-w-full max-h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
             <img
-              src={fullscreenMediaUrl}
+              src={getSafeMediaUrl(fullscreenMediaUrl)}
               alt="Full picture view"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+              }}
               className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
             />
           </div>

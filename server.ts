@@ -567,6 +567,91 @@ async function startServer() {
     }
   });
 
+  // --- UPLOADS DIRECTORY & PERSISTENT MEDIA SERVING ---
+  const uploadsDir = path.resolve(__dirname, 'public', 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use('/uploads', express.static(uploadsDir));
+
+  // Upload image/media endpoint
+  app.post('/api/upload', (req, res) => {
+    try {
+      const { dataUrl, filename } = req.body || {};
+      if (!dataUrl || typeof dataUrl !== 'string') {
+        return res.status(400).json({ success: false, error: 'No dataUrl provided' });
+      }
+
+      const matches = dataUrl.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        return res.status(400).json({ success: false, error: 'Invalid data URL format' });
+      }
+
+      const mimeType = matches[1];
+      const base64Data = matches[2];
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      let ext = 'jpg';
+      if (mimeType.includes('png')) ext = 'png';
+      else if (mimeType.includes('webp')) ext = 'webp';
+      else if (mimeType.includes('gif')) ext = 'gif';
+      else if (mimeType.includes('mp4') || mimeType.includes('video')) ext = 'mp4';
+
+      const safeName = filename
+        ? `${Date.now()}-${path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, '_')}`
+        : `upload-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+
+      const filePath = path.join(uploadsDir, safeName);
+      fs.writeFileSync(filePath, buffer);
+
+      const publicUrl = `/uploads/${safeName}`;
+      console.log(`[Upload] Image saved: ${publicUrl} (${Math.round(buffer.length / 1024)} KB)`);
+      return res.json({ success: true, url: publicUrl, filename: safeName });
+    } catch (err: any) {
+      console.error('[Upload] Error saving upload:', err);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Local posts storage endpoint (persistent feed posts)
+  const postsFile = 'src/data/posts.json';
+
+  app.get('/api/posts', (_req, res) => {
+    try {
+      const posts = readJsonFile<any[]>(postsFile, []);
+      res.json({ success: true, posts });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post('/api/posts', (req, res) => {
+    try {
+      const post = req.body;
+      if (!post || !post.id) {
+        return res.status(400).json({ success: false, error: 'Post data with id required' });
+      }
+
+      const posts = readJsonFile<any[]>(postsFile, []);
+      const existingIdx = posts.findIndex((p: any) => p.id === post.id);
+      if (existingIdx >= 0) {
+        posts[existingIdx] = { ...posts[existingIdx], ...post };
+      } else {
+        posts.unshift(post);
+      }
+
+      writeJsonFile(postsFile, posts);
+      broadcastRealtime('new_post', { post });
+
+      // Auto commit & push post activity to git
+      autoCommitAndPush(`feat(posts): publish "${(post.caption || post.tweetContent || 'post').slice(0, 40)}"`);
+
+      res.json({ success: true, post });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.resolve(__dirname, 'dist')));
     app.get('*', (_req, res) => {

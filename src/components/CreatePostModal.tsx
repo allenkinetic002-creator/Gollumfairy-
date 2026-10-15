@@ -16,6 +16,9 @@ import {
 } from 'lucide-react';
 import { BrokenPencilIcon } from './BrokenPencilIcon';
 
+import { processAndUploadImage, DEFAULT_FALLBACK_IMAGE } from '../lib/imageUpload';
+import { Loader2 } from 'lucide-react';
+
 export interface NewPostPayload {
   mediaType: 'image' | 'video';
   mediaUrl: string;
@@ -106,26 +109,30 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   }, [authorName]);
 
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   if (!isOpen) return null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const isVid = file.type.startsWith('video/');
     setMediaType(isVid ? 'video' : 'image');
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      if (dataUrl) {
-        setMediaUrl(dataUrl);
+    try {
+      setUploadingImage(true);
+      const url = await processAndUploadImage(file);
+      if (url) {
+        setMediaUrl(url);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Failed to process image:', err);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const toggleTag = (tag: string) => {
@@ -272,7 +279,15 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   </>
                 ) : (
                   <>
-                    <img src={mediaUrl} alt="Upload preview" className="relative z-10 w-full max-h-[380px] object-contain mx-auto" />
+                    <img
+                      src={mediaUrl}
+                      alt="Upload preview"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+                      }}
+                      className="relative z-10 w-full max-h-[380px] object-contain mx-auto"
+                    />
                     <span className="absolute top-2 left-2 z-20 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full text-white text-[9.5px] font-bold flex items-center gap-1">
                       <ImageIcon className="w-3 h-3 text-amber-400" /> Full Picture
                     </span>
@@ -288,6 +303,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
+              </div>
+            ) : uploadingImage ? (
+              <div className="w-full h-36 border-2 border-dashed border-purple-300 bg-purple-50/50 rounded-2xl flex flex-col items-center justify-center p-3 text-center">
+                <Loader2 className="w-6 h-6 text-purple-600 animate-spin mb-2" />
+                <p className="text-xs font-bold text-purple-900">Uploading & processing image...</p>
+                <p className="text-[10px] text-purple-600/80 mt-0.5">Optimizing for permanent storage</p>
               </div>
             ) : (
               <div

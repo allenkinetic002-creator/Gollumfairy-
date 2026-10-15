@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { X, Trash2, User } from 'lucide-react';
+import { X, Trash2, User, Loader2 } from 'lucide-react';
+import { processAndUploadImage } from '../lib/imageUpload';
 
 export interface NewTweetPayload {
   text: string;
@@ -47,6 +48,8 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
   const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   if (!isOpen) return null;
 
   const MAX_CHARS = 280;
@@ -55,18 +58,21 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
   const isOverLimit = charsLeft < 0;
   const canPost = (tweetText.trim().length > 0 || Boolean(selectedImage)) && !isOverLimit;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        if (dataUrl) {
-          setSelectedImage(dataUrl);
+      try {
+        setUploadingImage(true);
+        const url = await processAndUploadImage(file);
+        if (url) {
+          setSelectedImage(url);
           setShowImagePicker(false);
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Failed to upload image:', err);
+      } finally {
+        setUploadingImage(false);
+      }
     }
   };
 
@@ -218,11 +224,22 @@ export const CreateTweetModal: React.FC<CreateTweetModalProps> = ({
               </div>
 
               {/* Attached image preview */}
-              {selectedImage && (
+              {uploadingImage && (
+                <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 flex items-center justify-center gap-2 text-purple-700 text-xs font-bold">
+                  <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                  <span>Processing & uploading image...</span>
+                </div>
+              )}
+
+              {selectedImage && !uploadingImage && (
                 <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50 group">
                   <img
                     src={selectedImage}
                     alt="Selected attachment"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1511497584788-87676104235f?w=900&auto=format&fit=crop&q=80';
+                    }}
                     className="w-full h-44 object-cover object-center"
                   />
                   <button

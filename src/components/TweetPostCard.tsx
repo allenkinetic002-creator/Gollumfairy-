@@ -12,6 +12,7 @@ import { PhoneReactionPopup } from './PhoneReactionPopup';
 import { InfluenceRatingModal } from './InfluenceRatingModal';
 import { RaygunActionModal } from './RaygunActionModal';
 import { User } from 'lucide-react';
+import { getSafeMediaUrl, DEFAULT_FALLBACK_IMAGE } from '../lib/imageUpload';
 
 export interface TweetPostItem {
   id: string;
@@ -182,6 +183,10 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
                 src={post.authorAvatar}
                 alt={post.authorName}
                 onClick={() => onTogglePhoneReaction(post.id)}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+                }}
                 className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-600/30 p-0.5 shadow-xs cursor-pointer hover:ring-purple-600/60 transition-all"
               />
             ) : (
@@ -324,11 +329,15 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
         <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-950 max-h-[550px] flex items-center justify-center shadow-2xs group">
           <div
             className="absolute inset-0 bg-center bg-cover blur-xl opacity-20 scale-110 pointer-events-none"
-            style={{ backgroundImage: `url(${post.mediaUrl})` }}
+            style={{ backgroundImage: `url(${getSafeMediaUrl(post.mediaUrl)})` }}
           />
           <img
-            src={post.mediaUrl}
+            src={getSafeMediaUrl(post.mediaUrl)}
             alt="Sitch attachment"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+            }}
             className="relative z-10 w-full h-auto max-h-[550px] object-contain mx-auto"
           />
         </div>
