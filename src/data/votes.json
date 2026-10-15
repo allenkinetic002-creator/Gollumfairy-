@@ -3,17 +3,17 @@
     "personName": "Karak",
     "vote": "like",
     "isFinal": true,
-    "likes": 3,
+    "likes": 4,
     "dislikes": 0,
-    "updatedAt": "2026-10-15T13:15:00.000Z"
+    "updatedAt": "2026-10-15T20:39:20.805Z"
   },
   "karak": {
-    "personName": "karak",
+    "personName": "Karak",
     "vote": "like",
     "isFinal": true,
-    "likes": 5,
+    "likes": 4,
     "dislikes": 0,
-    "updatedAt": "2026-10-15T14:15:16.136Z"
+    "updatedAt": "2026-10-15T20:39:20.805Z"
   },
   "Kinetic": {
     "personName": "Kinetic",

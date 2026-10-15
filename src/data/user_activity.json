@@ -1,5 +1,33 @@
 [
   {
+    "id": "act-1792096760806-1sh3w",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for Karak (4 phone hand likes)",
+    "details": {
+      "personName": "Karak",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 4,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T20:39:20.805Z"
+    },
+    "savedAt": "2026-10-15T20:39:20.806Z"
+  },
+  {
+    "id": "act-1792096760779-7ttaa",
+    "action": "vote_submitted",
+    "description": "Finalized UP vote for Karak (4 phone hand likes)",
+    "details": {
+      "personName": "Karak",
+      "vote": "like",
+      "isFinal": true,
+      "likes": 4,
+      "dislikes": 0,
+      "updatedAt": "2026-10-15T20:39:20.778Z"
+    },
+    "savedAt": "2026-10-15T20:39:20.779Z"
+  },
+  {
     "id": "act-1792096183066-0iu1o",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-karak",
@@ -1395,32 +1423,5 @@
     },
     "timestamp": "2026-10-15T14:04:33.984Z",
     "savedAt": "2026-10-15T14:04:35.098Z"
-  },
-  {
-    "id": "act-1792073075098-e5bv8",
-    "action": "phone_hand_vote",
-    "description": "Phone Hand Vote: karak like (now 5 likes)",
-    "details": {
-      "personName": "karak",
-      "voteType": "like",
-      "likes": 5,
-      "dislikes": 0
-    },
-    "timestamp": "2026-10-15T14:04:33.984Z",
-    "savedAt": "2026-10-15T14:04:35.098Z"
-  },
-  {
-    "id": "act-1792073073482-uhw03",
-    "action": "vote_submitted",
-    "description": "Finalized UP vote for karak (5 phone hand likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "like",
-      "isFinal": true,
-      "likes": 5,
-      "dislikes": 0,
-      "updatedAt": "2026-10-15T14:04:33.481Z"
-    },
-    "savedAt": "2026-10-15T14:04:33.483Z"
   }
 ]
