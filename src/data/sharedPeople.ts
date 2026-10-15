@@ -122,7 +122,7 @@ export const INITIAL_SHARED_PEOPLE: SharedPerson[] = [
     city: 'Kyoto',
     percent: 92,
     matchPercent: 92,
-    approval: '84+',
+    approval: '98%',
     avatarBg: 'bg-amber-600',
     avatarInitial: 'KK',
     avatarText: 'KK',

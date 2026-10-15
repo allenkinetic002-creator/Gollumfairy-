@@ -394,7 +394,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
       tags: ['#fairy', '#autumnlight', '#aeri', '#dreamscape'],
       likeCount: 2450,
       isLiked: false,
-      commentsCount: 84,
+      commentsCount: 2,
       isPinned: true,
       audioTitle: 'Aeri Fairy - Golden Hour Mist',
       timeAgo: '2h ago',

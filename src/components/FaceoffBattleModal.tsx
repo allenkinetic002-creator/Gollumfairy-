@@ -23,7 +23,7 @@ const DEFAULT_CHALLENGE_COMMENTS: ChallengeCommentItem[] = [
     authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
     text: 'Freda had the lead in the morning but Heather is climbing fast! This is getting wild 🔥',
     timeAgo: '2h ago',
-    likes: 84,
+    likes: 5,
     isLiked: false,
   },
   {

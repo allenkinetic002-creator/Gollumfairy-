@@ -226,7 +226,7 @@ const REAL_TOP_CREATORS: Creator[] = [
     avatarInitial: "KK",
     role: "Visual Storyteller",
     location: "Kyoto, Japan",
-    upvotes: 84,
+    upvotes: 1,
     rating: 9.2,
     phoneHandLikes: 5,
     phoneHandDislikes: 0,
@@ -238,8 +238,8 @@ const REAL_TOP_CREATORS: Creator[] = [
       title: "am a bad kid",
       imageUrl: "/uploads/1792066274363-post_1792066273908_xh7e4u.jpg",
       gradientBg: "from-amber-600 to-rose-900",
-      likes: "84",
-      comments: "15",
+      likes: "1",
+      comments: "0",
       hasAudio: true,
       audioTitle: "Original Audio",
       tag: "Street Vignettes",
@@ -2761,7 +2761,11 @@ export default function App() {
                     {/* Likes count on the right */}
                     <div className="pb-1 shrink-0 ml-1">
                       <span className="text-[11px] font-bold text-slate-500 tabular-nums shrink-0 whitespace-nowrap">
-                        {isLiked ? `${person.topPost.likes} + 1` : `${person.topPost.likes}`} likes
+                        {(() => {
+                          const base = parseInt(person.topPost.likes || '1', 10) || 1;
+                          const total = isLiked ? Math.max(base, 1) : base;
+                          return `${total} ${total === 1 ? 'like' : 'likes'}`;
+                        })()}
                       </span>
                     </div>
                   </div>
