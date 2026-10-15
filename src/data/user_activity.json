@@ -1,5 +1,33 @@
 [
   {
+    "id": "act-1792091169705-xudop",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": false,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:09.705Z"
+    },
+    "savedAt": "2026-10-15T19:06:09.705Z"
+  },
+  {
+    "id": "act-1792091169694-8x2xv",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
+    "details": {
+      "support": false,
+      "favorite": false,
+      "trending": false,
+      "loyalty": false,
+      "genre": false,
+      "updatedAt": "2026-10-15T19:06:09.693Z"
+    },
+    "savedAt": "2026-10-15T19:06:09.694Z"
+  },
+  {
     "id": "act-1792074182215-keitm",
     "action": "like_post",
     "description": "Unliked post @user",
@@ -1246,31 +1274,5 @@
       "updatedAt": "2026-10-15T12:18:53.309Z"
     },
     "savedAt": "2026-10-15T12:18:53.309Z"
-  },
-  {
-    "id": "act-1792066732335-ic3wn",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": false,
-      "likeCount": 1,
-      "updatedAt": "2026-10-15T12:18:52.334Z"
-    },
-    "savedAt": "2026-10-15T12:18:52.335Z"
-  },
-  {
-    "id": "act-1792066732333-yizh8",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": false,
-      "likeCount": 1,
-      "updatedAt": "2026-10-15T12:18:52.332Z"
-    },
-    "savedAt": "2026-10-15T12:18:52.333Z"
   }
 ]
