@@ -35,12 +35,16 @@ interface StarStampsScreenProps {
   onBackToFeed: () => void;
   initialSearchQuery?: string;
   hideHeader?: boolean;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: string) => void;
 }
 
 export function StarStampsScreen({
   onBackToFeed,
   initialSearchQuery = '',
   hideHeader = false,
+  isLoggedIn = false,
+  onRequireAuth,
 }: StarStampsScreenProps) {
   const [stamps, setStamps] = useState<StarStamp[]>(() => loadStarStamps());
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
@@ -69,6 +73,10 @@ export function StarStampsScreen({
   };
 
   const handleRate = (stampId: string, rating: number) => {
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('rate commitments');
+      return;
+    }
     const updated = rateStarStamp(stampId, rating);
     setStamps(updated);
     const targetStamp = updated.find((s) => s.id === stampId);
@@ -80,6 +88,10 @@ export function StarStampsScreen({
   };
 
   const handleVote = (stampId: string, voteType: 'fulfilled' | 'active' | 'broken') => {
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('vote on outcomes');
+      return;
+    }
     const updated = voteStarStampOutcome(stampId, voteType);
     setStamps(updated);
     const targetStamp = updated.find((s) => s.id === stampId);
@@ -91,6 +103,10 @@ export function StarStampsScreen({
   };
 
   const handleAddComment = (stampId: string) => {
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('post feedback');
+      return;
+    }
     const text = commentInputs[stampId]?.trim();
     if (!text) return;
     const rating = ratingInputs[stampId];
@@ -186,7 +202,13 @@ export function StarStampsScreen({
 
           {/* Action Button: Create a Star Stamp - compact "+ Create" on narrow screens */}
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              if (!isLoggedIn && onRequireAuth) {
+                onRequireAuth('create star stamps');
+                return;
+              }
+              setShowCreateModal(true);
+            }}
             className="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-black hover:bg-slate-800 active:scale-95 text-white font-black text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer shrink-0"
             title="Create Star Stamp"
           >

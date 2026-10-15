@@ -254,6 +254,8 @@ export interface UserProfileScreenProps {
   onClearViewUser?: () => void;
   onOpenSettings?: () => void;
   onLogout?: () => void;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: string) => void;
 }
 
 export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
@@ -268,6 +270,8 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   onClearViewUser,
   onOpenSettings,
   onLogout,
+  isLoggedIn = false,
+  onRequireAuth,
 }) => {
   // Active user resolution
   const activeUser = viewUser || currentUser || {
@@ -579,6 +583,10 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
 
   // Handle Like Toggle on Selected or Grid Post
   const handleTogglePostLike = (postId: string) => {
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('like this post');
+      return;
+    }
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
@@ -606,6 +614,10 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   // Add Comment to Selected Post
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('post a comment');
+      return;
+    }
     if (!newCommentText.trim() || !selectedPost) return;
 
     const newComment: ProfileComment = {
@@ -638,6 +650,10 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
 
   // Toggle Like on Sitch Post
   const handleToggleSitchLike = (id: string) => {
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('like this post');
+      return;
+    }
     setSitchPosts((prev) =>
       prev.map((s) => {
         if (s.id === id) {
@@ -656,6 +672,10 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   // Publish New Sitch Post to Honey Jar
   const handleCreateSitch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('publish a post or tweet');
+      return;
+    }
     if (!newSitchContent.trim()) return;
     const newSitch: TweetPostItem = {
       id: `sitch-${Date.now()}`,
@@ -825,7 +845,13 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             {/* Quick Action Buttons (Follow, Message, Share) */}
             <div className="flex items-center gap-2 mt-3">
               <button
-                onClick={() => setIsFollowing(!isFollowing)}
+                onClick={() => {
+                  if (!isLoggedIn && onRequireAuth) {
+                    onRequireAuth('follow this creator');
+                    return;
+                  }
+                  setIsFollowing(!isFollowing);
+                }}
                 className={`flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
                   isFollowing
                     ? 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
@@ -846,14 +872,18 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               </button>
 
               <button
-                onClick={() =>
+                onClick={() => {
+                  if (!isLoggedIn && onRequireAuth) {
+                    onRequireAuth('send direct messages');
+                    return;
+                  }
                   onOpenSendPersonMessage({
                     id: 'p-elena',
                     name: wikiData.name,
                     handle: wikiData.handle,
                     avatarUrl: elenaAvatar,
-                  })
-                }
+                  });
+                }}
                 className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
                 title="Send Message"
               >

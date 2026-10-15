@@ -158,6 +158,8 @@ export interface FaceoffBattleModalProps {
     avatar: string;
     title?: string;
   };
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: string) => void;
 }
 
 export function FaceoffBattleModal({
@@ -175,6 +177,8 @@ export function FaceoffBattleModal({
     name: 'Heather Slime',
     avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
   },
+  isLoggedIn = false,
+  onRequireAuth,
 }: FaceoffBattleModalProps) {
   // Configured total scale: 2, 3, 10, or up to 10,000!
   const [targetContenderCount, setTargetContenderCount] = useState<number>(() => {
@@ -260,6 +264,10 @@ export function FaceoffBattleModal({
   }, [sortedContenders, searchQuery]);
 
   const handleVote = (contenderId: string) => {
+    if (!isLoggedIn && onRequireAuth) {
+      onRequireAuth('vote in faceoff battles');
+      return;
+    }
     setContenders((prev) =>
       prev.map((c) => {
         if (c.id === contenderId) {

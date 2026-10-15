@@ -156,6 +156,8 @@ interface UserSearchModalProps {
   onClose: () => void;
   onSelectUserToMessage?: (user: { id: string; name: string; handle: string; avatarUrl?: string }) => void;
   onViewUserProfile?: (user: UserSearchItem) => void;
+  isLoggedIn?: boolean;
+  onRequireAuth?: (action: string) => void;
 }
 
 export function UserSearchModal({
@@ -163,6 +165,8 @@ export function UserSearchModal({
   onClose,
   onSelectUserToMessage,
   onViewUserProfile,
+  isLoggedIn = false,
+  onRequireAuth,
 }: UserSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [followedMap, setFollowedMap] = useState<Record<string, boolean>>({});
@@ -367,7 +371,14 @@ export function UserSearchModal({
                     {/* Action buttons */}
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
-                        onClick={(e) => toggleFollow(user.id, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isLoggedIn && onRequireAuth) {
+                            onRequireAuth('follow creators');
+                            return;
+                          }
+                          toggleFollow(user.id, e);
+                        }}
                         className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
                           isFollowed
                             ? 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
@@ -391,6 +402,10 @@ export function UserSearchModal({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (!isLoggedIn && onRequireAuth) {
+                              onRequireAuth('send direct messages');
+                              return;
+                            }
                             onSelectUserToMessage({
                               id: user.id,
                               name: user.name,

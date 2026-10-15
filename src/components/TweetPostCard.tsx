@@ -422,7 +422,6 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
         {/* Raygun button on far right */}
         <button
           onClick={() => {
-            handleToggleRetweet();
             if (onToggleRaygun) {
               onToggleRaygun(post.id, post.authorName, post.authorAvatar, post.authorHandle);
             }

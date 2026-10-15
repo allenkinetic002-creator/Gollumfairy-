@@ -85,6 +85,7 @@ import { UserSearchModal, UserSearchItem } from './components/UserSearchModal';
 import { UserProfileScreen } from './components/UserProfileScreen';
 import { SettingsScreen } from './components/SettingsScreen';
 import { SignInModal } from './components/SignInModal';
+import { SignInRequiredModal } from './components/SignInRequiredModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
 import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend, submitVoteToBackend } from './lib/realtimeSync';
@@ -1549,6 +1550,40 @@ export default function App() {
     return null;
   });
   const isLoggedIn = Boolean(currentUser) && !isLoggedOut;
+  const [showSignInRequiredModal, setShowSignInRequiredModal] = useState(false);
+  const [authPromptAction, setAuthPromptAction] = useState<string>('interact with posts');
+
+  const requireAuth = (actionName = 'interact with posts'): boolean => {
+    if (isLoggedIn) return true;
+    setAuthPromptAction(actionName);
+    setShowSignInRequiredModal(true);
+    return false;
+  };
+
+  const handleQuickSignInGollumfairy = () => {
+    const gollumfairyUser = {
+      id: 'user-gollumfairy',
+      username: 'Gollumfairy',
+      name: 'Gollumfairy',
+      handle: '@Gollumfairy',
+      email: 'gollumfairy@fairy.app',
+      location: 'Fairy Realm',
+      profession: 'Head Creator & Curator',
+      bio: 'Official Gollumfairy account. Welcome to Fairy!',
+    };
+    setCurrentUser(gollumfairyUser);
+    setIsLoggedOut(false);
+    try {
+      localStorage.setItem('fairy_current_user', JSON.stringify(gollumfairyUser));
+    } catch (e) {}
+    setShowSignInRequiredModal(false);
+    setShowSignInModal(false);
+    setTweetSuccessToast('Logged in as @Gollumfairy! You can now like, post, comment, and message.');
+    setTimeout(() => {
+      setTweetSuccessToast(null);
+    }, 3500);
+  };
+
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
   const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
   const [repoSyncStatus, setRepoSyncStatus] = useState<SyncStatus | null>(null);
@@ -1688,6 +1723,7 @@ export default function App() {
   }, []);
 
   const handlePublishTweet = (payload: NewTweetPayload) => {
+    if (!requireAuth('publish a tweet')) return;
     const newTweet: FeedPost = {
       id: 'tweet-' + Date.now(),
       authorName: currentUser?.name || 'Anonymous User',
@@ -1750,6 +1786,7 @@ export default function App() {
   };
 
   const handlePublishPost = (payload: NewPostPayload) => {
+    if (!requireAuth('create and share a post')) return;
     const newPost: FeedPost = {
       id: 'post-' + Date.now(),
       authorName: currentUser?.name || 'Anonymous User',
@@ -1811,6 +1848,7 @@ export default function App() {
 
 
   const handleTogglePostLike = (postId: string) => {
+    if (!requireAuth('like this post')) return;
     setFeedPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
@@ -1848,6 +1886,7 @@ export default function App() {
   const [tieBreakerToast, setTieBreakerToast] = useState<string | null>(null);
 
   const toggleLikedCreatorPost = (rank: number) => {
+    if (!requireAuth('like this creator post')) return;
     setLikedCreatorPosts((prev) => ({
       ...prev,
       [rank]: !prev[rank],
@@ -1855,6 +1894,7 @@ export default function App() {
   };
 
   const handleHoneyJarClick = (rank: number) => {
+    if (!requireAuth('support with Honey Jar')) return;
     setHoneyJarCounts((prev) => ({
       ...prev,
       [rank]: (prev[rank] || 0) + 1,
@@ -1875,6 +1915,7 @@ export default function App() {
   const [activePhoneReactionId, setActivePhoneReactionId] = useState<string | null>(null);
 
   const handleToggleInfluenceRating = (id: string) => {
+    if (!requireAuth('rate creator influence')) return;
     setActiveInfluenceRatingId((prev) => (prev === id ? null : id));
   };
 
@@ -1883,6 +1924,7 @@ export default function App() {
   };
 
   const handleRatingSubmitted = (targetName: string, val: number) => {
+    if (!requireAuth('submit influence rating')) return;
     setCreatorsData((prev) => {
       const updated = { ...prev };
       Object.keys(updated).forEach((cat) => {
@@ -1897,6 +1939,7 @@ export default function App() {
   };
 
   const handleRatingReset = (targetName: string) => {
+    if (!requireAuth('reset influence rating')) return;
     setTweetSuccessToast(`✓ Rating reset for ${targetName}. You can now choose or type a new score!`);
     setTimeout(() => setTweetSuccessToast(null), 3000);
   };
@@ -1956,6 +1999,7 @@ export default function App() {
   });
 
   const handleToggleFaceoff = (id: string) => {
+    if (!requireAuth('vote in faceoff battle')) return;
     setOpenFaceoffPosts((prev) => ({
       ...prev,
       [id]: !prev[id],
@@ -1970,6 +2014,7 @@ export default function App() {
   };
 
   const handleMorphPencil = (id: string) => {
+    if (!requireAuth('follow creators')) return;
     setMorphedPosts((prev) => ({
       ...prev,
       [id]: true,
@@ -1988,6 +2033,7 @@ export default function App() {
   const [challengeOriginTweetId, setChallengeOriginTweetId] = useState<string | null>(null);
 
   const handleToggleRaygun = (id: string, name: string, avatar?: string, handle?: string) => {
+    if (!requireAuth('use Raygun arena')) return;
     if (activeRaygunPostId === id) {
       setActiveRaygunPostId(null);
     } else {
@@ -2098,10 +2144,12 @@ export default function App() {
   };
 
   const handleTogglePhoneReaction = (id: string) => {
+    if (!requireAuth('react and vote')) return;
     setActivePhoneReactionId((prev) => (prev === id ? null : id));
   };
 
   const handleOpenSendPersonMessage = (person: TargetMessagePerson) => {
+    if (!requireAuth(`message ${person.name || person.handle || 'creators'}`)) return;
     setTargetMessagePerson(person);
     setShowNormalMessagesScreen(true);
     setShowMatchesScreen(false);
@@ -2110,6 +2158,7 @@ export default function App() {
   const currentCreators = creatorsData[selectedCategory] || creatorsData.new_artists;
 
   const handleToggleCommentLike = (id: string) => {
+    if (!requireAuth('like comments')) return;
     setComments((prev) =>
       prev.map((c) => {
         if (c.id === id) {
@@ -2129,6 +2178,7 @@ export default function App() {
 
   const handlePostComment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!requireAuth('post a comment')) return;
     if (!inputComment.trim()) return;
 
     const newComment: CommentItem = {
@@ -2150,6 +2200,7 @@ export default function App() {
   };
 
   const handleToggleUpvoteCreator = (categoryKey: string, rank: number) => {
+    if (!requireAuth('upvote creators')) return;
     setCreatorsData((prev) => {
       const list = prev[categoryKey] || [];
       const updatedList = list.map((c) => {
@@ -2171,6 +2222,7 @@ export default function App() {
   };
 
   const handleToggleFollow = (categoryKey: string, rank: number) => {
+    if (!requireAuth('follow creators')) return;
     setCreatorsData((prev) => {
       const list = prev[categoryKey] || [];
       const updatedList = list.map((c) => {
@@ -2195,6 +2247,7 @@ export default function App() {
     voteType: 'like' | 'dislike',
     newVote: 'like' | 'dislike' | null
   ) => {
+    if (!requireAuth('vote on tie-breakers')) return;
     setCreatorsData((prev) => {
       const list = (prev[categoryKey] || []).map((c) => ({ ...c }));
       const targetIndex = list.findIndex((c) => c.name === personName);
@@ -2289,6 +2342,7 @@ export default function App() {
     voteType: 'like' | 'dislike',
     newVote: 'like' | 'dislike' | null
   ) => {
+    if (!requireAuth('vote on social reach')) return;
     setFeedPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
@@ -2338,6 +2392,8 @@ export default function App() {
           <StarStampsScreen
             onBackToFeed={() => setShowStarStampsScreen(false)}
             initialSearchQuery={starStampsSearchQuery}
+            isLoggedIn={isLoggedIn}
+            onRequireAuth={requireAuth}
           />
         </div>
       ) : showMatchesScreen ? (
@@ -2358,6 +2414,8 @@ export default function App() {
             }}
             targetPerson={targetMessagePerson}
             onClearTargetPerson={() => setTargetMessagePerson(null)}
+            isLoggedIn={isLoggedIn}
+            onRequireAuth={requireAuth}
           />
         </div>
       ) : (
@@ -2409,7 +2467,10 @@ export default function App() {
 
                 {/* 2nd header icon: Concentric Circle icon linked to Create Post Modal (Photo, Video & Writing) */}
                 <button
-                  onClick={() => setShowCreatePostModal(true)}
+                  onClick={() => {
+                    if (!requireAuth('create and upload a post')) return;
+                    setShowCreatePostModal(true);
+                  }}
                   aria-label="Create Post · Concentric Circle"
                   title="Create Post · Upload video, photo & writing"
                   className="hover:opacity-75 transition-transform active:scale-90 cursor-pointer p-0.5 flex items-center justify-center shrink-0"
@@ -2451,6 +2512,7 @@ export default function App() {
                 {/* 5th header icon: Message icon */}
                 <button
                   onClick={() => {
+                    if (!requireAuth('send and view direct messages')) return;
                     setTargetMessagePerson(null);
                     setShowNormalMessagesScreen(true);
                   }}
@@ -2644,6 +2706,8 @@ export default function App() {
                       participants={post.faceoffConfig?.participants}
                       redParticipant={post.faceoffConfig?.redParticipant}
                       blueParticipant={post.faceoffConfig?.blueParticipant}
+                      isLoggedIn={isLoggedIn}
+                      onRequireAuth={requireAuth}
                     />
                   </div>
                 )}
@@ -2997,8 +3061,20 @@ export default function App() {
                         <input
                           type="text"
                           value={inputComment}
-                          onChange={(e) => setInputComment(e.target.value)}
-                          placeholder="Add a comment..."
+                          onFocus={(e) => {
+                            if (!isLoggedIn) {
+                              e.target.blur();
+                              requireAuth('post a comment');
+                            }
+                          }}
+                          onChange={(e) => {
+                            if (!isLoggedIn) {
+                              requireAuth('post a comment');
+                              return;
+                            }
+                            setInputComment(e.target.value);
+                          }}
+                          placeholder={isLoggedIn ? "Add a comment..." : "Sign in to add a comment..."}
                           className="flex-1 bg-white border border-slate-200 rounded-full px-2.5 py-1 text-[11px] focus:outline-none focus:border-purple-500"
                         />
                         <button
@@ -3046,7 +3122,10 @@ export default function App() {
                       </div>
 
                       <button
-                        onClick={() => setIsDrawerOpen(true)}
+                        onClick={() => {
+                          if (!requireAuth('join community discussion')) return;
+                          setIsDrawerOpen(true);
+                        }}
                         className="w-full mt-1.5 py-1.5 px-3 bg-white border border-purple-200 hover:border-purple-400 rounded-full text-slate-500 text-[10.5px] flex items-center justify-between transition-colors shadow-2xs cursor-pointer shrink-0"
                       >
                         <span>Join the discussion...</span>
@@ -3376,7 +3455,11 @@ export default function App() {
                     {/* Broken Pencil Faceoff Battle Card attached on top of profile pic */}
                     {Boolean(openFaceoffPosts[`person-${person.name}`]) && (
                       <div className="w-full flex justify-center py-2 px-3 bg-white border-b border-slate-100">
-                        <FaceoffBattleModal onClose={() => handleCloseFaceoff(`person-${person.name}`)} />
+                        <FaceoffBattleModal
+                          onClose={() => handleCloseFaceoff(`person-${person.name}`)}
+                          isLoggedIn={isLoggedIn}
+                          onRequireAuth={requireAuth}
+                        />
                       </div>
                     )}
 
@@ -4008,6 +4091,8 @@ export default function App() {
           setRaygunTarget={setRaygunTarget}
           viewUser={selectedProfileUser}
           currentUser={currentUser || undefined}
+          isLoggedIn={isLoggedIn}
+          onRequireAuth={requireAuth}
           onClearViewUser={() => setSelectedProfileUser(null)}
           onOpenSettings={() => setShowSettingsScreen(true)}
           onLogout={() => {
@@ -4154,6 +4239,7 @@ export default function App() {
           {/* Main Floating Action Button (FAB) - Purple circle with white Honey Jar */}
           <button
             onClick={() => {
+              if (!requireAuth('write and share a tweet')) return;
               setShowCreateTweetModal(true);
             }}
             aria-label="Honey Jar · Write and post"
@@ -4215,6 +4301,8 @@ export default function App() {
       <UserSearchModal
         isOpen={showUserSearchModal}
         onClose={() => setShowUserSearchModal(false)}
+        isLoggedIn={isLoggedIn}
+        onRequireAuth={requireAuth}
         onSelectUserToMessage={(user) => {
           setTargetMessagePerson({
             id: user.id,
@@ -4229,6 +4317,15 @@ export default function App() {
           setShowUserSearchModal(false);
           setActiveNavIndex(4);
         }}
+      />
+
+      {/* Sign In Required Pop Up (Alerts unauthenticated visitors to sign in first) */}
+      <SignInRequiredModal
+        isOpen={showSignInRequiredModal}
+        onClose={() => setShowSignInRequiredModal(false)}
+        actionName={authPromptAction}
+        onOpenSignInModal={() => setShowSignInModal(true)}
+        onQuickSignIn={handleQuickSignInGollumfairy}
       />
 
       {/* Sign In Modal */}
