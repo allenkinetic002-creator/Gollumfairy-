@@ -1,5 +1,16 @@
 [
   {
+    "id": "act-1792060584034-wxd1u",
+    "action": "publish_post",
+    "description": "Post published: \"nice\"",
+    "details": {
+      "id": "post-1792060584588",
+      "mediaType": "image"
+    },
+    "timestamp": "2026-10-15T10:36:24.589Z",
+    "savedAt": "2026-10-15T10:36:24.034Z"
+  },
+  {
     "id": "act-1792058651738-93xwy",
     "action": "publish_post",
     "description": "Post published: \"hollow\"",

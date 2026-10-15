@@ -1,5 +1,25 @@
 [
   {
+    "id": "post-1792060584588",
+    "authorName": "Anonymous User",
+    "authorHandle": "@user",
+    "authorAvatar": "/src/assets/images/creator_portrait_elena_1791014499312.jpg",
+    "isVerified": true,
+    "timeAgo": "Just now",
+    "location": "Kyoto, Japan",
+    "mediaType": "image",
+    "mediaUrl": "/uploads/1792060570700-post_1792060571060_dodbvg.jpg",
+    "caption": "nice",
+    "tags": [
+      "#fairy",
+      "#autumnlight"
+    ],
+    "audioTitle": "Original Audio",
+    "likeCount": 1,
+    "isLiked": true,
+    "isTrending": true
+  },
+  {
     "id": "post-1792058652301",
     "authorName": "kinetic",
     "authorHandle": "@kinetic",
@@ -11,7 +31,10 @@
     "isTweet": false,
     "mediaUrl": "https://images.unsplash.com/photo-1511497584788-87676104235f?w=1000&auto=format&fit=crop&q=80",
     "caption": "hollow",
-    "tags": ["#fairy", "#autumnlight"],
+    "tags": [
+      "#fairy",
+      "#autumnlight"
+    ],
     "audioTitle": "Original Audio",
     "likeCount": 1,
     "isLiked": false,
@@ -32,7 +55,10 @@
     "isTweet": false,
     "mediaUrl": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=1000&auto=format&fit=crop&q=80",
     "caption": "tea and tea",
-    "tags": ["#fairy", "#autumnlight"],
+    "tags": [
+      "#fairy",
+      "#autumnlight"
+    ],
     "audioTitle": "Original Audio",
     "likeCount": 1,
     "isLiked": false,
