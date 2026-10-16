@@ -1,5 +1,22 @@
 [
   {
+    "id": "act-1792140368071-zpxwb",
+    "action": "relationship_updated",
+    "description": "Added @karak as Friend",
+    "details": {
+      "key": "karak",
+      "record": {
+        "targetKey": "karak",
+        "targetName": "karak",
+        "targetHandle": "@karak",
+        "status": "friend",
+        "mode": "friend",
+        "updatedAt": "2026-10-16T08:46:08.645Z"
+      }
+    },
+    "savedAt": "2026-10-16T08:46:08.071Z"
+  },
+  {
     "id": "act-1792140365843-ebip3",
     "action": "relationship_updated",
     "description": "Added @karak as Friend",
@@ -1509,18 +1526,5 @@
       "updatedAt": "2026-10-15T19:29:13.567Z"
     },
     "savedAt": "2026-10-15T19:29:13.567Z"
-  },
-  {
-    "id": "act-1792092553064-h2ada",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T19:29:13.064Z"
-    },
-    "savedAt": "2026-10-15T19:29:13.065Z"
   }
 ]
