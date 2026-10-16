@@ -1,5 +1,24 @@
 [
   {
+    "id": "act-1792131933441-drhz6",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-kinetic",
+    "details": {
+      "userId": "user-kinetic",
+      "switches": {
+        "support": true,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": false,
+        "supportedGenre": "Artist",
+        "updatedAt": "2026-10-16T06:25:33.440Z",
+        "activatedBy": "user-kinetic"
+      }
+    },
+    "savedAt": "2026-10-16T06:25:33.441Z"
+  },
+  {
     "id": "act-1792131932925-zp41o",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-kinetic",
@@ -1504,19 +1523,5 @@
       "updatedAt": "2026-10-15T19:06:10.113Z"
     },
     "savedAt": "2026-10-15T19:06:10.113Z"
-  },
-  {
-    "id": "act-1792091170110-o3vth",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
-    "details": {
-      "support": false,
-      "favorite": false,
-      "trending": false,
-      "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:06:10.109Z"
-    },
-    "savedAt": "2026-10-15T19:06:10.110Z"
   }
 ]
