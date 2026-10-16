@@ -1,5 +1,22 @@
 [
   {
+    "id": "act-1792140158474-hz840",
+    "action": "relationship_updated",
+    "description": "Added @karak as Friend",
+    "details": {
+      "key": "karak",
+      "record": {
+        "targetKey": "karak",
+        "targetName": "Karak",
+        "targetHandle": "@karak",
+        "status": "friend",
+        "mode": "friend",
+        "updatedAt": "2026-10-16T08:42:39.037Z"
+      }
+    },
+    "savedAt": "2026-10-16T08:42:38.474Z"
+  },
+  {
     "id": "act-1792140151174-o60u7",
     "action": "social_relationship",
     "description": "Removed relationship with @karak",
@@ -1526,19 +1543,5 @@
       "updatedAt": "2026-10-15T19:07:30.172Z"
     },
     "savedAt": "2026-10-15T19:07:30.173Z"
-  },
-  {
-    "id": "act-1792091217891-bmbtd",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
-    "details": {
-      "support": true,
-      "favorite": false,
-      "trending": false,
-      "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:06:57.891Z"
-    },
-    "savedAt": "2026-10-15T19:06:57.891Z"
   }
 ]
