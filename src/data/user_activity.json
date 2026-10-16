@@ -1,5 +1,41 @@
 [
   {
+    "id": "act-1792129349946-9kymm",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-kinetic",
+    "details": {
+      "userId": "user-kinetic",
+      "switches": {
+        "support": false,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": false,
+        "updatedAt": "2026-10-16T05:42:29.945Z",
+        "activatedBy": "user-kinetic"
+      }
+    },
+    "savedAt": "2026-10-16T05:42:29.946Z"
+  },
+  {
+    "id": "act-1792129349165-cngqw",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-kinetic",
+    "details": {
+      "userId": "user-kinetic",
+      "switches": {
+        "support": true,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": false,
+        "updatedAt": "2026-10-16T05:42:29.164Z",
+        "activatedBy": "user-kinetic"
+      }
+    },
+    "savedAt": "2026-10-16T05:42:29.165Z"
+  },
+  {
     "id": "act-1792129348462-rxvrk",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-kinetic",
@@ -1410,31 +1446,5 @@
     },
     "timestamp": "2026-10-15T14:15:16.627Z",
     "savedAt": "2026-10-15T14:15:33.610Z"
-  },
-  {
-    "id": "act-1792073725625-ym203",
-    "action": "phone_hand_vote",
-    "description": "Phone Hand vote for karak: unclicked vote (4 likes)",
-    "details": {
-      "personName": "karak",
-      "vote": "unvote",
-      "likes": 4,
-      "dislikes": 0
-    },
-    "timestamp": "2026-10-15T14:15:15.556Z",
-    "savedAt": "2026-10-15T14:15:25.625Z"
-  },
-  {
-    "id": "act-1792073725625-a5nty",
-    "action": "phone_hand_vote",
-    "description": "Phone Hand Vote: karak unclicked (now 4 likes)",
-    "details": {
-      "personName": "karak",
-      "voteType": "unvote",
-      "likes": 4,
-      "dislikes": 0
-    },
-    "timestamp": "2026-10-15T14:15:15.556Z",
-    "savedAt": "2026-10-15T14:15:25.625Z"
   }
 ]
