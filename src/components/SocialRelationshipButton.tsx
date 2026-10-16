@@ -292,10 +292,10 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
 
   const sizeClasses =
     size === 'sm'
-      ? 'px-2.5 py-1 text-[11px] h-7'
+      ? 'px-2 py-0.5 text-[10.5px] h-6'
       : size === 'lg'
-      ? 'px-4 py-2 text-sm h-10'
-      : 'px-3 py-1.5 text-xs h-8';
+      ? 'px-3 py-1 text-xs h-8'
+      : 'px-2.5 py-0.5 text-[11px] h-6.5';
 
   return (
     <div
@@ -306,21 +306,21 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
       {/* Non-modal, Inline Mini Floating Reaction Bar (Pops directly above button) */}
       {showQuickBar && (
         <div
-          className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 p-1 bg-white/95 backdrop-blur-md rounded-full border border-slate-200 shadow-lg animate-in fade-in zoom-in-90 duration-150"
+          className="absolute -top-8.5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-0.5 p-0.5 bg-white/95 backdrop-blur-md rounded-full border border-slate-200 shadow-md animate-in fade-in zoom-in-90 duration-150"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Follow Pill */}
           <button
             type="button"
             onClick={(e) => handleQuickBarSelect('follow', e)}
-            className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all flex items-center gap-1 cursor-pointer ${
+            className={`px-1.5 py-0.5 rounded-full text-[9px] font-black transition-all flex items-center gap-1 cursor-pointer ${
               currentMode === 'follow'
                 ? 'bg-purple-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-purple-50 hover:text-purple-700'
             }`}
             title="Follow mode"
           >
-            <UserPlus className="w-3 h-3" />
+            <UserPlus className="w-2.5 h-2.5" />
             <span>Follow</span>
           </button>
 
@@ -328,14 +328,14 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
           <button
             type="button"
             onClick={(e) => handleQuickBarSelect('friend', e)}
-            className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all flex items-center gap-1 cursor-pointer ${
+            className={`px-1.5 py-0.5 rounded-full text-[9px] font-black transition-all flex items-center gap-1 cursor-pointer ${
               currentMode === 'friend'
                 ? 'bg-emerald-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'
             }`}
             title="Add Friend mode"
           >
-            <HeartHandshake className="w-3 h-3" />
+            <HeartHandshake className="w-2.5 h-2.5" />
             <span>Friend</span>
           </button>
 
@@ -343,14 +343,14 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
           <button
             type="button"
             onClick={(e) => handleQuickBarSelect('enemy', e)}
-            className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all flex items-center gap-1 cursor-pointer ${
+            className={`px-1.5 py-0.5 rounded-full text-[9px] font-black transition-all flex items-center gap-1 cursor-pointer ${
               currentMode === 'enemy'
                 ? 'bg-rose-600 text-white shadow-xs'
                 : 'text-slate-600 hover:bg-rose-50 hover:text-rose-700'
             }`}
             title="Add Enemy mode"
           >
-            <Swords className="w-3 h-3" />
+            <Swords className="w-2.5 h-2.5" />
             <span>Enemy</span>
           </button>
         </div>
@@ -358,9 +358,9 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
 
       {/* Floating feedback toast badge (Non-modal) */}
       {switchFeedback && !showQuickBar && (
-        <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap animate-in fade-in slide-in-from-bottom-2 duration-150">
-          <span className="px-2 py-0.5 rounded-md bg-slate-900/90 text-white text-[10px] font-extrabold shadow-md flex items-center gap-1">
-            <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap animate-in fade-in slide-in-from-bottom-1 duration-150">
+          <span className="px-1.5 py-0.5 rounded-md bg-slate-900/90 text-white text-[9px] font-extrabold shadow-md flex items-center gap-1">
+            <Sparkles className="w-2 h-2 text-amber-300" />
             {switchFeedback}
           </span>
         </div>
@@ -379,7 +379,7 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
         onMouseLeave={() => setIsHovered(false)}
         title="Tap to toggle &bull; Long-press to switch between Follow, Add Friend & Add Enemy"
         aria-label={`${buttonLabel} ${targetHandle}`}
-        className={`relative group font-black rounded-full transition-all duration-150 flex items-center gap-1.5 cursor-pointer active:scale-95 overflow-hidden ${sizeClasses} ${buttonBg} ${className}`}
+        className={`relative group font-black rounded-full transition-all duration-150 flex items-center gap-1 cursor-pointer active:scale-95 overflow-hidden ${sizeClasses} ${buttonBg} ${className}`}
       >
         {/* Subtle hold progress ring/bar overlay */}
         {isHolding && (
@@ -391,15 +391,15 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
 
         <IconComponent
           className={`shrink-0 transition-transform ${
-            size === 'sm' ? 'w-3 h-3' : size === 'lg' ? 'w-4 h-4' : 'w-3.5 h-3.5'
-          } ${isHolding ? 'scale-125' : ''}`}
+            size === 'sm' ? 'w-2.5 h-2.5' : size === 'lg' ? 'w-3.5 h-3.5' : 'w-3 h-3'
+          } ${isHolding ? 'scale-120' : ''}`}
         />
 
         <span className="truncate">{buttonLabel}</span>
 
         {/* Small hold indicator dot */}
         <span
-          className="w-1.5 h-1.5 rounded-full bg-current opacity-40 group-hover:opacity-80 transition-opacity ml-0.5"
+          className="w-1 h-1 rounded-full bg-current opacity-40 group-hover:opacity-80 transition-opacity ml-0.5"
           title="Hold to switch"
         />
       </button>
