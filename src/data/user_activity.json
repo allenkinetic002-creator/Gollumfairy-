@@ -1,5 +1,24 @@
 [
   {
+    "id": "act-1792130618590-465ps",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-karak",
+    "details": {
+      "userId": "user-karak",
+      "switches": {
+        "support": true,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": true,
+        "supportedGenre": "Artist",
+        "updatedAt": "2026-10-16T06:03:38.590Z",
+        "activatedBy": "user-karak"
+      }
+    },
+    "savedAt": "2026-10-16T06:03:38.590Z"
+  },
+  {
     "id": "act-1792130612279-u4az0",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-karak",
@@ -1473,17 +1492,6 @@
   },
   {
     "id": "act-1792074182215-keitm",
-    "action": "like_post",
-    "description": "Unliked post @user",
-    "details": {
-      "postId": "post-1792060584588",
-      "isLiked": false
-    },
-    "timestamp": "2026-10-15T14:22:52.497Z",
-    "savedAt": "2026-10-15T14:23:02.215Z"
-  },
-  {
-    "id": "act-1792074182215-5cvg4",
     "action": "like_post",
     "description": "Unliked post @user",
     "details": {
