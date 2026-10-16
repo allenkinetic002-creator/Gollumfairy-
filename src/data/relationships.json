@@ -1,11 +1,11 @@
 {
   "karak": {
     "targetKey": "karak",
-    "targetName": "Karak",
+    "targetName": "karak",
     "targetHandle": "@karak",
     "status": "friend",
-    "mode": "friend",
-    "updatedAt": "2026-10-16T08:43:26.192Z"
+    "mode": "enemy",
+    "updatedAt": "2026-10-16T08:46:05.605Z"
   },
   "kinetic": {
     "targetKey": "kinetic",
