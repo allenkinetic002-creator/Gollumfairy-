@@ -4,8 +4,8 @@
     "targetName": "karak",
     "targetHandle": "@karak",
     "status": "friend",
-    "mode": "friend",
-    "updatedAt": "2026-10-16T08:46:08.645Z"
+    "mode": "follow",
+    "updatedAt": "2026-10-16T08:46:10.073Z"
   },
   "kinetic": {
     "targetKey": "kinetic",
