@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792140243482-mzskp",
+    "action": "social_relationship",
+    "description": "Followed @kinetic",
+    "details": {
+      "target": "kinetic",
+      "status": "following",
+      "mode": "follow"
+    },
+    "timestamp": "2026-10-16T08:44:02.703Z",
+    "savedAt": "2026-10-16T08:44:03.482Z"
+  },
+  {
     "id": "act-1792140242127-7i1nz",
     "action": "relationship_updated",
     "description": "Followed @kinetic",
@@ -1504,18 +1516,5 @@
       "updatedAt": "2026-10-15T19:29:12.703Z"
     },
     "savedAt": "2026-10-15T19:29:12.703Z"
-  },
-  {
-    "id": "act-1792092552354-803dn",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T19:29:12.353Z"
-    },
-    "savedAt": "2026-10-15T19:29:12.354Z"
   }
 ]
