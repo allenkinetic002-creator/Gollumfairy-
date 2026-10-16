@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792140159884-39cga",
+    "action": "social_relationship",
+    "description": "Added @karak as Friend",
+    "details": {
+      "target": "karak",
+      "status": "friend",
+      "mode": "friend"
+    },
+    "timestamp": "2026-10-16T08:42:39.038Z",
+    "savedAt": "2026-10-16T08:42:39.884Z"
+  },
+  {
     "id": "act-1792140158474-hz840",
     "action": "relationship_updated",
     "description": "Added @karak as Friend",
@@ -1529,19 +1541,5 @@
       "updatedAt": "2026-10-15T19:07:30.197Z"
     },
     "savedAt": "2026-10-15T19:07:30.197Z"
-  },
-  {
-    "id": "act-1792091250173-rxl2a",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
-    "details": {
-      "support": true,
-      "favorite": false,
-      "trending": false,
-      "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:07:30.172Z"
-    },
-    "savedAt": "2026-10-15T19:07:30.173Z"
   }
 ]
