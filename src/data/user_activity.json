@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792140231888-ytkdk",
+    "action": "social_relationship",
+    "description": "Removed relationship with @kinetic",
+    "details": {
+      "target": "kinetic",
+      "status": "none",
+      "mode": "friend"
+    },
+    "timestamp": "2026-10-16T08:43:50.909Z",
+    "savedAt": "2026-10-16T08:43:51.888Z"
+  },
+  {
     "id": "act-1792140230374-xr1tm",
     "action": "relationship_updated",
     "description": "Updated relationship with @kinetic",
@@ -1513,23 +1525,5 @@
       }
     },
     "savedAt": "2026-10-15T19:27:14.828Z"
-  },
-  {
-    "id": "act-1792092424825-5976d",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches for user user-karak",
-    "details": {
-      "userId": "user-karak",
-      "switches": {
-        "support": true,
-        "favorite": false,
-        "trending": false,
-        "loyalty": false,
-        "genre": false,
-        "updatedAt": "2026-10-15T19:27:04.825Z",
-        "activatedBy": "user-karak"
-      }
-    },
-    "savedAt": "2026-10-15T19:27:04.825Z"
   }
 ]
