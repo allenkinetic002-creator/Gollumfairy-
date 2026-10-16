@@ -11,13 +11,13 @@
       "activatedBy": "user-karak"
     },
     "user-kinetic": {
-      "support": true,
+      "support": false,
       "favorite": false,
       "trending": false,
       "loyalty": false,
       "genre": false,
       "supportedGenre": "Artist",
-      "updatedAt": "2026-10-16T05:44:18.756Z",
+      "updatedAt": "2026-10-16T06:25:32.924Z",
       "activatedBy": "user-kinetic"
     },
     "user-allen": {
@@ -51,7 +51,7 @@
       "activatedBy": "guest"
     }
   },
-  "lastActiveUser": "user-karak",
+  "lastActiveUser": "user-kinetic",
   "globalFallback": {
     "support": true,
     "favorite": false,
