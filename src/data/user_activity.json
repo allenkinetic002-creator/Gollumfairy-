@@ -1,5 +1,24 @@
 [
   {
+    "id": "act-1792130612279-u4az0",
+    "action": "fairy_switches_updated",
+    "description": "Updated system switches for user user-karak",
+    "details": {
+      "userId": "user-karak",
+      "switches": {
+        "support": false,
+        "favorite": false,
+        "trending": false,
+        "loyalty": false,
+        "genre": true,
+        "supportedGenre": "Artist",
+        "updatedAt": "2026-10-16T06:03:32.278Z",
+        "activatedBy": "user-karak"
+      }
+    },
+    "savedAt": "2026-10-16T06:03:32.279Z"
+  },
+  {
     "id": "act-1792130607616-prplj",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-karak",
@@ -1472,17 +1491,6 @@
       "isLiked": false
     },
     "timestamp": "2026-10-15T14:22:52.497Z",
-    "savedAt": "2026-10-15T14:23:02.215Z"
-  },
-  {
-    "id": "act-1792074182215-1xxwg",
-    "action": "like_post",
-    "description": "Liked post @user",
-    "details": {
-      "postId": "post-1792060584588",
-      "isLiked": true
-    },
-    "timestamp": "2026-10-15T14:22:51.848Z",
     "savedAt": "2026-10-15T14:23:02.215Z"
   }
 ]
