@@ -3,8 +3,8 @@
     "targetKey": "karak",
     "targetName": "Karak",
     "targetHandle": "@karak",
-    "status": "enemy",
+    "status": "none",
     "mode": "enemy",
-    "updatedAt": "2026-10-16T08:42:24.514Z"
+    "updatedAt": "2026-10-16T08:42:30.085Z"
   }
 }
