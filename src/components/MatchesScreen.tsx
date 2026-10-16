@@ -41,6 +41,14 @@ import { TrustReceiptsView } from './TrustReceiptsView';
 import { CreateTrustReceiptModal } from './CreateTrustReceiptModal';
 import { StarStampsScreen } from './StarStampsScreen';
 import { CreateStarStampModal } from './CreateStarStampModal';
+import {
+  getAllUserSwitchesMap,
+  checkUsersSeeEachOtherViaGenreSupport,
+  getGenreSupportMatchesForUser,
+  FairySystemSwitches,
+  DEFAULT_FAIRY_SWITCHES,
+  normalizeUserKey,
+} from '../lib/fairySwitches';
 
 export type Person = SharedPerson;
 
@@ -108,7 +116,22 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
 
   // Search & Filter state for matches
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'high' | 'chatting' | 'receipts'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'high' | 'chatting' | 'receipts' | 'genre-support'>('all');
+  const [switchesMap, setSwitchesMap] = useState<Record<string, FairySystemSwitches>>(() => getAllUserSwitchesMap());
+  const currentActiveUserKey = (typeof window !== 'undefined' ? localStorage.getItem('fairy_last_active_user_key') : '') || 'guest';
+
+  // Listen to live fairy switch updates so cross-system visibility updates dynamically
+  useEffect(() => {
+    const handleSwitchesSync = () => {
+      setSwitchesMap(getAllUserSwitchesMap());
+    };
+    window.addEventListener('fairy_switches_sync', handleSwitchesSync);
+    window.addEventListener('storage', handleSwitchesSync);
+    return () => {
+      window.removeEventListener('fairy_switches_sync', handleSwitchesSync);
+      window.removeEventListener('storage', handleSwitchesSync);
+    };
+  }, []);
 
   // Score feedback toast state
   const [scoreToast, setScoreToast] = useState<{
@@ -725,11 +748,35 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
     if (selectedFilter === 'chatting') {
       return hasActiveTimer(person.id);
     }
+    if (selectedFilter === 'genre-support') {
+      const conn = checkUsersSeeEachOtherViaGenreSupport(currentActiveUserKey, person.id);
+      if (conn.seesEachOther) return true;
+      const targetSwitches = switchesMap[normalizeUserKey(person.id)];
+      const viewerSwitches = switchesMap[normalizeUserKey(currentActiveUserKey)] || DEFAULT_FAIRY_SWITCHES;
+      return Boolean(
+        (viewerSwitches.genre && targetSwitches?.support) ||
+        (viewerSwitches.support && targetSwitches?.genre) ||
+        (!viewerSwitches.genre && !viewerSwitches.support && (targetSwitches?.genre || targetSwitches?.support))
+      );
+    }
     return true;
   });
 
   // Count of people with at least one Trust Receipt
   const peopleWithReceiptsCount = people.filter((p) => !!getRecentReceiptForPerson(p.id)).length;
+
+  // Count of people with active Genre ↔ Support mutual visibility
+  const genreSupportMatchesCount = people.filter((person) => {
+    const conn = checkUsersSeeEachOtherViaGenreSupport(currentActiveUserKey, person.id);
+    if (conn.seesEachOther) return true;
+    const targetSwitches = switchesMap[normalizeUserKey(person.id)];
+    const viewerSwitches = switchesMap[normalizeUserKey(currentActiveUserKey)] || DEFAULT_FAIRY_SWITCHES;
+    return Boolean(
+      (viewerSwitches.genre && targetSwitches?.support) ||
+      (viewerSwitches.support && targetSwitches?.genre) ||
+      (!viewerSwitches.genre && !viewerSwitches.support && (targetSwitches?.genre || targetSwitches?.support))
+    );
+  }).length;
 
   // =========================================================================
   // VIEW: MATCHES LIST SCREEN ("See for your matches")
@@ -981,6 +1028,21 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
                   <Clock className="w-2.5 h-2.5" />
                   <span>Chatting (Active)</span>
                 </button>
+                <button
+                  onClick={() => setSelectedFilter('genre-support')}
+                  className={`px-2.5 py-1 rounded-full font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+                    selectedFilter === 'genre-support'
+                      ? 'bg-gradient-to-r from-purple-600 to-red-600 text-white shadow-2xs ring-2 ring-purple-300'
+                      : 'bg-purple-50 text-purple-900 border border-purple-200/90 hover:bg-purple-100'
+                  }`}
+                  title="Users who activate Genre and Support see each other"
+                >
+                  <span className="flex items-center -space-x-1">
+                    <span className="w-2 h-2 rounded-full bg-purple-600 inline-block" />
+                    <span className="w-2 h-2 rounded-full bg-red-600 inline-block" />
+                  </span>
+                  <span>Genre ↔ Support ({genreSupportMatchesCount})</span>
+                </button>
               </div>
               {/* Fade on right edge so users can tell they scroll */}
               <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-7 bg-gradient-to-l from-white to-transparent" />
@@ -989,6 +1051,34 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
 
       {/* Main List Area (SafeArea container) */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2.5 scrollbar-thin">
+        {/* Active Genre ↔ Support Mutual Visibility Banner */}
+        {genreSupportMatchesCount > 0 && (
+          <div className="mb-2 p-3 bg-gradient-to-r from-purple-950 via-slate-900 to-rose-950 text-white rounded-2xl shadow-sm border border-purple-800/40 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/15">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-black flex items-center gap-1.5 flex-wrap">
+                  <span className="text-white">Genre ↔ Support Mutual Visibility</span>
+                  <span className="text-[9px] bg-purple-500/30 text-purple-200 border border-purple-400/30 px-1.5 py-0.2 rounded-full font-mono">
+                    {genreSupportMatchesCount} Connected
+                  </span>
+                </div>
+                <p className="text-[10.5px] text-slate-300 leading-tight mt-0.5 truncate">
+                  Active rule: Users who activate Genre and users who activate Support can see each other!
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedFilter(selectedFilter === 'genre-support' ? 'all' : 'genre-support')}
+              className="px-2.5 py-1.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-[10.5px] font-black cursor-pointer shrink-0 transition-transform active:scale-95 shadow-xs whitespace-nowrap"
+            >
+              {selectedFilter === 'genre-support' ? 'Show All' : 'Filter Connected'}
+            </button>
+          </div>
+        )}
+
         {people.length === 0 ? (
           /* Empty State: "No one left" in center of list screen */
           <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6">
@@ -1036,6 +1126,13 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
             const isChatting = hasActiveTimer(person.id);
             const isGreenPercent = person.percent >= 50;
             const recentReceipt = getRecentReceiptForPerson(person.id);
+            const genreSupportConn = checkUsersSeeEachOtherViaGenreSupport(currentActiveUserKey, person.id);
+            const targetSwitches = switchesMap[normalizeUserKey(person.id)];
+            const viewerSwitches = switchesMap[normalizeUserKey(currentActiveUserKey)] || DEFAULT_FAIRY_SWITCHES;
+            const hasCrossSynergy = genreSupportConn.seesEachOther ||
+              Boolean(viewerSwitches.genre && targetSwitches?.support) ||
+              Boolean(viewerSwitches.support && targetSwitches?.genre) ||
+              Boolean(!viewerSwitches.genre && !viewerSwitches.support && (targetSwitches?.genre || targetSwitches?.support));
 
             return (
               <div
@@ -1098,6 +1195,51 @@ export function MatchesScreen({ onBackToFeed }: MatchesScreenProps) {
                     </button>
                   </div>
                 </div>
+
+                {/* Genre ↔ Support Cross-System Visibility Badge */}
+                {hasCrossSynergy && (
+                  <div className="w-full bg-gradient-to-r from-purple-50/90 via-slate-50 to-rose-50/90 border border-purple-200/90 rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center -space-x-1 shrink-0">
+                        <span className="w-5 h-5 rounded-full bg-purple-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs ring-1 ring-white" title="Genre: Purple">
+                          G
+                        </span>
+                        <span className="w-5 h-5 rounded-full bg-red-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs ring-1 ring-white" title="Support: Red">
+                          S
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-900 leading-tight">
+                          <span className="text-purple-700">Genre</span>
+                          <span className="text-slate-400">↔</span>
+                          <span className="text-red-700">Support</span>
+                          <span className="text-[9.5px] px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-900 font-extrabold border border-purple-200">
+                            Mutual Visibility Active
+                          </span>
+                        </div>
+                        <p className="text-[10.5px] text-slate-600 font-medium truncate mt-0.5">
+                          {genreSupportConn.description || (
+                            targetSwitches?.genre
+                              ? `${person.name} activated Genre (Purple) · Seen because Support is active`
+                              : `${person.name} activated Support (Red) · Seen because Genre is active`
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1">
+                      {targetSwitches?.genre && (
+                        <span className="text-[9.5px] font-black px-2 py-0.5 rounded-md bg-purple-600 text-white shadow-2xs">
+                          Genre ON
+                        </span>
+                      )}
+                      {targetSwitches?.support && (
+                        <span className="text-[9.5px] font-black px-2 py-0.5 rounded-md bg-red-600 text-white shadow-2xs">
+                          Support ON
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* "How [Person] Deals" - Tweet / Comment Writing Container */}
                 {recentReceipt ? (

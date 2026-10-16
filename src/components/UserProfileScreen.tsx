@@ -52,6 +52,10 @@ import { FaceoffBattleModal } from './FaceoffBattleModal';
 import { InfluenceRatingModal } from './InfluenceRatingModal';
 import { RaygunActionModal } from './RaygunActionModal';
 import { TweetPostCard, TweetPostItem } from './TweetPostCard';
+import {
+  checkUsersSeeEachOtherViaGenreSupport,
+  normalizeUserKey,
+} from '../lib/fairySwitches';
 
 import postImage from '../assets/images/fairy_post_image_1791012530319.jpg';
 import elenaAvatar from '../assets/images/creator_portrait_elena_1791014499312.jpg';
@@ -915,6 +919,40 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               {wikiData.birthplace}
             </span>
           </p>
+          {/* Genre ↔ Support Mutual Connection Banner on Profile */}
+          {(() => {
+            const viewerKey = normalizeUserKey(currentUser) || (typeof window !== 'undefined' ? localStorage.getItem('fairy_last_active_user_key') : '') || 'guest';
+            const profileKey = normalizeUserKey((activeUser as any).id || activeUser.handle || activeUser.name);
+            const conn = checkUsersSeeEachOtherViaGenreSupport(viewerKey, profileKey);
+            if (!conn.seesEachOther) return null;
+            return (
+              <div className="mt-2 p-2.5 rounded-xl bg-gradient-to-r from-purple-50 via-indigo-50/70 to-rose-50 border border-purple-200/90 text-slate-800 text-xs font-semibold flex items-center justify-between gap-2 shadow-2xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center -space-x-1 shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-purple-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs ring-1 ring-white" title="Genre">
+                      G
+                    </span>
+                    <span className="w-5 h-5 rounded-full bg-red-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs ring-1 ring-white" title="Support">
+                      S
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-black text-purple-900 text-xs flex items-center gap-1.5">
+                      <span>Genre ↔ Support Mutual Visibility</span>
+                      <span className="text-[9px] bg-purple-100 text-purple-900 px-1.5 py-0.2 rounded font-black border border-purple-200">
+                        Seeing Each Other
+                      </span>
+                    </div>
+                    <p className="text-[10.5px] text-slate-600 truncate mt-0.5">{conn.description}</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 bg-gradient-to-r from-purple-600 to-red-600 text-white font-extrabold text-[9px] rounded-full shrink-0 shadow-2xs">
+                  Connected
+                </span>
+              </div>
+            );
+          })()}
+
           {/* Bio Overview Snippet */}
           <p className="text-xs text-slate-700 mt-2 leading-relaxed">
             {wikiData.bioOverview}

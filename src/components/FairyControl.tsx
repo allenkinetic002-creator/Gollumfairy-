@@ -33,6 +33,9 @@ import {
   FAIRY_LAST_USER_KEY,
   getActiveUsersForFeature,
   FairyUserProfile,
+  getAllCommunityGenreSupportPairs,
+  getGenreSupportMatchesForUser,
+  checkUsersSeeEachOtherViaGenreSupport,
 } from '../lib/fairySwitches';
 import { TOP_10_GENRES, getGenreInfo } from '../lib/genres';
 
@@ -395,7 +398,7 @@ export function FairyControl({
   const [activators, setActivators] = useState<CommunityMemberActivation[]>(COMMUNITY_ACTIVATORS);
   const [isCommunityActivatorsOpen, setIsCommunityActivatorsOpen] = useState(false);
   const [activatorFilter, setActivatorFilter] = useState<
-    'all' | 'support' | 'favorite' | 'trending' | 'loyalty' | 'genre'
+    'all' | 'support' | 'favorite' | 'trending' | 'loyalty' | 'genre' | 'genre-support'
   >('all');
   const [activatorStatusFilter, setActivatorStatusFilter] = useState<
     'all' | 'activated' | 'not_activated'
@@ -481,18 +484,23 @@ export function FairyControl({
     else if (activatorFilter === 'trending') matchesFeature = person.activatedFeatures.trending;
     else if (activatorFilter === 'loyalty') matchesFeature = person.activatedFeatures.loyalty;
     else if (activatorFilter === 'genre') matchesFeature = person.activatedFeatures.genre;
+    else if (activatorFilter === 'genre-support') matchesFeature = person.activatedFeatures.genre || person.activatedFeatures.support;
 
     // Status filter: All | Activated | Not Activated
     let matchesStatus = true;
     if (activatorStatusFilter === 'activated') {
       if (activatorFilter === 'all') {
         matchesStatus = Object.values(person.activatedFeatures).some(Boolean);
+      } else if (activatorFilter === 'genre-support') {
+        matchesStatus = Boolean(person.activatedFeatures.genre || person.activatedFeatures.support);
       } else {
-        matchesStatus = person.activatedFeatures[activatorFilter];
+        matchesStatus = Boolean(person.activatedFeatures[activatorFilter]);
       }
     } else if (activatorStatusFilter === 'not_activated') {
       if (activatorFilter === 'all') {
         matchesStatus = Object.values(person.activatedFeatures).some((v) => !v);
+      } else if (activatorFilter === 'genre-support') {
+        matchesStatus = !person.activatedFeatures.genre && !person.activatedFeatures.support;
       } else {
         matchesStatus = !person.activatedFeatures[activatorFilter];
       }
@@ -1594,6 +1602,54 @@ export function FairyControl({
                 </div>
               </div>
 
+              {/* Genre ↔ Support Mutual Visibility Station */}
+              <div className="bg-gradient-to-r from-red-50/90 via-purple-50/70 to-red-50/90 p-3 rounded-2xl border border-red-200/90 space-y-2 shadow-2xs">
+                <div className="flex items-center justify-between text-[11px] font-black text-slate-900">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                    <span>Genre ↔ Support Mutual Visibility</span>
+                  </div>
+                  <span className="text-[9.5px] bg-red-600 text-white px-2 py-0.5 rounded-full font-bold shadow-2xs">
+                    Connected
+                  </span>
+                </div>
+                <p className="text-[10.5px] text-slate-600 leading-snug">
+                  <strong>Cross-System Rule:</strong> Any user who activates Genre and other users who activate Support can see each other across Feed and Matches.
+                </p>
+                <div className="space-y-1.5 pt-0.5">
+                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                    Creators on Genre who see you:
+                  </div>
+                  {activeGenreUsers.length > 0 ? (
+                    activeGenreUsers.map((gUser) => (
+                      <div key={gUser.id} className="flex items-center justify-between bg-white p-2 rounded-xl border border-purple-200/70 shadow-2xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-full bg-purple-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                            {gUser.avatarInitial}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-black text-slate-900 truncate flex items-center gap-1.5">
+                              <span>{gUser.name}</span>
+                              <span className="text-[9px] bg-purple-100 text-purple-900 px-1.5 py-0.2 rounded font-black border border-purple-200">
+                                Genre Active
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-500 truncate">{gUser.handle} &bull; Visible to you &amp; vice-versa</div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-emerald-700 font-black flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" /> Seeing Each Other
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-[10.5px] text-slate-500 bg-white p-2.5 rounded-xl border border-dashed border-slate-200 text-center">
+                      Waiting for creators to activate Genre. Once activated, they instantly appear here!
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {supportFeedback && (
                 <div className="p-2 rounded-lg bg-red-100 text-red-900 text-xs font-bold animate-fadeIn">
                   {supportFeedback}
@@ -2433,6 +2489,54 @@ export function FairyControl({
                 </label>
               </div>
 
+              {/* Genre ↔ Support Mutual Visibility Station */}
+              <div className="bg-gradient-to-r from-purple-50/90 via-red-50/70 to-purple-50/90 p-3 rounded-2xl border border-purple-200/90 space-y-2 shadow-2xs">
+                <div className="flex items-center justify-between text-[11px] font-black text-slate-900">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+                    <span>Genre ↔ Support Mutual Visibility</span>
+                  </div>
+                  <span className="text-[9.5px] bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold shadow-2xs">
+                    Connected
+                  </span>
+                </div>
+                <p className="text-[10.5px] text-slate-600 leading-snug">
+                  <strong>Cross-System Rule:</strong> Any user who activates Genre and other users who activate Support can see each other across Feed and Matches.
+                </p>
+                <div className="space-y-1.5 pt-0.5">
+                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                    Users on Support who see you:
+                  </div>
+                  {activeSupportUsers.length > 0 ? (
+                    activeSupportUsers.map((sUser) => (
+                      <div key={sUser.id} className="flex items-center justify-between bg-white p-2 rounded-xl border border-red-200/70 shadow-2xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-full bg-red-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                            {sUser.avatarInitial}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-black text-slate-900 truncate flex items-center gap-1.5">
+                              <span>{sUser.name}</span>
+                              <span className="text-[9px] bg-red-100 text-red-900 px-1.5 py-0.2 rounded font-black border border-red-200">
+                                Support Active
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-500 truncate">{sUser.handle} &bull; Visible to you &amp; vice-versa</div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-emerald-700 font-black flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" /> Seeing Each Other
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-[10.5px] text-slate-500 bg-white p-2.5 rounded-xl border border-dashed border-slate-200 text-center">
+                      Waiting for users to activate Support. Once activated, they instantly appear here!
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {genreFeedback && (
                 <div className="p-2 rounded-lg bg-purple-100 text-purple-950 text-xs font-bold animate-fadeIn">
                   {genreFeedback}
@@ -2610,6 +2714,20 @@ export function FairyControl({
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
                   Genre
+                </button>
+                <button
+                  onClick={() => setActivatorFilter('genre-support')}
+                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    activatorFilter === 'genre-support'
+                      ? 'bg-gradient-to-r from-purple-600 to-red-600 text-white shadow-2xs ring-2 ring-purple-300'
+                      : 'bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100'
+                  }`}
+                >
+                  <span className="flex items-center -space-x-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-600 inline-block" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block" />
+                  </span>
+                  Genre ↔ Support Pairs
                 </button>
               </div>
 

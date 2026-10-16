@@ -10,6 +10,10 @@ import {
 } from 'lucide-react';
 import { INITIAL_SHARED_PEOPLE, loadSharedPeople } from '../data/sharedPeople';
 import { AeriMessageBubbleIcon } from './AeriMessageBubbleIcon';
+import {
+  checkUsersSeeEachOtherViaGenreSupport,
+  normalizeUserKey,
+} from '../lib/fairySwitches';
 
 export interface UserSearchItem {
   id: string;
@@ -293,6 +297,22 @@ export function UserSearchModal({
                             Verified
                           </span>
                         </div>
+
+                        {/* Genre ↔ Support Mutual Connection Badge */}
+                        {(() => {
+                          const viewerKey = (typeof window !== 'undefined' ? localStorage.getItem('fairy_last_active_user_key') : '') || 'guest';
+                          const conn = checkUsersSeeEachOtherViaGenreSupport(viewerKey, user.id);
+                          if (!conn.seesEachOther) return null;
+                          return (
+                            <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black text-purple-950 bg-gradient-to-r from-purple-50 via-indigo-50/60 to-red-50 border border-purple-200/90 px-2 py-0.5 rounded-md shadow-2xs">
+                              <span className="flex items-center -space-x-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-purple-600 inline-block" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block" />
+                              </span>
+                              <span>Genre ↔ Support: You see each other</span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 

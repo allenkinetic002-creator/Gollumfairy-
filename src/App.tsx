@@ -96,6 +96,9 @@ import {
   subscribeToFairySwitches,
   FairySystemSwitches,
   DEFAULT_FAIRY_SWITCHES,
+  checkUsersSeeEachOtherViaGenreSupport,
+  getAllUserSwitchesMap,
+  normalizeUserKey,
 } from './lib/fairySwitches';
 
 export interface FeedPost {
@@ -713,26 +716,36 @@ export default function App() {
   ]);
 
   // Priority Feed Sorting:
-  // When user has Support ON with a chosen supportedGenre, matching posts are pinned first (first post you see)!
+  // 1. Cross-connected posts where author and viewer see each other via Genre ↔ Support synergy
+  // 2. Posts matching active Support's supportedGenre
+  // 3. Regular posts
   const sortedFeedPosts = useMemo(() => {
-    if (!fairySwitches.support || !fairySwitches.supportedGenre) {
-      return feedPosts;
-    }
-    const target = fairySwitches.supportedGenre.toLowerCase().trim();
+    const viewerKey = normalizeUserKey(currentUser) || (typeof window !== 'undefined' ? localStorage.getItem('fairy_last_active_user_key') : '') || 'guest';
+    const switchesMap = getAllUserSwitchesMap();
+    const viewerSwitches = switchesMap[viewerKey] || fairySwitches;
+    const target = (viewerSwitches.supportedGenre || fairySwitches.supportedGenre || '').toLowerCase().trim();
+
+    const crossConnectedPosts: FeedPost[] = [];
     const supportedPosts: FeedPost[] = [];
     const regularPosts: FeedPost[] = [];
 
     feedPosts.forEach((p) => {
+      const authorKey = normalizeUserKey(p.authorHandle || p.authorName);
+      const conn = checkUsersSeeEachOtherViaGenreSupport(viewerKey, authorKey);
       const pGenre = (p.genre || '').toLowerCase().trim();
-      if (pGenre && (pGenre === target || pGenre.includes(target))) {
+      const isGenreSupported = target && pGenre && (pGenre === target || pGenre.includes(target));
+
+      if (conn.seesEachOther) {
+        crossConnectedPosts.push(p);
+      } else if (fairySwitches.support && isGenreSupported) {
         supportedPosts.push(p);
       } else {
         regularPosts.push(p);
       }
     });
 
-    return [...supportedPosts, ...regularPosts];
-  }, [feedPosts, fairySwitches.support, fairySwitches.supportedGenre]);
+    return [...crossConnectedPosts, ...supportedPosts, ...regularPosts];
+  }, [feedPosts, fairySwitches, currentUser]);
 
   // Initialize Supabase backend sync and real-time listeners on mount
   useEffect(() => {
@@ -1807,6 +1820,51 @@ export default function App() {
               </div>
             )}
 
+            {/* Active Genre ↔ Support Feed Awareness Banner */}
+            {(fairySwitches.genre || fairySwitches.support) && (
+              <div className="w-full bg-gradient-to-r from-purple-950 via-slate-900 to-rose-950 text-white rounded-2xl p-2.5 sm:p-3 border border-purple-800/40 shadow-xs flex items-center justify-between gap-2.5 shrink-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center -space-x-1 shrink-0">
+                    <span className={`w-6 h-6 rounded-full ${fairySwitches.genre ? 'bg-purple-600' : 'bg-slate-700'} text-white text-[10px] font-black flex items-center justify-center shadow-xs ring-1 ring-white`} title="Genre">
+                      G
+                    </span>
+                    <span className={`w-6 h-6 rounded-full ${fairySwitches.support ? 'bg-red-600' : 'bg-slate-700'} text-white text-[10px] font-black flex items-center justify-center shadow-xs ring-1 ring-white`} title="Support">
+                      S
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-black flex items-center gap-1.5 flex-wrap">
+                      <span>Genre ↔ Support Visibility Active</span>
+                      <span className="text-[9.5px] bg-white/20 px-1.5 py-0.2 rounded font-mono">
+                        {fairySwitches.genre && fairySwitches.support
+                          ? 'Genre & Support Active'
+                          : fairySwitches.genre
+                          ? 'Genre Active (Seeing Support Creators)'
+                          : 'Support Active (Seeing Genre Creators)'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-300 leading-tight mt-0.5 truncate">
+                      {fairySwitches.genre
+                        ? 'Any user who activated Support can see your posts, and you see theirs!'
+                        : 'Any user who activated Genre can see your posts, and you see theirs!'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setActiveNavIndex(2);
+                    setControlSubTab('fairy-control');
+                    setShowMatchesScreen(false);
+                    setShowNormalMessagesScreen(false);
+                    setShowStarStampsScreen(false);
+                  }}
+                  className="px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[10px] font-extrabold rounded-lg shrink-0 cursor-pointer transition-colors whitespace-nowrap"
+                >
+                  Switches &rarr;
+                </button>
+              </div>
+            )}
+
             {sortedFeedPosts.map((post) =>
               post.isTweet ? (
                 <TweetPostCard
@@ -1890,9 +1948,39 @@ export default function App() {
                   }}
                   userGenreEnabled={Boolean(fairySwitches.genre)}
                   supportedGenre={fairySwitches.support ? fairySwitches.supportedGenre : undefined}
+                  genreSupportConnected={(() => {
+                    const viewerKey = normalizeUserKey(currentUser) || (typeof window !== 'undefined' ? localStorage.getItem('fairy_last_active_user_key') : '') || 'guest';
+                    const authorKey = normalizeUserKey(post.authorHandle || post.authorName);
+                    const conn = checkUsersSeeEachOtherViaGenreSupport(viewerKey, authorKey);
+                    return conn.seesEachOther ? { seesEachOther: true, label: conn.badgeLabel, description: conn.description } : undefined;
+                  })()}
                 />
               ) : (
               <div key={post.id} className="space-y-1.5 shrink-0">
+                {/* Genre ↔ Support Mutual Connection Banner */}
+                {(() => {
+                  const viewerKey = normalizeUserKey(currentUser) || (typeof window !== 'undefined' ? localStorage.getItem('fairy_last_active_user_key') : '') || 'guest';
+                  const authorKey = normalizeUserKey(post.authorHandle || post.authorName);
+                  const conn = checkUsersSeeEachOtherViaGenreSupport(viewerKey, authorKey);
+                  if (!conn.seesEachOther) return null;
+                  return (
+                    <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-950 via-slate-900 to-rose-950 text-white text-[10px] font-black mb-1.5 shadow-xs border border-purple-800/40 animate-fadeIn">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="flex items-center -space-x-1 shrink-0">
+                          <span className="w-3.5 h-3.5 rounded-full bg-purple-500 inline-block ring-1 ring-white" />
+                          <span className="w-3.5 h-3.5 rounded-full bg-red-500 inline-block ring-1 ring-white" />
+                        </div>
+                        <span className="tracking-tight truncate">
+                          🤝 {conn.badgeLabel}: You see {post.authorName} &bull; {conn.description}
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-full text-[8.5px] uppercase tracking-wider font-black shrink-0 shadow-2xs">
+                        Seeing Each Other
+                      </span>
+                    </div>
+                  );
+                })()}
+
                 {/* Priority Pin Banner when genre is tied with active Support */}
                 {post.genre && fairySwitches.support && fairySwitches.supportedGenre && post.genre.toLowerCase().trim() === fairySwitches.supportedGenre.toLowerCase().trim() && (
                   <div className="flex items-center justify-between px-2.5 py-1 rounded-xl bg-gradient-to-r from-red-500/15 via-rose-500/20 to-red-500/10 border border-red-300 text-red-700 text-[10px] font-black mb-1 shadow-2xs animate-fadeIn">

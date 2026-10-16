@@ -83,6 +83,7 @@ interface TweetPostCardProps {
   onPhoneVote?: (postId: string, authorName: string, type: 'like' | 'dislike' | 'unvote' | 'reset', newLikes: number, newDislikes: number) => void;
   userGenreEnabled?: boolean;
   supportedGenre?: string;
+  genreSupportConnected?: { seesEachOther: boolean; label: string; description: string };
 }
 
 export const TweetPostCard: React.FC<TweetPostCardProps> = ({
@@ -114,6 +115,7 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
   onPhoneVote,
   userGenreEnabled = false,
   supportedGenre,
+  genreSupportConnected,
 }) => {
   const [isRetweeted, setIsRetweeted] = useState(Boolean(post.isRetweeted));
   const [retweetCount, setRetweetCount] = useState(post.retweetCount ?? 14);
@@ -187,6 +189,24 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
               onPhoneVote?.(post.id, post.authorName, type, newLikes, newDislikes);
             }}
           />
+        </div>
+      )}
+
+      {/* Genre ↔ Support Mutual Connection Banner */}
+      {genreSupportConnected?.seesEachOther && (
+        <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-950 via-slate-900 to-rose-950 text-white text-[10px] font-black mb-2 shadow-xs border border-purple-800/40">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-center -space-x-1 shrink-0">
+              <span className="w-3.5 h-3.5 rounded-full bg-purple-500 inline-block ring-1 ring-white" />
+              <span className="w-3.5 h-3.5 rounded-full bg-red-500 inline-block ring-1 ring-white" />
+            </div>
+            <span className="tracking-tight truncate">
+              🤝 {genreSupportConnected.label}: You see {post.authorName} &bull; {genreSupportConnected.description}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-full text-[8.5px] uppercase tracking-wider font-black shrink-0 shadow-2xs">
+            Seeing Each Other
+          </span>
         </div>
       )}
 
