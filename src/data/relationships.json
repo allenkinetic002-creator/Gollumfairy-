@@ -11,8 +11,8 @@
     "targetKey": "kinetic",
     "targetName": "Kinetic",
     "targetHandle": "@kinetic",
-    "status": "friend",
-    "mode": "friend",
-    "updatedAt": "2026-10-16T08:43:53.343Z"
+    "status": "following",
+    "mode": "follow",
+    "updatedAt": "2026-10-16T08:44:02.703Z"
   }
 }
