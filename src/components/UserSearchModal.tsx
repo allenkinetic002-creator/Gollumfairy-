@@ -11,6 +11,7 @@ import {
 import { INITIAL_SHARED_PEOPLE, loadSharedPeople } from '../data/sharedPeople';
 import { AeriMessageBubbleIcon } from './AeriMessageBubbleIcon';
 import { SocialRelationshipButton } from './SocialRelationshipButton';
+import { getRelationship, subscribeRelationships } from '../lib/relationships';
 
 export interface UserSearchItem {
   id: string;
@@ -101,6 +102,13 @@ export function UserSearchModal({
 }: UserSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [followedMap, setFollowedMap] = useState<Record<string, boolean>>({});
+  const [, setRelTick] = useState(0);
+
+  React.useEffect(() => {
+    return subscribeRelationships(() => {
+      setRelTick((t) => t + 1);
+    });
+  }, []);
 
   // Merge directory with shared people from local storage if available
   const allUsers = useMemo(() => {
@@ -272,15 +280,33 @@ export function UserSearchModal({
                         )}
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-none truncate">
-                            {user.name}
-                          </h3>
-                          <span className="text-[11px] font-bold text-slate-400 truncate">
-                            {user.handle}
-                          </span>
-                        </div>
+                      {(() => {
+                        const rel = getRelationship(user.handle);
+                        return (
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-none truncate">
+                                {user.name}
+                              </h3>
+                              <span className="text-[11px] font-bold text-slate-400 truncate">
+                                {user.handle}
+                              </span>
+                              {rel.status === 'friend' && (
+                                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800">
+                                  🤝 Friend
+                                </span>
+                              )}
+                              {rel.status === 'enemy' && (
+                                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-rose-100 text-rose-800">
+                                  ⚔️ Enemy
+                                </span>
+                              )}
+                              {rel.status === 'following' && (
+                                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-800">
+                                  ✓ Following
+                                </span>
+                              )}
+                            </div>
 
                         <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 flex-wrap">
                           <span className="inline-flex items-center gap-1 text-slate-600 font-medium">
@@ -297,7 +323,9 @@ export function UserSearchModal({
                           </span>
                         </div>
                       </div>
-                    </div>
+                    );
+                  })()}
+                </div>
 
                     {/* Action buttons */}
                     <div className="flex items-center gap-1.5 shrink-0">

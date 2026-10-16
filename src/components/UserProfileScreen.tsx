@@ -34,9 +34,13 @@ import {
   Clock,
   Compass,
   Settings,
+  HeartHandshake,
+  Swords,
+  Users,
 } from 'lucide-react';
 
 import { SettingsScreen } from './SettingsScreen';
+import { SocialRelationshipsModal, RelationshipTabType } from './SocialRelationshipsModal';
 
 import { AeriFlameIcon } from './AeriFlameIcon';
 import { AeriCommentIcon } from './AeriCommentIcon';
@@ -55,9 +59,14 @@ import { TweetPostCard, TweetPostItem } from './TweetPostCard';
 import { SocialRelationshipButton } from './SocialRelationshipButton';
 import {
   getRelationship,
+  getUserFollowing,
+  getUserFriends,
+  getUserEnemies,
+  getUserFollowers,
   getAllFollowing,
   getAllFriends,
   getAllEnemies,
+  getAllFollowers,
   normalizeTargetKey,
   subscribeRelationships,
   isUserSelf,
@@ -262,6 +271,7 @@ export interface UserProfileScreenProps {
   onLogout?: () => void;
   isLoggedIn?: boolean;
   onRequireAuth?: (action: string) => void;
+  onSelectUserProfile?: (user: { name: string; handle: string; profession?: string; avatarUrl?: string }) => void;
 }
 
 export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
@@ -278,6 +288,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   onLogout,
   isLoggedIn = false,
   onRequireAuth,
+  onSelectUserProfile,
 }) => {
   // Active user resolution
   const activeUser = viewUser || currentUser || {
@@ -295,29 +306,34 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
     (currentUser && (isUserSelf(activeUser.handle, currentUser) || isUserSelf(activeUser.name, currentUser)))
   );
 
-  // Relationship state for this creator (when viewing another user's page)
+  // Generalized User Relationship state for this user (supports any profile and current user)
+  const userKey = normalizeTargetKey(activeUser.handle || activeUser.name);
   const [relationship, setRelationship] = useState(() =>
-    getRelationship(activeUser.handle || activeUser.name)
+    getRelationship(activeUser.handle || activeUser.name, currentUser?.handle)
   );
-  const [followingList, setFollowingList] = useState(() => getAllFollowing());
-  const [friendsList, setFriendsList] = useState(() => getAllFriends());
-  const [enemiesList, setEnemiesList] = useState(() => getAllEnemies());
+  const [followingList, setFollowingList] = useState(() => getUserFollowing(userKey));
+  const [friendsList, setFriendsList] = useState(() => getUserFriends(userKey));
+  const [enemiesList, setEnemiesList] = useState(() => getUserEnemies(userKey));
+  const [followersList, setFollowersList] = useState(() => getUserFollowers(userKey));
+  const [relationshipsModalTab, setRelationshipsModalTab] = useState<RelationshipTabType | null>(null);
 
   useEffect(() => {
-    const norm = activeUser.handle || activeUser.name;
-    setRelationship(getRelationship(norm));
-    setFollowingList(getAllFollowing());
-    setFriendsList(getAllFriends());
-    setEnemiesList(getAllEnemies());
+    const norm = normalizeTargetKey(activeUser.handle || activeUser.name);
+    setRelationship(getRelationship(norm, currentUser?.handle));
+    setFollowingList(getUserFollowing(norm));
+    setFriendsList(getUserFriends(norm));
+    setEnemiesList(getUserEnemies(norm));
+    setFollowersList(getUserFollowers(norm));
 
     const unsubscribe = subscribeRelationships(() => {
-      setRelationship(getRelationship(norm));
-      setFollowingList(getAllFollowing());
-      setFriendsList(getAllFriends());
-      setEnemiesList(getAllEnemies());
+      setRelationship(getRelationship(norm, currentUser?.handle));
+      setFollowingList(getUserFollowing(norm));
+      setFriendsList(getUserFriends(norm));
+      setEnemiesList(getUserEnemies(norm));
+      setFollowersList(getUserFollowers(norm));
     });
     return () => unsubscribe();
-  }, [activeUser.handle, activeUser.name]);
+  }, [activeUser.handle, activeUser.name, currentUser?.handle]);
 
   // Settings modal fallback state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -836,33 +852,78 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             </div>
           </div>
 
-          {/* Instagram Stats Counters */}
+          {/* Instagram & Fairy Social Network Stats Counters */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between text-center px-1">
-              <div>
-                <span className="block font-black text-base text-slate-900 leading-tight">
+            <div className="grid grid-cols-5 text-center gap-0.5 sm:gap-1.5 px-0.5">
+              {/* Posts */}
+              <div className="py-0.5">
+                <span className="block font-black text-sm sm:text-base text-slate-900 leading-tight">
                   {posts.length}
                 </span>
-                <span className="text-[11px] text-slate-500 font-semibold">Posts</span>
+                <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">Posts</span>
               </div>
-              <div>
-                <span className="block font-black text-base text-slate-900 leading-tight">
+
+              {/* Followers */}
+              <button
+                type="button"
+                onClick={() => setRelationshipsModalTab('followers')}
+                className="cursor-pointer hover:bg-slate-50 rounded-lg py-0.5 transition-colors group"
+                title="View Followers list"
+              >
+                <span className="block font-black text-sm sm:text-base text-slate-900 group-hover:text-blue-600 leading-tight">
                   {isOwnProfile
-                    ? ((currentUser as any)?.followers || '1.2K')
+                    ? (1200 + followersList.length)
                     : (relationship.status === 'following' || relationship.status === 'friend')
-                    ? '48.2K (+1 You)'
-                    : ((activeUser as any)?.followers || '48.2K')}
+                    ? `${((activeUser as any)?.followers || '850')} (+1 You)`
+                    : (followersList.length > 0 ? `${(activeUser as any)?.followers || '850'} (+${followersList.length})` : ((activeUser as any)?.followers || '850'))}
                 </span>
-                <span className="text-[11px] text-slate-500 font-semibold">Followers</span>
-              </div>
-              <div>
-                <span className="block font-black text-base text-slate-900 leading-tight">
-                  {isOwnProfile
-                    ? (24 + followingList.length)
-                    : ((activeUser as any)?.following || 238)}
+                <span className="text-[10px] sm:text-[11px] text-slate-500 group-hover:text-blue-600 font-semibold flex items-center justify-center">
+                  Followers
                 </span>
-                <span className="text-[11px] text-slate-500 font-semibold">Following</span>
-              </div>
+              </button>
+
+              {/* Following */}
+              <button
+                type="button"
+                onClick={() => setRelationshipsModalTab('following')}
+                className="cursor-pointer hover:bg-slate-50 rounded-lg py-0.5 transition-colors group"
+                title="View Following list"
+              >
+                <span className="block font-black text-sm sm:text-base text-slate-900 group-hover:text-purple-600 leading-tight">
+                  {isOwnProfile ? (24 + followingList.length) : ((activeUser as any)?.following || 15) + followingList.length}
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-slate-500 group-hover:text-purple-600 font-semibold flex items-center justify-center">
+                  Following
+                </span>
+              </button>
+
+              {/* Friends (🤝) */}
+              <button
+                type="button"
+                onClick={() => setRelationshipsModalTab('friends')}
+                className="cursor-pointer hover:bg-emerald-50 rounded-lg py-0.5 transition-colors group"
+                title="View Friends circle"
+              >
+                <span className="block font-black text-sm sm:text-base text-emerald-700 leading-tight flex items-center justify-center gap-0.5">
+                  <HeartHandshake className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>{friendsList.length}</span>
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-emerald-700 font-bold">Friends</span>
+              </button>
+
+              {/* Enemies (⚔️) */}
+              <button
+                type="button"
+                onClick={() => setRelationshipsModalTab('enemies')}
+                className="cursor-pointer hover:bg-rose-50 rounded-lg py-0.5 transition-colors group"
+                title="View Declared Enemies"
+              >
+                <span className="block font-black text-sm sm:text-base text-rose-700 leading-tight flex items-center justify-center gap-0.5">
+                  <Swords className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  <span>{enemiesList.length}</span>
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-rose-700 font-bold">Enemies</span>
+              </button>
             </div>
           </div>
         </div>
@@ -955,9 +1016,18 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                   <Settings className="w-3.5 h-3.5" />
                 </button>
 
-                <span className="ml-auto text-[10px] font-semibold text-slate-400">
-                  {followingList.length} Following &middot; {friendsList.length} Friends
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setRelationshipsModalTab('friends')}
+                  className="ml-auto text-[10.5px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                  title="Manage Friends, Enemies, and Following"
+                >
+                  <span className="text-emerald-700 font-black">🤝 {friendsList.length}</span>
+                  <span>&middot;</span>
+                  <span className="text-rose-700 font-black">⚔️ {enemiesList.length}</span>
+                  <span>&middot;</span>
+                  <span className="text-purple-700 font-black">👥 {followingList.length}</span>
+                </button>
               </>
             ) : (
               <>
@@ -1010,10 +1080,10 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                   <Share2 className="w-3 h-3" />
                 </button>
 
-                {/* Sleek compact relationship indicator badge on HIS page */}
+                {/* Sleek compact relationship indicator badge on target page */}
                 {relationship.status !== 'none' && (
                   <span
-                    className={`ml-auto text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                    className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                       relationship.status === 'friend'
                         ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                         : relationship.status === 'enemy'
@@ -1026,6 +1096,17 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                     {relationship.status === 'following' && '✓ Following'}
                   </span>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => setRelationshipsModalTab('friends')}
+                  className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1 cursor-pointer transition-colors"
+                  title="View their relationships"
+                >
+                  <span>🤝 {friendsList.length}</span>
+                  <span>&middot;</span>
+                  <span>⚔️ {enemiesList.length}</span>
+                </button>
               </>
             )}
           </div>
@@ -1278,35 +1359,136 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
             </ul>
           </div>
 
-          {/* Section 4: Associated With & Collaborators */}
+          {/* Section 4: Associated With & Social Circle (Dynamic Friends, Enemies & Following) */}
           <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200/90 shadow-2xs">
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
-              <h3 className="font-serif font-black text-base text-slate-900 flex items-center gap-2">
-                <span>4. Associated With</span>
-              </h3>
-              <span className="text-[11px] text-slate-400 font-medium">Collaborators & Peers</span>
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100 flex-wrap gap-2">
+              <div>
+                <h3 className="font-serif font-black text-base text-slate-900 flex items-center gap-2">
+                  <span>4. Social Circle & Affiliations</span>
+                </h3>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {friendsList.length} Friends &bull; {enemiesList.length} Enemies &bull; {followingList.length} Following
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRelationshipsModalTab('friends')}
+                className="text-xs text-purple-600 hover:text-purple-800 font-bold cursor-pointer flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-full transition-colors"
+              >
+                <span>Manage Network</span>
+                <span>&rarr;</span>
+              </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {wikiData.associatedWith.map((peer, idx) => (
-                <div
-                  key={idx}
-                  onClick={() =>
-                    onOpenSendPersonMessage({
-                      id: `peer-${idx}`,
-                      name: peer.name,
-                      handle: peer.handle,
-                    })
-                  }
-                  className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-200 transition-colors cursor-pointer group"
-                >
-                  <p className="font-black text-xs text-slate-900 group-hover:text-purple-700">
-                    {peer.name}
-                  </p>
-                  <p className="text-[11px] text-slate-500">{peer.handle}</p>
-                  <p className="text-[10px] text-purple-600 mt-1 font-semibold">{peer.role}</p>
-                </div>
-              ))}
-            </div>
+
+            {/* Grid of Dynamic Friends, Enemies, and Collaborators */}
+            {friendsList.length > 0 || enemiesList.length > 0 || followingList.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Friends */}
+                {friendsList.map((f) => (
+                  <div
+                    key={`friend-${f.targetKey}`}
+                    onClick={() =>
+                      onOpenSendPersonMessage({
+                        id: `person-${f.targetKey}`,
+                        name: f.targetName,
+                        handle: f.targetHandle,
+                        avatarUrl: f.targetAvatar,
+                      })
+                    }
+                    className="p-3 rounded-lg border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/60 transition-colors cursor-pointer group flex items-start justify-between"
+                  >
+                    <div>
+                      <p className="font-black text-xs text-slate-900 group-hover:text-emerald-800">
+                        {f.targetName}
+                      </p>
+                      <p className="text-[11px] text-slate-500 font-medium">{f.targetHandle}</p>
+                      <p className="text-[10px] text-emerald-700 mt-1 font-extrabold flex items-center gap-1">
+                        <span>🤝 Verified Friend</span>
+                      </p>
+                    </div>
+                    <span className="text-emerald-600 text-[10px] font-bold">Chat</span>
+                  </div>
+                ))}
+
+                {/* Enemies */}
+                {enemiesList.map((e) => (
+                  <div
+                    key={`enemy-${e.targetKey}`}
+                    onClick={() =>
+                      onOpenSendPersonMessage({
+                        id: `person-${e.targetKey}`,
+                        name: e.targetName,
+                        handle: e.targetHandle,
+                        avatarUrl: e.targetAvatar,
+                      })
+                    }
+                    className="p-3 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-100/60 transition-colors cursor-pointer group flex items-start justify-between"
+                  >
+                    <div>
+                      <p className="font-black text-xs text-slate-900 group-hover:text-rose-800">
+                        {e.targetName}
+                      </p>
+                      <p className="text-[11px] text-slate-500 font-medium">{e.targetHandle}</p>
+                      <p className="text-[10px] text-rose-700 mt-1 font-extrabold flex items-center gap-1">
+                        <span>⚔️ Declared Enemy / Rival</span>
+                      </p>
+                    </div>
+                    <span className="text-rose-600 text-[10px] font-bold">Faceoff</span>
+                  </div>
+                ))}
+
+                {/* Following (not already in friends) */}
+                {followingList
+                  .filter((fol) => !friendsList.some((f) => f.targetKey === fol.targetKey))
+                  .map((fol) => (
+                    <div
+                      key={`fol-${fol.targetKey}`}
+                      onClick={() =>
+                        onOpenSendPersonMessage({
+                          id: `person-${fol.targetKey}`,
+                          name: fol.targetName,
+                          handle: fol.targetHandle,
+                          avatarUrl: fol.targetAvatar,
+                        })
+                      }
+                      className="p-3 rounded-lg border border-purple-200 bg-purple-50/50 hover:bg-purple-100/60 transition-colors cursor-pointer group flex items-start justify-between"
+                    >
+                      <div>
+                        <p className="font-black text-xs text-slate-900 group-hover:text-purple-800">
+                          {fol.targetName}
+                        </p>
+                        <p className="text-[11px] text-slate-500 font-medium">{fol.targetHandle}</p>
+                        <p className="text-[10px] text-purple-700 mt-1 font-extrabold">
+                          ✓ Following / Peer
+                        </p>
+                      </div>
+                      <span className="text-purple-600 text-[10px] font-bold">Chat</span>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {wikiData.associatedWith.map((peer, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() =>
+                      onOpenSendPersonMessage({
+                        id: `peer-${idx}`,
+                        name: peer.name,
+                        handle: peer.handle,
+                      })
+                    }
+                    className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-200 transition-colors cursor-pointer group"
+                  >
+                    <p className="font-black text-xs text-slate-900 group-hover:text-purple-700">
+                      {peer.name}
+                    </p>
+                    <p className="text-[11px] text-slate-500">{peer.handle}</p>
+                    <p className="text-[10px] text-purple-600 mt-1 font-semibold">{peer.role}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -2108,18 +2290,26 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
         </div>
       )}
 
-      {/* Embedded Settings Modal fallback */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col animate-fadeIn">
-          <SettingsScreen
-            onBack={() => setIsSettingsOpen(false)}
-            onOpenDMControl={() => {
-              setIsSettingsOpen(false);
-              onBackToFeed();
-            }}
-          />
-        </div>
-      )}
+      {/* Interactive Social Relationships Modal (Friends, Enemies, Following, Followers) */}
+      <SocialRelationshipsModal
+        isOpen={relationshipsModalTab !== null}
+        onClose={() => setRelationshipsModalTab(null)}
+        initialTab={relationshipsModalTab || 'friends'}
+        profileUserName={wikiData.name}
+        profileUserHandle={wikiData.handle}
+        isOwnProfile={Boolean(isOwnProfile)}
+        currentUser={currentUser}
+        friendsList={friendsList}
+        enemiesList={enemiesList}
+        followingList={followingList}
+        followersList={followersList}
+        onOpenMessagePerson={onOpenSendPersonMessage}
+        onSelectUserProfile={(user) => {
+          if (onSelectUserProfile) {
+            onSelectUserProfile(user);
+          }
+        }}
+      />
     </div>
   );
 };

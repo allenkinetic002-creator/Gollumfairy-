@@ -3422,6 +3422,7 @@ export default function App() {
           onRequireAuth={requireAuth}
           onClearViewUser={() => setSelectedProfileUser(null)}
           onOpenSettings={() => setShowSettingsScreen(true)}
+          onSelectUserProfile={(user) => setSelectedProfileUser(user as any)}
           onLogout={() => {
             setCurrentUser(null);
             setIsLoggedOut(true);
