@@ -1,5 +1,22 @@
 [
   {
+    "id": "act-1792140143970-njswd",
+    "action": "relationship_updated",
+    "description": "Added @karak as Enemy",
+    "details": {
+      "key": "karak",
+      "record": {
+        "targetKey": "karak",
+        "targetName": "Karak",
+        "targetHandle": "@karak",
+        "status": "enemy",
+        "mode": "enemy",
+        "updatedAt": "2026-10-16T08:42:24.514Z"
+      }
+    },
+    "savedAt": "2026-10-16T08:42:23.970Z"
+  },
+  {
     "id": "act-1792132122853-q4lsk",
     "action": "fairy_switches_updated",
     "description": "Updated system switches for user user-kinetic",
@@ -1524,19 +1541,5 @@
       "updatedAt": "2026-10-15T19:06:57.179Z"
     },
     "savedAt": "2026-10-15T19:06:57.180Z"
-  },
-  {
-    "id": "act-1792091179557-muhq8",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
-    "details": {
-      "support": true,
-      "favorite": false,
-      "trending": false,
-      "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:06:19.556Z"
-    },
-    "savedAt": "2026-10-15T19:06:19.557Z"
   }
 ]

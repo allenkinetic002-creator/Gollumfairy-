@@ -1,1 +1,10 @@
-{}
+{
+  "karak": {
+    "targetKey": "karak",
+    "targetName": "Karak",
+    "targetHandle": "@karak",
+    "status": "enemy",
+    "mode": "enemy",
+    "updatedAt": "2026-10-16T08:42:24.514Z"
+  }
+}
