@@ -1891,6 +1891,7 @@ export default function App() {
                   }}
                   userGenreEnabled={Boolean(fairySwitches.genre)}
                   supportedGenre={fairySwitches.support ? fairySwitches.supportedGenre : undefined}
+                  currentUser={currentUser}
                 />
               ) : (
               <div key={post.id} className="space-y-1.5 shrink-0">
@@ -1985,7 +1986,25 @@ export default function App() {
                     </div>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5 leading-none flex-wrap">
-                        <span className="text-[13px] font-black text-slate-900 tracking-tight">
+                        <span
+                          onClick={() => {
+                            setSelectedProfileUser({
+                              id: post.id || `user-${post.authorHandle}`,
+                              name: post.authorName,
+                              handle: post.authorHandle,
+                              city: post.location || 'London, UK',
+                              avatarUrl: post.authorAvatar,
+                              bio: `Official creator on Fairy. Featured posts in ${post.genre || 'creative'} stream.`,
+                              integrityScore: 95,
+                              followers: '48.2k',
+                              following: '238',
+                              postsCount: 12,
+                            });
+                            setActiveNavIndex(4);
+                          }}
+                          className="text-[13px] font-black text-slate-900 tracking-tight hover:underline cursor-pointer"
+                          title={`View ${post.authorName}'s profile`}
+                        >
                           {post.authorName}
                         </span>
                         {post.isVerified && (
@@ -2029,6 +2048,7 @@ export default function App() {
                     <SocialRelationshipButton
                       targetHandle={post.authorHandle || `@${post.authorName}`}
                       targetName={post.authorName}
+                      currentUser={currentUser}
                       onRequireAuth={requireAuth}
                       size="sm"
                     />
@@ -2852,6 +2872,7 @@ export default function App() {
                         <SocialRelationshipButton
                           targetHandle={person.handle}
                           targetName={person.name}
+                          currentUser={currentUser}
                           onRequireAuth={requireAuth}
                           size="sm"
                         />
@@ -3187,6 +3208,7 @@ export default function App() {
                       <SocialRelationshipButton
                         targetHandle={previewCreator.handle}
                         targetName={previewCreator.name}
+                        currentUser={currentUser}
                         onRequireAuth={requireAuth}
                         size="md"
                       />
@@ -3624,6 +3646,7 @@ export default function App() {
           setShowUserSearchModal(false);
           setActiveNavIndex(4);
         }}
+        currentUser={currentUser}
       />
 
       {/* Sign In Required Pop Up (Alerts unauthenticated visitors to sign in first) */}

@@ -17,6 +17,7 @@ import {
   RelationshipStatus,
   RelationshipButtonMode,
   normalizeTargetKey,
+  isUserSelf,
 } from '../lib/relationships';
 
 interface SocialRelationshipButtonProps {
@@ -24,6 +25,7 @@ interface SocialRelationshipButtonProps {
   targetName?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  currentUser?: { handle?: string; name?: string; id?: string; email?: string } | null;
   onRequireAuth?: (action: string) => boolean | void;
   showModeHint?: boolean;
 }
@@ -33,9 +35,25 @@ export const SocialRelationshipButton: React.FC<SocialRelationshipButtonProps> =
   targetName,
   className = '',
   size = 'sm',
+  currentUser,
   onRequireAuth,
   showModeHint = false,
 }) => {
+  // Resolve current logged in user to prevent following yourself
+  const activeCurrentUser = currentUser !== undefined ? currentUser : (() => {
+    try {
+      const raw = localStorage.getItem('fairy_current_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  // A logged in user should never see Follow/Friend/Enemy on themselves
+  if (activeCurrentUser && (isUserSelf(targetHandle, activeCurrentUser) || isUserSelf(targetName, activeCurrentUser))) {
+    return null;
+  }
+
   const normKey = normalizeTargetKey(targetHandle || targetName || 'user');
   const [record, setRecord] = useState(() => getRelationship(normKey));
   const [showQuickBar, setShowQuickBar] = useState(false);

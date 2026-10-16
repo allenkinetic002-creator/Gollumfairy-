@@ -84,6 +84,7 @@ interface TweetPostCardProps {
   onPhoneVote?: (postId: string, authorName: string, type: 'like' | 'dislike' | 'unvote' | 'reset', newLikes: number, newDislikes: number) => void;
   userGenreEnabled?: boolean;
   supportedGenre?: string;
+  currentUser?: { handle?: string; name?: string; id?: string; email?: string } | null;
 }
 
 export const TweetPostCard: React.FC<TweetPostCardProps> = ({
@@ -108,6 +109,7 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
   onMorphPencil,
   onNoAdverb,
   onOpenStarStamps,
+  currentUser,
   onRatingSubmit,
   onRatingReset,
   authorPhoneLikes = 0,
@@ -250,6 +252,7 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
           <SocialRelationshipButton
             targetHandle={post.authorHandle}
             targetName={post.authorName}
+            currentUser={currentUser}
             size="sm"
           />
 

@@ -213,3 +213,40 @@ export async function togglePrimaryAction(
     targetHandle,
   });
 }
+
+/**
+ * Checks if target matches the currently logged in user
+ */
+export function isUserSelf(
+  targetIdentifier?: string,
+  currentUser?: { handle?: string; name?: string; id?: string; email?: string } | null
+): boolean {
+  if (!targetIdentifier || !currentUser) return false;
+  const targetNorm = normalizeTargetKey(targetIdentifier);
+  if (!targetNorm) return false;
+
+  const currentHandleNorm = normalizeTargetKey(currentUser.handle || '');
+  const currentNameNorm = normalizeTargetKey(currentUser.name || '');
+  const currentIdNorm = normalizeTargetKey(currentUser.id || '');
+
+  return (
+    (Boolean(currentHandleNorm) && targetNorm === currentHandleNorm) ||
+    (Boolean(currentNameNorm) && targetNorm === currentNameNorm) ||
+    (Boolean(currentIdNorm) && targetNorm === currentIdNorm)
+  );
+}
+
+export function getAllFollowing(): RelationshipRecord[] {
+  return Object.values(inMemoryState).filter(
+    (r) => r.status === 'following' || r.status === 'friend'
+  );
+}
+
+export function getAllFriends(): RelationshipRecord[] {
+  return Object.values(inMemoryState).filter((r) => r.status === 'friend');
+}
+
+export function getAllEnemies(): RelationshipRecord[] {
+  return Object.values(inMemoryState).filter((r) => r.status === 'enemy');
+}
+

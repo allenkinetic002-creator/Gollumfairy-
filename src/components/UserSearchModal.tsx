@@ -87,6 +87,7 @@ interface UserSearchModalProps {
   onViewUserProfile?: (user: UserSearchItem) => void;
   isLoggedIn?: boolean;
   onRequireAuth?: (action: string) => void;
+  currentUser?: { handle?: string; name?: string; id?: string; email?: string } | null;
 }
 
 export function UserSearchModal({
@@ -96,6 +97,7 @@ export function UserSearchModal({
   onViewUserProfile,
   isLoggedIn = false,
   onRequireAuth,
+  currentUser,
 }: UserSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [followedMap, setFollowedMap] = useState<Record<string, boolean>>({});
@@ -302,6 +304,7 @@ export function UserSearchModal({
                       <SocialRelationshipButton
                         targetHandle={user.handle}
                         targetName={user.name}
+                        currentUser={currentUser}
                         onRequireAuth={(action) => {
                           if (!isLoggedIn && onRequireAuth) {
                             onRequireAuth(action);

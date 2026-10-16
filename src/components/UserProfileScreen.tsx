@@ -53,6 +53,15 @@ import { InfluenceRatingModal } from './InfluenceRatingModal';
 import { RaygunActionModal } from './RaygunActionModal';
 import { TweetPostCard, TweetPostItem } from './TweetPostCard';
 import { SocialRelationshipButton } from './SocialRelationshipButton';
+import {
+  getRelationship,
+  getAllFollowing,
+  getAllFriends,
+  getAllEnemies,
+  normalizeTargetKey,
+  subscribeRelationships,
+  isUserSelf,
+} from '../lib/relationships';
 
 import postImage from '../assets/images/fairy_post_image_1791012530319.jpg';
 import elenaAvatar from '../assets/images/creator_portrait_elena_1791014499312.jpg';
@@ -279,6 +288,36 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
     profession: 'Creative Developer & Founder',
     bio: 'Creative developer, founder & digital artist on Fairy.',
   };
+
+  // Determine if viewing own profile
+  const isOwnProfile = isLoggedIn && (
+    !viewUser ||
+    (currentUser && (isUserSelf(activeUser.handle, currentUser) || isUserSelf(activeUser.name, currentUser)))
+  );
+
+  // Relationship state for this creator (when viewing another user's page)
+  const [relationship, setRelationship] = useState(() =>
+    getRelationship(activeUser.handle || activeUser.name)
+  );
+  const [followingList, setFollowingList] = useState(() => getAllFollowing());
+  const [friendsList, setFriendsList] = useState(() => getAllFriends());
+  const [enemiesList, setEnemiesList] = useState(() => getAllEnemies());
+
+  useEffect(() => {
+    const norm = activeUser.handle || activeUser.name;
+    setRelationship(getRelationship(norm));
+    setFollowingList(getAllFollowing());
+    setFriendsList(getAllFriends());
+    setEnemiesList(getAllEnemies());
+
+    const unsubscribe = subscribeRelationships(() => {
+      setRelationship(getRelationship(norm));
+      setFollowingList(getAllFollowing());
+      setFriendsList(getAllFriends());
+      setEnemiesList(getAllEnemies());
+    });
+    return () => unsubscribe();
+  }, [activeUser.handle, activeUser.name]);
 
   // Settings modal fallback state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -808,79 +847,120 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               </div>
               <div>
                 <span className="block font-black text-base text-slate-900 leading-tight">
-                  48.2K
+                  {isOwnProfile
+                    ? ((currentUser as any)?.followers || '1.2K')
+                    : (relationship.status === 'following' || relationship.status === 'friend')
+                    ? '48.2K (+1 You)'
+                    : ((activeUser as any)?.followers || '48.2K')}
                 </span>
                 <span className="text-[11px] text-slate-500 font-semibold">Followers</span>
               </div>
               <div>
                 <span className="block font-black text-base text-slate-900 leading-tight">
-                  238
+                  {isOwnProfile
+                    ? (24 + followingList.length)
+                    : ((activeUser as any)?.following || 238)}
                 </span>
                 <span className="text-[11px] text-slate-500 font-semibold">Following</span>
               </div>
             </div>
 
-            {/* Quick Action Buttons (Follow, Message, Share) */}
+            {/* Quick Action Buttons: Differ for Own Profile vs Other User */}
             <div className="flex items-center gap-2 mt-3">
-              <SocialRelationshipButton
-                targetHandle={wikiData.handle}
-                targetName={wikiData.name}
-                onRequireAuth={(action: string) => {
-                  if (!isLoggedIn && onRequireAuth) {
-                    onRequireAuth(action);
-                    return false;
-                  }
-                  return true;
-                }}
-                size="md"
-                className="flex-1 justify-center rounded-lg h-9"
-                showModeHint
-              />
+              {isOwnProfile ? (
+                <>
+                  <button
+                    onClick={() => {
+                      if (onOpenSettings) onOpenSettings();
+                      else setIsSettingsOpen(true);
+                    }}
+                    className="flex-1 py-1.5 px-3 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 h-9 shadow-xs"
+                    title="Edit your profile"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-slate-300" />
+                    <span>Edit Profile</span>
+                  </button>
 
-              <button
-                onClick={() => {
-                  if (!isLoggedIn && onRequireAuth) {
-                    onRequireAuth('send direct messages');
-                    return;
-                  }
-                  onOpenSendPersonMessage({
-                    id: (activeUser.id || 'user-' + wikiData.handle),
-                    name: wikiData.name,
-                    handle: wikiData.handle,
-                    avatarUrl: activeUser.avatarUrl || '',
-                  });
-                }}
-                className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                title="Send Message"
-              >
-                <AeriMessageBubbleIcon size={14} className="w-3.5 h-3.5 text-slate-700" />
-                <span>Message</span>
-              </button>
+                  <button
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(window.location.href);
+                        setToastMessage('📋 Profile link copied to clipboard!');
+                        setTimeout(() => setToastMessage(null), 2500);
+                      }
+                    }}
+                    className="flex-1 py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 h-9"
+                    title="Share Profile"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Share Profile</span>
+                  </button>
 
-              <button
-                onClick={() => {
-                  if (navigator.clipboard) {
-                    navigator.clipboard.writeText(window.location.href);
-                    setToastMessage('📋 Profile link copied to clipboard!');
-                    setTimeout(() => setToastMessage(null), 2500);
-                  }
-                }}
-                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer"
-                title="Share Profile"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
+                  <button
+                    onClick={() => {
+                      if (onOpenSettings) onOpenSettings();
+                      else setIsSettingsOpen(true);
+                    }}
+                    className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer h-9 w-9 flex items-center justify-center"
+                    title="Settings"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* For other users, show the interactive SocialRelationshipButton */}
+                  <SocialRelationshipButton
+                    targetHandle={wikiData.handle}
+                    targetName={wikiData.name}
+                    currentUser={currentUser}
+                    onRequireAuth={(action: string) => {
+                      if (!isLoggedIn && onRequireAuth) {
+                        onRequireAuth(action);
+                        return false;
+                      }
+                      return true;
+                    }}
+                    size="md"
+                    className="flex-1 justify-center rounded-lg h-9"
+                    showModeHint
+                  />
 
-              <button
-                onClick={() => {
-                  if (onOpenSettings) onOpenSettings();
-                  else setIsSettingsOpen(true);
-                }}
-                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer"
-                title="Settings"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
+                  <button
+                    onClick={() => {
+                      if (!isLoggedIn && onRequireAuth) {
+                        onRequireAuth('send direct messages');
+                        return;
+                      }
+                      onOpenSendPersonMessage({
+                        id: (activeUser.id || 'user-' + wikiData.handle),
+                        name: wikiData.name,
+                        handle: wikiData.handle,
+                        avatarUrl: activeUser.avatarUrl || '',
+                      });
+                    }}
+                    className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 h-9"
+                    title="Send Message"
+                  >
+                    <AeriMessageBubbleIcon size={14} className="w-3.5 h-3.5 text-slate-700" />
+                    <span>Message</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(window.location.href);
+                        setToastMessage('📋 Profile link copied to clipboard!');
+                        setTimeout(() => setToastMessage(null), 2500);
+                      }
+                    }}
+                    className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer h-9 w-9 flex items-center justify-center"
+                    title="Share Profile"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -930,6 +1010,64 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
               {wikiData.website}
             </a>
           </div>
+
+          {/* Social Relationship Reflection Banner on HIS page */}
+          {!isOwnProfile && relationship.status !== 'none' && (
+            <div className="mt-3">
+              {relationship.status === 'friend' && (
+                <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-2.5 flex items-center justify-between text-xs text-emerald-950 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-lg bg-emerald-600 text-white font-black text-xs">🤝</span>
+                    <div>
+                      <span className="font-extrabold text-emerald-950 text-xs">Mutual Friends</span>
+                      <p className="text-[10.5px] text-emerald-700">You added {wikiData.name} as a friend. Priority DMs & close circle unlocked.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 shrink-0">Friends</span>
+                </div>
+              )}
+              {relationship.status === 'enemy' && (
+                <div className="bg-rose-50 border border-rose-300 rounded-xl p-2.5 flex items-center justify-between text-xs text-rose-950 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-lg bg-rose-600 text-white font-black text-xs">⚔️</span>
+                    <div>
+                      <span className="font-extrabold text-rose-950 text-xs">Nemesis Rival</span>
+                      <p className="text-[10.5px] text-rose-700">Marked as your Enemy. Rivalry heat active in Faceoff Battles & rankings.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-200 text-rose-900 shrink-0">Enemy</span>
+                </div>
+              )}
+              {relationship.status === 'following' && (
+                <div className="bg-purple-50/80 border border-purple-200 rounded-xl p-2 flex items-center justify-between text-xs text-purple-950">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-lg bg-purple-600 text-white font-black text-[10px]">✓</span>
+                    <span className="text-[11px] font-bold text-purple-900">You are following {wikiData.name}</span>
+                  </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 shrink-0">Following</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Social Circle Summary on YOUR own page */}
+          {isOwnProfile && (
+            <div className="mt-3 bg-slate-50 border border-slate-200/90 rounded-xl p-2.5 flex items-center justify-between text-xs text-slate-700">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-800">Your Connections:</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-extrabold">
+                  {followingList.length} Following
+                </span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold">
+                  {friendsList.length} Friends
+                </span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-extrabold">
+                  {enemiesList.length} Enemies
+                </span>
+              </div>
+              <span className="text-[10.5px] font-semibold text-slate-400">You (Logged in)</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1593,11 +1731,14 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                     <BrokenPencilIcon className="w-[56px] sm:w-[62px] h-auto" />
                   </div>
                 ) : (
-                  <SocialRelationshipButton
-                    targetHandle={wikiData.handle}
-                    targetName={wikiData.name}
-                    size="sm"
-                  />
+                  !isOwnProfile ? (
+                    <SocialRelationshipButton
+                      targetHandle={wikiData.handle}
+                      targetName={wikiData.name}
+                      currentUser={currentUser}
+                      size="sm"
+                    />
+                  ) : null
                 )}
                 <button
                   onClick={() => setSelectedPost(null)}
