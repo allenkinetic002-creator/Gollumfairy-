@@ -107,18 +107,6 @@ export function initRealtimeStream() {
       }
     });
 
-    eventSource.addEventListener('fairy_switches_updated', (e: MessageEvent) => {
-      try {
-        const data = JSON.parse(e.data);
-        notifyListeners('fairy_switches_updated', data);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('fairy_switches_sync', { detail: data }));
-        }
-      } catch (err) {
-        console.warn('[Realtime] Failed to parse fairy_switches_updated event:', err);
-      }
-    });
-
     eventSource.onerror = () => {
       isConnected = false;
       eventSource?.close();

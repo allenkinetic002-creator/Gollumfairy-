@@ -20,26 +20,6 @@
       "updatedAt": "2026-10-16T06:25:33.440Z",
       "activatedBy": "user-kinetic"
     },
-    "user-allen": {
-      "support": true,
-      "favorite": true,
-      "trending": false,
-      "loyalty": true,
-      "genre": true,
-      "supportedGenre": "Artist",
-      "updatedAt": "2026-10-16T05:45:00.000Z",
-      "activatedBy": "user-allen"
-    },
-    "user-gollumfairy": {
-      "support": true,
-      "favorite": false,
-      "trending": true,
-      "loyalty": false,
-      "genre": true,
-      "supportedGenre": "Artist",
-      "updatedAt": "2026-10-16T05:45:00.000Z",
-      "activatedBy": "user-gollumfairy"
-    },
     "guest": {
       "support": true,
       "favorite": false,
@@ -53,12 +33,11 @@
   },
   "lastActiveUser": "user-kinetic",
   "globalFallback": {
-    "support": true,
+    "support": false,
     "favorite": false,
     "trending": false,
     "loyalty": false,
-    "genre": true,
-    "supportedGenre": "Artist"
+    "genre": false
   },
-  "updatedAt": "2026-10-16T05:45:00.000Z"
+  "updatedAt": "2026-10-15T12:00:00.000Z"
 }

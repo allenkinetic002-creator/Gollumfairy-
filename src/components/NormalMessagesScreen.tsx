@@ -28,10 +28,6 @@ import { AeriRaygunIcon } from './AeriRaygunIcon';
 import elenaAvatar from '../assets/images/creator_portrait_elena_1791014499312.jpg';
 import { sendRemoteMessage } from '../lib/fairyBackend';
 import { syncActivityToRepo } from '../lib/repoSync';
-import {
-  checkUsersSeeEachOtherViaGenreSupport,
-  normalizeUserKey,
-} from '../lib/fairySwitches';
 
 
 import {
@@ -724,29 +720,6 @@ export function NormalMessagesScreen({
             <span>End timer now &rarr;</span>
           </button>
         </div>
-
-        {/* Genre ↔ Support Mutual Connection Banner in Chat */}
-        {(() => {
-          const viewerKey = (typeof window !== 'undefined' ? localStorage.getItem('fairy_last_active_user_key') : '') || 'guest';
-          const conn = checkUsersSeeEachOtherViaGenreSupport(viewerKey, activeConv.id);
-          if (!conn.seesEachOther) return null;
-          return (
-            <div className="bg-gradient-to-r from-purple-950 via-slate-900 to-rose-950 text-white px-3 py-1.5 flex items-center justify-between text-[10px] font-black shrink-0 border-b border-purple-800/40 shadow-2xs">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="flex items-center -space-x-1 shrink-0">
-                  <span className="w-3.5 h-3.5 rounded-full bg-purple-500 inline-block ring-1 ring-white" />
-                  <span className="w-3.5 h-3.5 rounded-full bg-red-500 inline-block ring-1 ring-white" />
-                </div>
-                <span className="tracking-tight truncate">
-                  🤝 {conn.badgeLabel}: You &amp; {activeConv.name} see each other via active Genre/Support switches
-                </span>
-              </div>
-              <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-full text-[8.5px] uppercase tracking-wider font-black shrink-0 shadow-2xs">
-                Seeing Each Other
-              </span>
-            </div>
-          );
-        })()}
 
         {/* Message Stream */}
         <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 bg-[#F8FAFC] overscroll-contain touch-pan-y">
