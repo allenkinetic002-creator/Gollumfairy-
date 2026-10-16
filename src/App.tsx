@@ -78,6 +78,7 @@ import { AeriHorseIcon } from './components/AeriHorseIcon';
 import { CreatePostModal, NewPostPayload } from './components/CreatePostModal';
 import { CreateTweetModal, NewTweetPayload } from './components/CreateTweetModal';
 import { TweetPostCard } from './components/TweetPostCard';
+import { SocialRelationshipButton } from './components/SocialRelationshipButton';
 import { RaygunActionModal } from './components/RaygunActionModal';
 import { PastChallengesModal } from './components/PastChallengesModal';
 import { ChallengePostModal, ChallengePostPayload } from './components/ChallengePostModal';
@@ -2010,8 +2011,8 @@ export default function App() {
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    {/* Follow button morphs into pure broken pencil icon (isolated per post, does not affect other posts) */}
-                    {(Boolean(post.faceoffConfig) || Boolean(morphedPosts[post.id])) ? (
+                    {/* Faceoff battle icon if challenge exists */}
+                    {Boolean(post.faceoffConfig) && (
                       <div
                         onClick={() => handleToggleFaceoff(post.id)}
                         title="Click to toggle faceoff battle"
@@ -2022,15 +2023,16 @@ export default function App() {
                       >
                         <BrokenPencilIcon className="w-[56px] sm:w-[62px] h-auto" />
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => handleMorphPencil(post.id)}
-                        className="px-3 py-1 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold text-[11px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1"
-                      >
-                        <UserPlus className="w-3 h-3 text-purple-600" />
-                        <span>Follow</span>
-                      </button>
                     )}
+
+                    {/* Social Relationship Button: click to follow/unfollow, long press to switch to friend/enemy */}
+                    <SocialRelationshipButton
+                      targetHandle={post.authorHandle || `@${post.authorName}`}
+                      targetName={post.authorName}
+                      onRequireAuth={requireAuth}
+                      size="sm"
+                    />
+
                     <button
                       aria-label="Post options"
                       className="p-1 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
@@ -2847,26 +2849,12 @@ export default function App() {
                           <BrokenPencilIcon className="w-[56px] sm:w-[62px] h-auto" />
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleToggleFollow(selectedCategory, person.rank)}
-                          className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                            person.isFollowing
-                              ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                              : 'bg-purple-600 hover:bg-purple-700 text-white shadow-xs'
-                          }`}
-                        >
-                          {person.isFollowing ? (
-                            <>
-                              <UserCheck className="w-3 h-3 text-purple-600" />
-                              <span>Following</span>
-                            </>
-                          ) : (
-                            <>
-                              <UserPlus className="w-3 h-3 text-purple-200" />
-                              <span>Follow</span>
-                            </>
-                          )}
-                        </button>
+                        <SocialRelationshipButton
+                          targetHandle={person.handle}
+                          targetName={person.name}
+                          onRequireAuth={requireAuth}
+                          size="sm"
+                        />
                       )}
                       <button
                         aria-label="Options"
@@ -3196,26 +3184,12 @@ export default function App() {
                         <BrokenPencilIcon className="w-[58px] sm:w-[64px] h-auto" />
                       </div>
                     ) : (
-                      <button
-                        onClick={() => handleToggleFollow(selectedCategory, previewCreator.rank)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold cursor-pointer transition-all flex items-center gap-1.5 ${
-                          previewCreator.isFollowing
-                            ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                            : 'bg-purple-600 hover:bg-purple-700 text-white shadow-2xs'
-                        }`}
-                      >
-                        {previewCreator.isFollowing ? (
-                          <>
-                            <UserCheck className="w-3.5 h-3.5 text-purple-600" />
-                            <span>Following</span>
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="w-3.5 h-3.5 text-purple-200" />
-                            <span>Follow</span>
-                          </>
-                        )}
-                      </button>
+                      <SocialRelationshipButton
+                        targetHandle={previewCreator.handle}
+                        targetName={previewCreator.name}
+                        onRequireAuth={requireAuth}
+                        size="md"
+                      />
                     )}
 
                     <button

@@ -593,6 +593,42 @@ async function startServer() {
     }
   });
 
+  // --- SOCIAL RELATIONSHIPS (FOLLOW, FRIEND, ENEMY) ---
+  app.get('/api/relationships', (_req, res) => {
+    const raw = readJsonFile<any>('src/data/relationships.json', {});
+    res.json(raw);
+  });
+
+  app.post('/api/relationships', (req, res) => {
+    try {
+      const { key, record } = req.body;
+      if (!key || !record) {
+        return res.status(400).json({ success: false, error: 'Key and record are required' });
+      }
+
+      const raw = readJsonFile<any>('src/data/relationships.json', {});
+      raw[key] = record;
+      writeJsonFile('src/data/relationships.json', raw);
+
+      broadcastRealtime('relationship_updated', { key, record });
+      const actionTitle =
+        record.status === 'following'
+          ? `Followed ${record.targetHandle || key}`
+          : record.status === 'friend'
+          ? `Added ${record.targetHandle || key} as Friend`
+          : record.status === 'enemy'
+          ? `Added ${record.targetHandle || key} as Enemy`
+          : `Updated relationship with ${record.targetHandle || key}`;
+
+      logActivity('relationship_updated', actionTitle, { key, record });
+      autoCommitAndPush(`feat(social): ${actionTitle}`);
+
+      res.json({ success: true, record });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // Automated Activity Sync endpoint: called when user creates posts, votes, interacts
   app.post('/api/sync/repo-update', async (req, res) => {
     runGitQueued(async () => {

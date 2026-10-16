@@ -14,6 +14,7 @@ import { RaygunActionModal } from './RaygunActionModal';
 import { User } from 'lucide-react';
 import { getSafeMediaUrl, DEFAULT_FALLBACK_IMAGE } from '../lib/imageUpload';
 import { getGenreInfo } from '../lib/genres';
+import { SocialRelationshipButton } from './SocialRelationshipButton';
 
 export interface TweetPostItem {
   id: string;
@@ -244,8 +245,14 @@ export const TweetPostCard: React.FC<TweetPostCardProps> = ({
           </div>
         </div>
 
-        {/* Right side: Trending badge & Ongoing status & Broken pencil toggle */}
+        {/* Right side: SocialRelationshipButton & Trending badge & Ongoing status & Broken pencil toggle */}
         <div className="flex items-center gap-1.5 shrink-0">
+          <SocialRelationshipButton
+            targetHandle={post.authorHandle}
+            targetName={post.authorName}
+            size="sm"
+          />
+
           {post.isTrending && (
             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF0F5] border border-pink-100/80 shadow-2xs">
               <AeriFlameIcon filled className="w-3 h-3 text-[#FF5722]" />

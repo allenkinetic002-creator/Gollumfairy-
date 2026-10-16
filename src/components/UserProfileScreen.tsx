@@ -52,6 +52,7 @@ import { FaceoffBattleModal } from './FaceoffBattleModal';
 import { InfluenceRatingModal } from './InfluenceRatingModal';
 import { RaygunActionModal } from './RaygunActionModal';
 import { TweetPostCard, TweetPostItem } from './TweetPostCard';
+import { SocialRelationshipButton } from './SocialRelationshipButton';
 
 import postImage from '../assets/images/fairy_post_image_1791012530319.jpg';
 import elenaAvatar from '../assets/images/creator_portrait_elena_1791014499312.jpg';
@@ -821,32 +822,20 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
 
             {/* Quick Action Buttons (Follow, Message, Share) */}
             <div className="flex items-center gap-2 mt-3">
-              <button
-                onClick={() => {
+              <SocialRelationshipButton
+                targetHandle={wikiData.handle}
+                targetName={wikiData.name}
+                onRequireAuth={(action: string) => {
                   if (!isLoggedIn && onRequireAuth) {
-                    onRequireAuth('follow this creator');
-                    return;
+                    onRequireAuth(action);
+                    return false;
                   }
-                  setIsFollowing(!isFollowing);
+                  return true;
                 }}
-                className={`flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
-                  isFollowing
-                    ? 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
-                    : 'bg-purple-600 text-white hover:bg-purple-700'
-                }`}
-              >
-                {isFollowing ? (
-                  <>
-                    <UserCheck className="w-3.5 h-3.5 text-purple-600" />
-                    <span>Following</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-3.5 h-3.5 text-purple-200" />
-                    <span>Follow</span>
-                  </>
-                )}
-              </button>
+                size="md"
+                className="flex-1 justify-center rounded-lg h-9"
+                showModeHint
+              />
 
               <button
                 onClick={() => {
@@ -1604,13 +1593,11 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
                     <BrokenPencilIcon className="w-[56px] sm:w-[62px] h-auto" />
                   </div>
                 ) : (
-                  <button
-                    onClick={() => setIsFaceoffOpen(true)}
-                    className="px-3 py-1 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold text-[11px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1"
-                  >
-                    <UserPlus className="w-3 h-3 text-purple-600" />
-                    <span>Follow</span>
-                  </button>
+                  <SocialRelationshipButton
+                    targetHandle={wikiData.handle}
+                    targetName={wikiData.name}
+                    size="sm"
+                  />
                 )}
                 <button
                   onClick={() => setSelectedPost(null)}

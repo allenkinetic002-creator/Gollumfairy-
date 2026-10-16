@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { INITIAL_SHARED_PEOPLE, loadSharedPeople } from '../data/sharedPeople';
 import { AeriMessageBubbleIcon } from './AeriMessageBubbleIcon';
+import { SocialRelationshipButton } from './SocialRelationshipButton';
 
 export interface UserSearchItem {
   id: string;
@@ -298,33 +299,18 @@ export function UserSearchModal({
 
                     {/* Action buttons */}
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
+                      <SocialRelationshipButton
+                        targetHandle={user.handle}
+                        targetName={user.name}
+                        onRequireAuth={(action) => {
                           if (!isLoggedIn && onRequireAuth) {
-                            onRequireAuth('follow creators');
-                            return;
+                            onRequireAuth(action);
+                            return false;
                           }
-                          toggleFollow(user.id, e);
+                          return true;
                         }}
-                        className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                          isFollowed
-                            ? 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
-                            : 'bg-black text-white hover:bg-slate-800 shadow-xs'
-                        }`}
-                      >
-                        {isFollowed ? (
-                          <>
-                            <UserCheck className="w-3.5 h-3.5 text-purple-600" />
-                            <span>Following</span>
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="w-3.5 h-3.5 text-purple-400" />
-                            <span>Follow</span>
-                          </>
-                        )}
-                      </button>
+                        size="sm"
+                      />
 
                       {onSelectUserToMessage && (
                         <button
