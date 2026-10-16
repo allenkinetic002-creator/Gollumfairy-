@@ -1,5 +1,34 @@
 [
   {
+    "id": "act-1792141614459-o0qqa",
+    "action": "relationship_updated",
+    "description": "Added @kinetic as Enemy",
+    "details": {
+      "key": "kinetic",
+      "record": {
+        "targetKey": "kinetic",
+        "targetName": "kinetic",
+        "targetHandle": "@kinetic",
+        "status": "enemy",
+        "mode": "enemy",
+        "updatedAt": "2026-10-16T09:06:54.274Z"
+      }
+    },
+    "savedAt": "2026-10-16T09:06:54.459Z"
+  },
+  {
+    "id": "act-1792141614450-5urpk",
+    "action": "social_relationship",
+    "description": "Added @kinetic as Enemy",
+    "details": {
+      "target": "kinetic",
+      "status": "enemy",
+      "mode": "enemy"
+    },
+    "timestamp": "2026-10-16T09:06:54.274Z",
+    "savedAt": "2026-10-16T09:06:54.450Z"
+  },
+  {
     "id": "act-1792140986116-kq9rn",
     "action": "social_relationship",
     "description": "Removed relationship with @kinetic",
@@ -1543,31 +1572,5 @@
       "updatedAt": "2026-10-15T19:29:17.331Z"
     },
     "savedAt": "2026-10-15T19:29:17.332Z"
-  },
-  {
-    "id": "act-1792092557329-zpm52",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": false,
-      "likeCount": 1,
-      "updatedAt": "2026-10-15T19:29:17.329Z"
-    },
-    "savedAt": "2026-10-15T19:29:17.329Z"
-  },
-  {
-    "id": "act-1792092556659-y710n",
-    "action": "post_action",
-    "description": "Post action: like on post-1792066294285",
-    "details": {
-      "postId": "post-1792066294285",
-      "action": "like",
-      "isLiked": true,
-      "likeCount": 2,
-      "updatedAt": "2026-10-15T19:29:16.659Z"
-    },
-    "savedAt": "2026-10-15T19:29:16.659Z"
   }
 ]
