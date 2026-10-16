@@ -1,5 +1,22 @@
 [
   {
+    "id": "act-1792140230374-xr1tm",
+    "action": "relationship_updated",
+    "description": "Updated relationship with @kinetic",
+    "details": {
+      "key": "kinetic",
+      "record": {
+        "targetKey": "kinetic",
+        "targetName": "Kinetic",
+        "targetHandle": "@kinetic",
+        "status": "none",
+        "mode": "friend",
+        "updatedAt": "2026-10-16T08:43:50.909Z"
+      }
+    },
+    "savedAt": "2026-10-16T08:43:50.374Z"
+  },
+  {
     "id": "act-1792140220162-20w07",
     "action": "relationship_updated",
     "description": "Added @kinetic as Friend",
@@ -1514,23 +1531,5 @@
       }
     },
     "savedAt": "2026-10-15T19:27:04.825Z"
-  },
-  {
-    "id": "act-1792092423112-svrke",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches for user user-karak",
-    "details": {
-      "userId": "user-karak",
-      "switches": {
-        "support": false,
-        "favorite": false,
-        "trending": false,
-        "loyalty": false,
-        "genre": false,
-        "updatedAt": "2026-10-15T19:27:03.111Z",
-        "activatedBy": "user-karak"
-      }
-    },
-    "savedAt": "2026-10-15T19:27:03.112Z"
   }
 ]
