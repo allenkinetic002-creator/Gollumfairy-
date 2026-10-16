@@ -11,12 +11,12 @@
       "activatedBy": "user-karak"
     },
     "user-kinetic": {
-      "support": true,
+      "support": false,
       "favorite": false,
       "trending": false,
       "loyalty": false,
       "genre": false,
-      "updatedAt": "2026-10-15T19:18:36.673Z",
+      "updatedAt": "2026-10-16T05:42:28.461Z",
       "activatedBy": "user-kinetic"
     },
     "guest": {
@@ -30,7 +30,7 @@
       "activatedBy": "guest"
     }
   },
-  "lastActiveUser": "user-karak",
+  "lastActiveUser": "user-kinetic",
   "globalFallback": {
     "support": false,
     "favorite": false,
