@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792140151174-o60u7",
+    "action": "social_relationship",
+    "description": "Removed relationship with @karak",
+    "details": {
+      "target": "karak",
+      "status": "none",
+      "mode": "enemy"
+    },
+    "timestamp": "2026-10-16T08:42:30.085Z",
+    "savedAt": "2026-10-16T08:42:31.174Z"
+  },
+  {
     "id": "act-1792140149513-2xayt",
     "action": "relationship_updated",
     "description": "Updated relationship with @karak",
@@ -1528,19 +1540,5 @@
       "updatedAt": "2026-10-15T19:06:57.891Z"
     },
     "savedAt": "2026-10-15T19:06:57.891Z"
-  },
-  {
-    "id": "act-1792091217889-lbkoj",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
-    "details": {
-      "support": true,
-      "favorite": false,
-      "trending": false,
-      "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:06:57.888Z"
-    },
-    "savedAt": "2026-10-15T19:06:57.889Z"
   }
 ]
