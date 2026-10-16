@@ -24,8 +24,9 @@
       "favorite": false,
       "trending": false,
       "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:43:23.985Z",
+      "genre": true,
+      "supportedGenre": "Artist",
+      "updatedAt": "2026-10-16T05:41:58.611Z",
       "activatedBy": "guest"
     }
   },
