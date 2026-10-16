@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792140145303-uetaz",
+    "action": "social_relationship",
+    "description": "Added @karak as Enemy",
+    "details": {
+      "target": "karak",
+      "status": "enemy",
+      "mode": "enemy"
+    },
+    "timestamp": "2026-10-16T08:42:24.515Z",
+    "savedAt": "2026-10-16T08:42:25.303Z"
+  },
+  {
     "id": "act-1792140143970-njswd",
     "action": "relationship_updated",
     "description": "Added @karak as Enemy",
@@ -1527,19 +1539,5 @@
       "updatedAt": "2026-10-15T19:06:57.200Z"
     },
     "savedAt": "2026-10-15T19:06:57.201Z"
-  },
-  {
-    "id": "act-1792091217180-m1byx",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches (Support, Favorite, Trending, Loyalty, Genre)",
-    "details": {
-      "support": true,
-      "favorite": false,
-      "trending": false,
-      "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-15T19:06:57.179Z"
-    },
-    "savedAt": "2026-10-15T19:06:57.180Z"
   }
 ]
