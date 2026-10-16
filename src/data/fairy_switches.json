@@ -15,9 +15,9 @@
       "favorite": false,
       "trending": false,
       "loyalty": false,
-      "genre": false,
+      "genre": true,
       "supportedGenre": "Artist",
-      "updatedAt": "2026-10-16T06:28:16.964Z",
+      "updatedAt": "2026-10-16T06:28:23.317Z",
       "activatedBy": "user-kinetic"
     },
     "guest": {
