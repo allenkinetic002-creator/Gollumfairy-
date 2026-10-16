@@ -1,5 +1,34 @@
 [
   {
+    "id": "act-1792140220162-20w07",
+    "action": "relationship_updated",
+    "description": "Added @kinetic as Friend",
+    "details": {
+      "key": "kinetic",
+      "record": {
+        "targetKey": "kinetic",
+        "targetName": "Kinetic",
+        "targetHandle": "@kinetic",
+        "status": "friend",
+        "mode": "friend",
+        "updatedAt": "2026-10-16T08:43:40.713Z"
+      }
+    },
+    "savedAt": "2026-10-16T08:43:40.162Z"
+  },
+  {
+    "id": "act-1792140220154-ajv73",
+    "action": "social_relationship",
+    "description": "Added @kinetic as Friend",
+    "details": {
+      "target": "kinetic",
+      "status": "friend",
+      "mode": "friend"
+    },
+    "timestamp": "2026-10-16T08:43:40.713Z",
+    "savedAt": "2026-10-16T08:43:40.154Z"
+  },
+  {
     "id": "act-1792140207035-3dhgm",
     "action": "social_relationship",
     "description": "Added @karak as Friend",
@@ -1503,41 +1532,5 @@
       }
     },
     "savedAt": "2026-10-15T19:27:03.112Z"
-  },
-  {
-    "id": "act-1792091916673-44dpc",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches for user user-kinetic",
-    "details": {
-      "userId": "user-kinetic",
-      "switches": {
-        "support": true,
-        "favorite": false,
-        "trending": false,
-        "loyalty": false,
-        "genre": false,
-        "updatedAt": "2026-10-15T19:18:36.673Z",
-        "activatedBy": "user-kinetic"
-      }
-    },
-    "savedAt": "2026-10-15T19:18:36.673Z"
-  },
-  {
-    "id": "act-1792091883370-35tus",
-    "action": "fairy_switches_updated",
-    "description": "Updated system switches for user user-karak",
-    "details": {
-      "userId": "user-karak",
-      "switches": {
-        "support": true,
-        "favorite": false,
-        "trending": false,
-        "loyalty": false,
-        "genre": false,
-        "updatedAt": "2026-10-15T19:18:03.369Z",
-        "activatedBy": "user-karak"
-      }
-    },
-    "savedAt": "2026-10-15T19:18:03.370Z"
   }
 ]

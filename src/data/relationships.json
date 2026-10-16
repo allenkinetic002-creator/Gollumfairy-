@@ -6,5 +6,13 @@
     "status": "friend",
     "mode": "friend",
     "updatedAt": "2026-10-16T08:43:26.192Z"
+  },
+  "kinetic": {
+    "targetKey": "kinetic",
+    "targetName": "Kinetic",
+    "targetHandle": "@kinetic",
+    "status": "friend",
+    "mode": "friend",
+    "updatedAt": "2026-10-16T08:43:40.713Z"
   }
 }
