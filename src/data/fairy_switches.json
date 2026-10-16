@@ -11,12 +11,12 @@
       "activatedBy": "user-karak"
     },
     "user-kinetic": {
-      "support": false,
+      "support": true,
       "favorite": false,
       "trending": false,
       "loyalty": false,
       "genre": false,
-      "updatedAt": "2026-10-16T05:42:29.945Z",
+      "updatedAt": "2026-10-16T05:42:30.524Z",
       "activatedBy": "user-kinetic"
     },
     "guest": {
