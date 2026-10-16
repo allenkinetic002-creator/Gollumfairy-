@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792140380498-9sz44",
+    "action": "social_relationship",
+    "description": "Added @karak as Friend",
+    "details": {
+      "target": "karak",
+      "status": "friend",
+      "mode": "enemy"
+    },
+    "timestamp": "2026-10-16T08:46:15.751Z",
+    "savedAt": "2026-10-16T08:46:20.498Z"
+  },
+  {
     "id": "act-1792140378467-952w9",
     "action": "social_relationship",
     "description": "Added @karak as Friend",
@@ -1523,17 +1535,6 @@
   },
   {
     "id": "act-1792092556315-w3plw",
-    "action": "like_post",
-    "description": "Unliked post @karak",
-    "details": {
-      "postId": "post-1792066294285",
-      "isLiked": false
-    },
-    "timestamp": "2026-10-15T19:29:13.256Z",
-    "savedAt": "2026-10-15T19:29:16.315Z"
-  },
-  {
-    "id": "act-1792092556315-btaar",
     "action": "like_post",
     "description": "Unliked post @karak",
     "details": {
