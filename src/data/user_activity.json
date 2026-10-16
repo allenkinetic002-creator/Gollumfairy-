@@ -1,5 +1,22 @@
 [
   {
+    "id": "act-1792140385080-smhyv",
+    "action": "relationship_updated",
+    "description": "Updated relationship with @kinetic",
+    "details": {
+      "key": "kinetic",
+      "record": {
+        "targetKey": "kinetic",
+        "targetName": "Kinetic",
+        "targetHandle": "@kinetic",
+        "status": "none",
+        "mode": "friend",
+        "updatedAt": "2026-10-16T08:46:25.663Z"
+      }
+    },
+    "savedAt": "2026-10-16T08:46:25.080Z"
+  },
+  {
     "id": "act-1792140380498-9sz44",
     "action": "social_relationship",
     "description": "Added @karak as Friend",
@@ -1531,17 +1548,6 @@
       "isLiked": true
     },
     "timestamp": "2026-10-15T19:29:13.616Z",
-    "savedAt": "2026-10-15T19:29:16.315Z"
-  },
-  {
-    "id": "act-1792092556315-w3plw",
-    "action": "like_post",
-    "description": "Unliked post @karak",
-    "details": {
-      "postId": "post-1792066294285",
-      "isLiked": false
-    },
-    "timestamp": "2026-10-15T19:29:13.256Z",
     "savedAt": "2026-10-15T19:29:16.315Z"
   }
 ]
