@@ -1,5 +1,17 @@
 [
   {
+    "id": "act-1792140389924-wzmup",
+    "action": "social_relationship",
+    "description": "Removed relationship with @kinetic",
+    "details": {
+      "target": "kinetic",
+      "status": "none",
+      "mode": "enemy"
+    },
+    "timestamp": "2026-10-16T08:46:27.353Z",
+    "savedAt": "2026-10-16T08:46:29.924Z"
+  },
+  {
     "id": "act-1792140386769-mmyll",
     "action": "relationship_updated",
     "description": "Updated relationship with @kinetic",
@@ -1537,17 +1549,6 @@
   },
   {
     "id": "act-1792092556315-pllc9",
-    "action": "like_post",
-    "description": "Unliked post @karak",
-    "details": {
-      "postId": "post-1792066294285",
-      "isLiked": false
-    },
-    "timestamp": "2026-10-15T19:29:14.098Z",
-    "savedAt": "2026-10-15T19:29:16.315Z"
-  },
-  {
-    "id": "act-1792092556315-gkzn2",
     "action": "like_post",
     "description": "Unliked post @karak",
     "details": {
