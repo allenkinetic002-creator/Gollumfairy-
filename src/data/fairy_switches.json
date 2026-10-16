@@ -15,8 +15,8 @@
       "favorite": false,
       "trending": false,
       "loyalty": false,
-      "genre": false,
-      "updatedAt": "2026-10-16T05:44:18.347Z",
+      "genre": true,
+      "updatedAt": "2026-10-16T05:44:18.756Z",
       "activatedBy": "user-kinetic"
     },
     "guest": {
