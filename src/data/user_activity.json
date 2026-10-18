@@ -1,5 +1,51 @@
 [
   {
+    "id": "act-1792334445740-19ksi",
+    "action": "relationship_updated",
+    "description": "Added @karak as Friend",
+    "details": {
+      "key": "karak",
+      "record": {
+        "targetKey": "karak",
+        "targetName": "Karak",
+        "targetHandle": "@karak",
+        "targetProfession": "Visual Storyteller",
+        "targetCity": "Kyoto, Japan",
+        "targetInitial": "KK",
+        "targetBg": "bg-amber-600",
+        "targetAvatar": "",
+        "sourceKey": "allenkinetic002-creator",
+        "status": "friend",
+        "mode": "follow",
+        "updatedAt": "2026-10-18T14:40:46.204Z"
+      }
+    },
+    "savedAt": "2026-10-18T14:40:45.740Z"
+  },
+  {
+    "id": "act-1792334444969-aimfc",
+    "action": "relationship_updated",
+    "description": "Added @karak as Friend",
+    "details": {
+      "key": "karak",
+      "record": {
+        "targetKey": "karak",
+        "targetName": "Karak",
+        "targetHandle": "@karak",
+        "targetProfession": "Visual Storyteller",
+        "targetCity": "Kyoto, Japan",
+        "targetInitial": "KK",
+        "targetBg": "bg-amber-600",
+        "targetAvatar": "",
+        "sourceKey": "allenkinetic002-creator",
+        "status": "friend",
+        "mode": "enemy",
+        "updatedAt": "2026-10-18T14:40:45.442Z"
+      }
+    },
+    "savedAt": "2026-10-18T14:40:44.969Z"
+  },
+  {
     "id": "act-1792334444752-7v8xa",
     "action": "social_relationship",
     "description": "Added @karak as Friend",
@@ -1569,28 +1615,6 @@
       "isLiked": true
     },
     "timestamp": "2026-10-15T19:29:17.190Z",
-    "savedAt": "2026-10-15T19:29:21.056Z"
-  },
-  {
-    "id": "act-1792092561056-09ub4",
-    "action": "like_post",
-    "description": "Unliked post @karak",
-    "details": {
-      "postId": "post-1792066294285",
-      "isLiked": false
-    },
-    "timestamp": "2026-10-15T19:29:16.844Z",
-    "savedAt": "2026-10-15T19:29:21.056Z"
-  },
-  {
-    "id": "act-1792092561056-s0763",
-    "action": "like_post",
-    "description": "Unliked post @karak",
-    "details": {
-      "postId": "post-1792066294285",
-      "isLiked": false
-    },
-    "timestamp": "2026-10-15T19:29:16.844Z",
     "savedAt": "2026-10-15T19:29:21.056Z"
   }
 ]
