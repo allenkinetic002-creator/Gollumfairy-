@@ -88,6 +88,7 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { SignInModal, DEFAULT_REGISTERED_ACCOUNTS, getStoredRegisteredAccounts, RegisteredAccount } from './components/SignInModal';
 import { SignInRequiredModal } from './components/SignInRequiredModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
+import initialServerPosts from './data/posts.json';
 import { syncActivityToRepo, subscribeToSyncStatus, SyncStatus } from './lib/repoSync';
 import { subscribeToRealtime, togglePostLikeOnBackend, addCommentToBackend, submitVoteToBackend, fetchRemoteVotes } from './lib/realtimeSync';
 import { getSafeMediaUrl, DEFAULT_FALLBACK_IMAGE, TEA_AND_TEA_IMAGE } from './lib/imageUpload';
@@ -585,7 +586,23 @@ function getRankBadgeStyle(rank: number) {
 
 export default function App() {
   // Nav index: 0 = Home (Post Screen), 1 = Thumbs Up (Top 10 People Leaderboard), 2 = Comments, 3 = Trending, 4 = Profile
-  const [activeNavIndex, setActiveNavIndex] = useState(0);
+  const [activeNavIndex, setActiveNavIndex] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fairy_active_nav_index');
+      if (saved !== null) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 0 && parsed <= 4) return parsed;
+      }
+    } catch {}
+    return 0;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('fairy_active_nav_index', String(activeNavIndex));
+    } catch {}
+  }, [activeNavIndex]);
+
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -671,47 +688,73 @@ export default function App() {
   const [showCreateTweetModal, setShowCreateTweetModal] = useState(false);
   const [tweetSuccessToast, setTweetSuccessToast] = useState<string | null>(null);
   const [fullscreenMediaUrl, setFullscreenMediaUrl] = useState<string | null>(null);
-  const [feedPosts, setFeedPosts] = useState<FeedPost[]>([
-    {
-      id: "post-welcome-gollumfairy",
-      authorName: "Gollumfairy",
-      authorHandle: "@Gollumfairy",
-      authorAvatar: "",
-      isVerified: true,
-      timeAgo: "Just now",
-      location: "Fairy Realm",
-      mediaType: "image",
-      mediaUrl: postImage,
-      caption: "Welcome to Fairy Social Feed! Verified trust receipts, real community creators, and live GitHub sync are active 🧚✨",
-      tags: ["#fairy", "#creators", "#trustreceipts"],
-      genre: "Artist",
-      audioTitle: "Original Audio",
-      likeCount: 42,
-      isLiked: false,
-      isTrending: true,
-    },
-    {
-      id: "tweet-allen-welcome",
-      authorName: "Allen Dharak",
-      authorHandle: "@allenkinetic002-creator",
-      authorAvatar: "",
-      isVerified: true,
-      timeAgo: "10m ago",
-      isTweet: true,
-      tweetContent: "Fairy ecosystem is live with verified real accounts, persistent ratings, and live GitHub repository auto-sync.",
-      mediaType: "tweet",
-      caption: "Fairy ecosystem is live.",
-      tags: ["#design", "#creators", "#build"],
-      genre: "Tech & Code",
-      audioTitle: "Original Audio",
-      likeCount: 38,
-      isLiked: false,
-      isTrending: true,
-      retweetCount: 8,
-      replyCount: 5,
-      viewCount: "1.2K",
-    },
-  ]);
+  const [feedPosts, setFeedPosts] = useState<FeedPost[]>(() => {
+    try {
+      const cached = localStorage.getItem('fairy_cached_feed_posts');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {}
+
+    if (Array.isArray(initialServerPosts) && initialServerPosts.length > 0) {
+      return (initialServerPosts as any[]).map((p: any) => ({
+        id: p.id,
+        authorName: p.authorName || p.author_name || 'Anonymous User',
+        authorHandle: p.authorHandle || p.author_handle || '@user',
+        authorAvatar: p.authorAvatar || p.author_avatar || '',
+        isVerified: !!(p.isVerified || p.is_verified),
+        timeAgo: p.timeAgo || p.time_ago || 'Recent',
+        location: p.location || undefined,
+        mediaType: (p.mediaType || p.media_type) as any || (p.isTweet || p.is_tweet ? 'tweet' : 'image'),
+        isTweet: !!(p.isTweet || p.is_tweet),
+        tweetContent: p.tweetContent || p.tweet_content || undefined,
+        mediaUrl: p.mediaUrl || p.media_url,
+        caption: p.caption || p.tweet_content || '',
+        tags: p.tags || [],
+        genre: p.genre || undefined,
+        audioTitle: p.audioTitle || p.audio_title || 'Original Audio',
+        likeCount: p.likeCount ?? p.like_count ?? 1,
+        isLiked: !!p.isLiked,
+        isTrending: true,
+        retweetCount: p.retweetCount ?? p.retweet_count ?? 0,
+        replyCount: p.replyCount ?? p.reply_count ?? 0,
+        viewCount: p.viewCount || p.view_count || '1',
+        faceoffConfig: p.faceoffConfig || p.faceoff_config,
+      }));
+    }
+
+    return [
+      {
+        id: "post-welcome-gollumfairy",
+        authorName: "Gollumfairy",
+        authorHandle: "@Gollumfairy",
+        authorAvatar: "",
+        isVerified: true,
+        timeAgo: "Just now",
+        location: "Fairy Realm",
+        mediaType: "image",
+        mediaUrl: postImage,
+        caption: "Welcome to Fairy Social Feed! Verified trust receipts, real community creators, and live GitHub sync are active 🧚✨",
+        tags: ["#fairy", "#creators", "#trustreceipts"],
+        genre: "Artist",
+        audioTitle: "Original Audio",
+        likeCount: 42,
+        isLiked: false,
+        isTrending: true,
+      },
+    ];
+  });
+
+  useEffect(() => {
+    if (feedPosts && feedPosts.length > 0) {
+      try {
+        localStorage.setItem('fairy_cached_feed_posts', JSON.stringify(feedPosts));
+      } catch {}
+    }
+  }, [feedPosts]);
 
   // Priority Feed Sorting:
   // When user has Support ON with a chosen supportedGenre, matching posts are pinned first (first post you see)!
@@ -1062,7 +1105,25 @@ export default function App() {
   // Top 10 Creators Categories
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRank, setSelectedRank] = useState<number | 'all'>(1);
-  const [creatorsData, setCreatorsData] = useState<Record<string, Creator[]>>(ALL_TOP_CREATORS);
+  const [creatorsData, setCreatorsData] = useState<Record<string, Creator[]>>(() => {
+    try {
+      const cached = localStorage.getItem('fairy_cached_creators');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch {}
+    return ALL_TOP_CREATORS;
+  });
+
+  useEffect(() => {
+    try {
+      if (creatorsData) {
+        localStorage.setItem('fairy_cached_creators', JSON.stringify(creatorsData));
+      }
+    } catch {}
+  }, [creatorsData]);
+
   const [previewCreator, setPreviewCreator] = useState<Creator | null>(null);
   const [likedCreatorPosts, setLikedCreatorPosts] = useState<Record<number, boolean>>({ 1: true });
   const [honeyJarCounts, setHoneyJarCounts] = useState<Record<number, number>>({});
@@ -1094,7 +1155,23 @@ export default function App() {
   const [showStarStampsScreen, setShowStarStampsScreen] = useState(false);
   const [starStampsSearchQuery, setStarStampsSearchQuery] = useState('');
   const [showUserSearchModal, setShowUserSearchModal] = useState(false);
-  const [selectedProfileUser, setSelectedProfileUser] = useState<UserSearchItem | null>(null);
+  const [selectedProfileUser, setSelectedProfileUser] = useState<UserSearchItem | null>(() => {
+    try {
+      const saved = localStorage.getItem('fairy_selected_profile_user');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return null;
+  });
+
+  useEffect(() => {
+    try {
+      if (selectedProfileUser) {
+        localStorage.setItem('fairy_selected_profile_user', JSON.stringify(selectedProfileUser));
+      } else {
+        localStorage.removeItem('fairy_selected_profile_user');
+      }
+    } catch {}
+  }, [selectedProfileUser]);
   const [targetMessagePerson, setTargetMessagePerson] = useState<TargetMessagePerson | null>(null);
   const [activeInfluenceRatingId, setActiveInfluenceRatingId] = useState<string | null>(null);
   const [activePhoneReactionId, setActivePhoneReactionId] = useState<string | null>(null);
@@ -3418,6 +3495,7 @@ export default function App() {
           setRaygunTarget={setRaygunTarget}
           viewUser={selectedProfileUser}
           currentUser={currentUser || undefined}
+          feedPosts={feedPosts}
           isLoggedIn={isLoggedIn}
           onRequireAuth={requireAuth}
           onClearViewUser={() => setSelectedProfileUser(null)}

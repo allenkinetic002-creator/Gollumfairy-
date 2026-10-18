@@ -272,6 +272,7 @@ export interface UserProfileScreenProps {
   isLoggedIn?: boolean;
   onRequireAuth?: (action: string) => void;
   onSelectUserProfile?: (user: { name: string; handle: string; profession?: string; avatarUrl?: string }) => void;
+  feedPosts?: any[];
 }
 
 export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
@@ -289,6 +290,7 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   isLoggedIn = false,
   onRequireAuth,
   onSelectUserProfile,
+  feedPosts = [],
 }) => {
   // Active user resolution
   const activeUser = viewUser || currentUser || {
@@ -422,22 +424,25 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   const [isEditWikiModalOpen, setIsEditWikiModalOpen] = useState(false);
 
   // Editable User Wiki & Biographical Data
-  const [wikiData, setWikiData] = useState<UserWikiBioData>(() =>
-    buildProfileWikiData(activeUser)
-  );
+  const userWikiStorageKey = `fairy_wiki_${userKey}`;
+  const getInitialWiki = (): UserWikiBioData => {
+    try {
+      const saved = localStorage.getItem(userWikiStorageKey);
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return buildProfileWikiData(activeUser);
+  };
 
-  // Edit Form Temp State
-  const [editFormData, setEditFormData] = useState<UserWikiBioData>(() =>
-    buildProfileWikiData(activeUser)
-  );
+  const [wikiData, setWikiData] = useState<UserWikiBioData>(getInitialWiki);
+  const [editFormData, setEditFormData] = useState<UserWikiBioData>(getInitialWiki);
   const [newTriviaInput, setNewTriviaInput] = useState('');
 
   // Automatically sync wiki data whenever active user changes
   useEffect(() => {
-    const updated = buildProfileWikiData(activeUser);
+    const updated = getInitialWiki();
     setWikiData(updated);
     setEditFormData(updated);
-  }, [activeUser.name, activeUser.handle]);
+  }, [userWikiStorageKey]);
 
 
   // 12 Rich Posts for the Instagram Grid
@@ -738,6 +743,9 @@ export const UserProfileScreen: React.FC<UserProfileScreenProps> = ({
   const handleSaveWikiData = (e: React.FormEvent) => {
     e.preventDefault();
     setWikiData(editFormData);
+    try {
+      localStorage.setItem(userWikiStorageKey, JSON.stringify(editFormData));
+    } catch {}
     setIsEditWikiModalOpen(false);
     setToastMessage('✨ Your Fairypedia information has been updated!');
     setTimeout(() => setToastMessage(null), 3000);
