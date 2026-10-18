@@ -1,5 +1,18 @@
 [
   {
+    "id": "act-1792334452619-l6swh",
+    "action": "social_relationship",
+    "description": "Added @karak as Friend",
+    "details": {
+      "target": "karak",
+      "source": "allenkinetic002-creator",
+      "status": "friend",
+      "mode": "follow"
+    },
+    "timestamp": "2026-10-18T14:40:46.205Z",
+    "savedAt": "2026-10-18T14:40:52.619Z"
+  },
+  {
     "id": "act-1792334450768-gillp",
     "action": "social_relationship",
     "description": "Added @karak as Friend",
@@ -1601,17 +1614,6 @@
   },
   {
     "id": "act-1792092561056-q0n1b",
-    "action": "like_post",
-    "description": "Unliked post @karak",
-    "details": {
-      "postId": "post-1792066294285",
-      "isLiked": false
-    },
-    "timestamp": "2026-10-15T19:29:17.884Z",
-    "savedAt": "2026-10-15T19:29:21.056Z"
-  },
-  {
-    "id": "act-1792092561056-6xg2c",
     "action": "like_post",
     "description": "Unliked post @karak",
     "details": {
