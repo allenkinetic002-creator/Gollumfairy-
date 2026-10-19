@@ -66,7 +66,7 @@ import { AeriRaygunIcon } from './components/AeriRaygunIcon';
 import { AeriSearchIcon } from './components/AeriSearchIcon';
 import { AeriConcentricCircleIcon } from './components/AeriConcentricCircleIcon';
 import { AeriHappyFlameIcon } from './components/AeriHappyFlameIcon';
-import { AeriSlimeSqueezeIcon } from './components/AeriSlimeSqueezeIcon';
+import { FairyIcon } from './components/FairyIcon';
 import { AeriStackedChairsIcon } from './components/AeriStackedChairsIcon';
 import { AeriThumbsUpIcon } from './components/AeriThumbsUpIcon';
 import { AeriMonoblocChairIcon } from './components/AeriMonoblocChairIcon';
@@ -1727,7 +1727,7 @@ export default function App() {
             <div className="w-full flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0">
-                  <AeriSlimeSqueezeIcon size={30} className="w-[30px] h-[33.7px] shrink-0 drop-shadow-xs" />
+                  <FairyIcon size={32} className="w-[32px] h-[35px] shrink-0 drop-shadow-xs" />
                 </div>
                 <h1 className="text-[21px] font-black tracking-tight text-black leading-none font-sans">
                   Fairy
