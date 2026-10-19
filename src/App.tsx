@@ -1726,8 +1726,8 @@ export default function App() {
             {/* Main Header Row: Logo on left, all 5 icons in a single row on right */}
             <div className="w-full flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0 translate-y-[3px]">
-                  <FairyIcon size={44} className="w-[44px] h-[50px] shrink-0 drop-shadow-sm" />
+                <div className="hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer flex items-center justify-center shrink-0 translate-y-[2px]">
+                  <FairyIcon size={44} className="shrink-0" />
                 </div>
                 <h1 className="text-[22px] font-black tracking-tight text-black leading-none font-sans">
                   Fairy
