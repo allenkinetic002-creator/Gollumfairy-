@@ -367,8 +367,8 @@ export const SignInModal: React.FC<SignInModalProps> = ({
 
         {/* Modal Header */}
         <div className="flex flex-col items-center text-center pt-1 pb-3 border-b border-slate-100">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-500 text-white flex items-center justify-center shadow-md p-1.5 overflow-hidden">
-            <FairyIcon size={34} />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-500 text-white flex items-center justify-center shadow-md p-1 overflow-hidden">
+            <FairyIcon size={42} className="translate-y-[2px]" />
           </div>
           <h3 className="text-xl font-black text-slate-900 tracking-tight mt-2.5">
             {isSignUp ? 'Register with Username' : 'Log in as Registered User'}
